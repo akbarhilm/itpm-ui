@@ -263,12 +263,14 @@ export default function DetailProyek(props) {
     // console.log(event)
     if (event.target.name === "jenisAplikasi") {
       if (event.target.value === "SAP") {
-        setDataProyek(prev => ({ ...prev, jenisLayanan: "PENGEMBANGAN" }));
+        setDataProyek(prev => ({ ...prev, jenisLayanan: "PENGEMBANGAN", aplikasi: listAplikasi ? listAplikasi.find(d => d.KODEAPLIKASI === "SAP") : null }));
         setSap(true);
+        setDataDialogModul(prev => ({ ...prev, idapl: listAplikasi ? listAplikasi.find(d => d.KODEAPLIKASI === "SAP").IDAPLIKASI : null }));
       }
       else {
-        setDataProyek(prev => ({ ...prev, jenisLayanan: null }));
+        setDataProyek(prev => ({ ...prev, jenisLayanan: null, aplikasi: null }));
         setSap(false);
+        setDataDialogModul(prev => ({ ...prev, idapl: null }));
       }
       // setDataProyek(prevDataProyek => ({ ...prevDataProyek, [event.target.name]: event.target.value }))
     }
@@ -656,7 +658,7 @@ export default function DetailProyek(props) {
         {/* <Grid item xs={6} container direction="column" justify="flex-start" alignItems="flex-start" alignContent="flex-start"> */}
         <Grid item xs={6} >
           {/* <Grid item xs style={{ background: "grey" }}> */}
-          <FormControl component="fieldset" className={classes.radio} fullWidth error={error.jenisLayanan.error}>
+          <FormControl component="fieldset" className={classes.radio} fullWidth error={error.jenisLayanan.error} disabled={sap}>
             <FormLabel component="legend">Jenis Layanan</FormLabel>
             <RadioGroup row aria-label="jenisLayanan" name="jenisLayanan" value={dataProyek && dataProyek.jenisLayanan ? dataProyek.jenisLayanan : ""} onChange={handleChangeRadio}>
               {jenisLayanan.map(d => (<FormControlLabel key={d.value} value={d.value} control={<Radio />} label={d.label} />))}
