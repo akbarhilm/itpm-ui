@@ -5,7 +5,7 @@ const cookies = new Cookies();
 export const token = cookies.get("token");
 
 const api = axios.create({
-  baseURL: "http://10.10.40.141:5000/api/",
+  baseURL: "http://" + process.env.REACT_APP_HOST_API + ":5000/api/",
   headers: {
     "Content-Type": "application/json",
   },

@@ -17,12 +17,12 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function Page401(props) {
-  const classes = useStyles()
+  const classes = useStyles();
   return (
     <div className={classes.container}>
       <Typography variant="h4">401</Typography>
       <Typography variant="subtitle1">Anda Tidak Berhak Mengakses Halaman Ini</Typography>
-      <a className={classes.login} href="https://info.indonesian-aerospace.com/">Login</a>
+      <a className={classes.login} href={process.env.REACT_APP_HOST_LOGIN}>Login</a>
     </div>
-  )
+  );
 }

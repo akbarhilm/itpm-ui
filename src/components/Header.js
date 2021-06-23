@@ -107,11 +107,11 @@ export default function Header(props) {
   };
 
   const doLogout = () => {
-    cookies.remove("token", { path: "/", domain: process.env.REACT_APP_API_URL });
+    cookies.remove("token", { path: "/", domain: process.env.REACT_APP_HOST });
     // cookies.remove("refresh", { path: "/", domain: process.env.REACT_APP_API_URL });
     // dispatch(logout());
 
-    window.location.href = "https://info.indonesian-aerospace.com/";
+    window.location.href = process.env.REACT_APP_HOST_LOGIN;
   };
 
   const handleLinkToProyek = () => {

@@ -12,15 +12,25 @@ init:
   stage: init
   script:
     - npm install
+  only:
+    - dev
 
 build_dev:
   stage: build
+  before_script:
+    - export REACT_APP_HOST=10.1.94.235
+    - export REACT_APP_HOST_API=10.1.94.235
+    - export REACT_APP_HOST_LOGIN=https://info.indonesian-aerospace.com/
   script: 
     - npm run build
     - cp -f ~/project/wait/wait .
     - docker build -t $DOCKER_REPOSITORY/dev-apps/itpm-ui .
+  only:
+    - dev
 
 staging_dev:
   stage: staging
   script:
     - docker push $DOCKER_REPOSITORY/dev-apps/itpm-ui
+  only:
+    - dev
