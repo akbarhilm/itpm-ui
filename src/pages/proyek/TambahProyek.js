@@ -350,6 +350,7 @@ export default function DetailProyek(props) {
             console.log("update", response.data);
             // setDataProyek(prev => ({ ...prev, idProyek: response.data.idproyek }));
             setEdit(true);
+            setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil ubah", severity: "success" });
           })
           .catch((error) => {
             if (error.response)
@@ -364,6 +365,7 @@ export default function DetailProyek(props) {
             console.log("valid", response.data);
             setDataProyek(prev => ({ ...prev, idProyek: response.data.idproyek }));
             setEdit(true);
+            setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil simpan", severity: "success" });
           })
           .catch((error) => {
             if (error.response)
@@ -432,6 +434,7 @@ export default function DetailProyek(props) {
             // setEdit(true);
             setListAplikasi([]);
             handleCloseDialog();
+            setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil simpan", severity: "success" });
           })
           .catch((error) => {
             if (error.response)
@@ -449,6 +452,7 @@ export default function DetailProyek(props) {
             // setEdit(true);
             setDataProyek(prev => ({ ...prev, aplikasi: { ...prev.aplikasi } }));
             handleCloseDialog();
+            setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil simpan", severity: "success" });
           })
           .catch((error) => {
             if (error.response)

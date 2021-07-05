@@ -15,7 +15,7 @@ const defaultAlert = { openAlertDialog: false, messageAlertDialog: "", severity:
 export default function Proyek(props) {
   const { auth, setProyek, setMenuSideBar } = props;
   const history = useHistory();
-  if (!auth) history.push("/401");
+  // if (!auth) history.push("/401");
 
   const [totalPages, setTotalPages] = useState(0);
   const [page, setPage] = useState(1);
@@ -42,21 +42,21 @@ export default function Proyek(props) {
         setListProyek(response.data.list);
         setLoading(false);
         // console.log(response.data)
-      })
-      .catch((error) => {
-        // console.log("error", error.message)
-        setLoading(false);
-        if (error.response)
-          setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data, severity: "error" });
-        else
-          setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
       });
+    // .catch((error) => {
+    //   // console.log("error", error.message)
+    //   setLoading(false);
+    //   if (error.response)
+    //     setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data, severity: "error" });
+    //   else
+    //     setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
+    // });
   }, []);
 
   useEffect(() => {
-    if (auth) {
-      getProyek();
-    }
+    // if (auth) {
+    getProyek();
+    // }
   }, [auth, getProyek]);
 
   const handleChange = (event, value) => {

@@ -117,7 +117,7 @@ export default function Header(props) {
   const handleLinkToProyek = () => {
     setProyek();
     setMenuSideBar(false);
-    history.push("/");
+    history.push("/proyek");
   };
 
   return (

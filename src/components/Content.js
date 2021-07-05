@@ -7,6 +7,7 @@ import Proyek from "../pages/proyek/Proyek";
 import Page401 from "./Page401";
 import DetailProyek from "../pages/proyek/DetailProyek";
 import TambahProyek from "../pages/proyek/TambahProyek";
+import LandingPage from "./LandingPage";
 // import PermohonanBantuan from "../pages/permohonan-bantuan/Index";
 // import { MuiPickersUtilsProvider } from "@material-ui/pickers";
 // import Home from "../pages/home/home";
@@ -37,6 +38,9 @@ export default function Content(props) {
       <Paper className={classes.paper}>
         <Switch>
           <Route exact path='/' >
+            <LandingPage />
+          </Route>
+          <Route exact path='/proyek' >
             <Proyek auth={auth} setProyek={setProyek} setMenuSideBar={setMenuSideBar} />
           </Route>
           <Route exact path='/401' >
