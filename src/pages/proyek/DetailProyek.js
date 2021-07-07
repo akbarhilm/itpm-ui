@@ -47,7 +47,7 @@ export default function DetailProyek(props) {
     if (proyek) {
       getProyekById(proyek.IDPROYEK)
         .then((response) => {
-          console.log(response.data);
+          // console.log(response.data);
           setDataProyek(response.data);
         })
         .catch((error) => {
@@ -58,7 +58,7 @@ export default function DetailProyek(props) {
         });
       getStepperProyekById(proyek.IDPROYEK)
         .then((response) => {
-          console.log(response.data);
+          // console.log(response.data);
           setStepper(response.data);
         })
         .catch((error) => {

@@ -7,10 +7,9 @@ import Proyek from "../pages/proyek/Proyek";
 import Page401 from "./Page401";
 import DetailProyek from "../pages/proyek/DetailProyek";
 import TambahProyek from "../pages/proyek/TambahProyek";
-import LandingPage from "./LandingPage";
-// import PermohonanBantuan from "../pages/permohonan-bantuan/Index";
+// import LandingPage from "./LandingPage";
+import PrivateRoute from "./PrivateRoute";
 // import { MuiPickersUtilsProvider } from "@material-ui/pickers";
-// import Home from "../pages/home/home";
 // import moment from 'moment';
 
 const useStyles = makeStyles((theme) => ({
@@ -27,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function Content(props) {
-  const { auth, proyek, setProyek, setMenuSideBar } = props;
+  const { proyek, setProyek, setMenuSideBar } = props;
   const classes = useStyles();
 
 
@@ -37,11 +36,11 @@ export default function Content(props) {
     <MUIContainer maxWidth="lg" className={classes.container}>
       <Paper className={classes.paper}>
         <Switch>
-          <Route exact path='/' >
-            <LandingPage />
-          </Route>
+          <PrivateRoute exact path='/' >
+            <Proyek setProyek={setProyek} setMenuSideBar={setMenuSideBar} />
+          </PrivateRoute>
           <Route exact path='/proyek' >
-            <Proyek auth={auth} setProyek={setProyek} setMenuSideBar={setMenuSideBar} />
+            <Proyek setProyek={setProyek} setMenuSideBar={setMenuSideBar} />
           </Route>
           <Route exact path='/401' >
             <Page401 />
@@ -53,7 +52,7 @@ export default function Content(props) {
             <TambahProyek proyek={proyek} />
           </Route>
           <Route exact path='/:namauri' >
-            <DetailProyek auth={auth} proyek={proyek} />
+            <DetailProyek proyek={proyek} />
           </Route>
         </Switch>
       </Paper>

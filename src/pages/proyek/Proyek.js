@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Grid, Typography, IconButton, List, ListItem, ListItemAvatar, Avatar, ListItemText, ListItemSecondaryAction, Divider, CircularProgress } from "@material-ui/core";
 import { AddBoxOutlined, EditOutlined } from '@material-ui/icons';
 import Pagination from "@material-ui/lab/Pagination";
@@ -7,16 +7,18 @@ import { useHistory } from "react-router-dom";
 import { useCallback } from "react";
 // import { token } from '../../utils/ApiConfig'
 import AlertDialog from '../../components/AlertDialog';
+import { UserContext } from "../../utils/UserContext";
 
 const itemsPerPage = 10;
 
 const defaultAlert = { openAlertDialog: false, messageAlertDialog: "", severity: "info" };
 
 export default function Proyek(props) {
-  const { auth, setProyek, setMenuSideBar } = props;
+  const { setProyek, setMenuSideBar } = props;
+  const { user } = useContext(UserContext);
   const history = useHistory();
-  // if (!auth) history.push("/401");
 
+  const [refresh, setRefresh] = useState(Boolean(user));
   const [totalPages, setTotalPages] = useState(0);
   const [page, setPage] = useState(1);
   const [listProyek, setListProyek] = useState([]);
@@ -54,30 +56,34 @@ export default function Proyek(props) {
   }, []);
 
   useEffect(() => {
-    // if (auth) {
-    getProyek();
-    // }
-  }, [auth, getProyek]);
+    if (refresh) {
+      history.push("/");
+      setRefresh(false);
+    }
+  }, [refresh, history]);
+
+  useEffect(() => {
+    if (!refresh) {
+      getProyek();
+    }
+  }, [refresh, getProyek]);
 
   const handleChange = (event, value) => {
     setPage(value);
   };
 
   const handleAdd = () => {
-    // alert("tambah")
     setMenuSideBar(false);
     history.push("/proyek/tambah");
   };
 
   const handleEdit = (project) => {
-    // alert("edit " + project.NAMAPROYEK)
     setProyek(project);
     setMenuSideBar(false);
     history.push("/proyek/ubah");
   };
 
   const handleDetail = (project) => {
-    // alert("detail " + project.N_ITPM_PROJ)
     setProyek(project);
     setMenuSideBar(true);
     history.push("/" + project.NAMAURI);

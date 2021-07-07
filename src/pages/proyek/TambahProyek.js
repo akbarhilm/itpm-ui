@@ -344,10 +344,10 @@ export default function DetailProyek(props) {
     // console.log("proyek", dataProyek)
     if (validateAll()) {
       if (edit) {
-        console.log("update");
+        // console.log("update");
         updateProyek(formatDataCreate())
           .then((response) => {
-            console.log("update", response.data);
+            // console.log("update", response.data);
             // setDataProyek(prev => ({ ...prev, idProyek: response.data.idproyek }));
             setEdit(true);
             setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil ubah", severity: "success" });
@@ -362,7 +362,7 @@ export default function DetailProyek(props) {
       else {
         createProyek(formatDataCreate())
           .then((response) => {
-            console.log("valid", response.data);
+            // console.log("valid", response.data);
             setDataProyek(prev => ({ ...prev, idProyek: response.data.idproyek }));
             setEdit(true);
             setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil simpan", severity: "success" });
@@ -426,10 +426,10 @@ export default function DetailProyek(props) {
   const saveDialog = () => {
     if (validateDataDialog())
       if (openDialogAplikasi) {
-        console.log("aplikasi", dataDialogAplikasi);
+        // console.log("aplikasi", dataDialogAplikasi);
         createAplikasi(dataDialogAplikasi)
           .then((response) => {
-            console.log("valid", response.data);
+            // console.log("valid", response.data);
             // setDataProyek(prev => ({ ...prev, idProyek: response.data.idproyek }));
             // setEdit(true);
             setListAplikasi([]);
@@ -444,10 +444,10 @@ export default function DetailProyek(props) {
           });
       }
       else if (openDialogModul) {
-        console.log("modul", dataDialogModul);
+        // console.log("modul", dataDialogModul);
         createModul(dataDialogModul)
           .then((response) => {
-            console.log("valid", response.data);
+            // console.log("valid", response.data);
             // setDataProyek(prev => ({ ...prev, idProyek: response.data.idproyek }));
             // setEdit(true);
             setDataProyek(prev => ({ ...prev, aplikasi: { ...prev.aplikasi } }));

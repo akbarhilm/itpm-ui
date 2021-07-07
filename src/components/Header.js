@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useContext } from "react";
 import Cookies from "universal-cookie";
 
 // Redux
@@ -37,7 +37,8 @@ import { makeStyles, ButtonBase } from "@material-ui/core";
 
 import logoitpm from '../assets/image/logo_itpm.png';
 import { useHistory } from "react-router-dom";
-import { getUser } from "../gateways/api/CommonAPI";
+import { UserContext } from "../utils/UserContext";
+// import { getUser } from "../gateways/api/CommonAPI";
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -76,20 +77,20 @@ const useStyles = makeStyles((theme) => ({
 export default function Header(props) {
   const { setProyek, setMenuSideBar } = props;
   const history = useHistory();
-
+  const { user } = useContext(UserContext);
   const cookies = new Cookies();
   const classes = useStyles();
-  const [user, setUser] = useState();
+  // const [user, setUser] = useState();
   const [anchor, setAnchor] = useState({ menu: null, pengguna: null });
   const popover = {
     menu: Boolean(anchor.menu),
     pengguna: Boolean(anchor.pengguna),
   };
 
-  useEffect(() => {
-    if (!user)
-      getUser().then((response) => setUser(response.data));
-  }, [user]);
+  // useEffect(() => {
+  //   if (!user)
+  //     getUser().then((response) => setUser(response.data));
+  // }, [user]);
 
   const handleAnchor = (event) => {
     setAnchor((prevState) => ({
