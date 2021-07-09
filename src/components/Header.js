@@ -108,7 +108,7 @@ export default function Header(props) {
   };
 
   const doLogout = () => {
-    cookies.remove("token", { path: "/", domain: process.env.REACT_APP_HOST });
+    cookies.remove("auth", { path: "/", domain: process.env.REACT_APP_HOST });
     // cookies.remove("refresh", { path: "/", domain: process.env.REACT_APP_API_URL });
     // dispatch(logout());
 

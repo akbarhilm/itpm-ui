@@ -16,8 +16,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Page401(props) {
+export default function Page401() {
   const classes = useStyles();
+
   return (
     <div className={classes.container}>
       <Typography variant="h4">401</Typography>

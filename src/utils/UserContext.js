@@ -3,6 +3,7 @@ import { getUser } from '../gateways/api/CommonAPI';
 import { setAuthApi } from './ApiConfig';
 import Cookies from "universal-cookie";
 import { getAuth } from './Auth';
+
 //set initial value of user to null (pre-login)
 export const UserContext = createContext(null);
 
@@ -24,11 +25,13 @@ export function useFindUser() {
         });
     }
 
+    // condition for login from info
     if (params.get("token")) {
       setAuthApi("Bearer " + params.get("token"));
       findUser();
       cookies.set('auth', params.get("token"), { path: '/' });
     }
+    // if cookies has set for auth
     else {
       setAuthApi(getAuth());
       findUser();

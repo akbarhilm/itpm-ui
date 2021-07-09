@@ -104,89 +104,89 @@ export default function DetailProyek(props) {
         </Paper>
       </Grid>
       <Grid item >
-        <Paper className={classes.paper}>
-          <Grid container direction="column" spacing={4}>
-            <Grid item >
-              <Typography variant="h4" align="center">{dataProyek ? dataProyek.NAMAPROYEK : ""}</Typography>
-              <Typography variant="body1" align="center">{dataProyek ? dataProyek.KETPROYEK : ""}</Typography>
+        {/* <Paper className={classes.paper}> */}
+        <Grid container direction="column" spacing={4}>
+          <Grid item >
+            <Typography variant="h4" align="center">{dataProyek ? dataProyek.NAMAPROYEK : ""}</Typography>
+            <Typography variant="body1" align="center">{dataProyek ? dataProyek.KETPROYEK : ""}</Typography>
+          </Grid>
+          <Grid item container direction="row" spacing={2} justify="space-between">
+            <Grid item xs={6} container direction="column" >
+              <TextField
+                label="Nomor Layanan"
+                variant="outlined"
+                className={classes.fieldDisabled}
+                fullWidth
+                disabled
+                value={dataProyek && dataProyek.LAYANAN ? dataProyek.LAYANAN.NOLAYANAN : ""}
+              />
+              <Grid item container direction="row" spacing={2} justify="space-between">
+                <Grid item xs>
+                  <TextField
+                    label="NIK BPO"
+                    variant="outlined"
+                    className={classes.fieldDisabled}
+                    fullWidth
+                    disabled
+                    value={dataProyek ? dataProyek.NIKREQ : ""}
+                  />
+                </Grid>
+                <Grid item xs>
+                  <TextField
+                    label="NIK PM"
+                    variant="outlined"
+                    className={classes.fieldDisabled}
+                    fullWidth
+                    disabled
+                    value={dataProyek ? dataProyek.NIKPM : ""}
+                  />
+                </Grid>
+              </Grid>
+              <Grid item container direction="row" spacing={2} justify="space-between">
+                <Grid item xs>
+                  <TextField
+                    label="Jenis Layanan"
+                    variant="outlined"
+                    className={classes.fieldDisabled}
+                    fullWidth
+                    disabled
+                    value={dataProyek && jenisLayanan.find(d => d.value === dataProyek.KODELAYANAN) ? jenisLayanan.find(d => d.value === dataProyek.KODELAYANAN).label : ""}
+                  />
+                </Grid>
+                <Grid item xs>
+                  <TextField
+                    label="Jenis Aplikasi"
+                    variant="outlined"
+                    className={classes.fieldDisabled}
+                    fullWidth
+                    disabled
+                    value={dataProyek && jenisAplikasi.find(d => d.value === dataProyek.KODEAPLIKASI) ? jenisAplikasi.find(d => d.value === dataProyek.KODEAPLIKASI).label : ""}
+                  />
+                </Grid>
+              </Grid>
             </Grid>
-            <Grid item container direction="row" spacing={2} justify="space-between">
-              <Grid item xs={6} container direction="column" >
-                <TextField
-                  label="Nomor Layanan"
-                  variant="outlined"
-                  className={classes.fieldDisabled}
-                  fullWidth
-                  disabled
-                  value={dataProyek && dataProyek.LAYANAN ? dataProyek.LAYANAN.NOLAYANAN : ""}
-                />
-                <Grid item container direction="row" spacing={2} justify="space-between">
-                  <Grid item xs>
-                    <TextField
-                      label="NIK BPO"
-                      variant="outlined"
-                      className={classes.fieldDisabled}
-                      fullWidth
-                      disabled
-                      value={dataProyek ? dataProyek.NIKREQ : ""}
-                    />
-                  </Grid>
-                  <Grid item xs>
-                    <TextField
-                      label="NIK PM"
-                      variant="outlined"
-                      className={classes.fieldDisabled}
-                      fullWidth
-                      disabled
-                      value={dataProyek ? dataProyek.NIKPM : ""}
-                    />
-                  </Grid>
-                </Grid>
-                <Grid item container direction="row" spacing={2} justify="space-between">
-                  <Grid item xs>
-                    <TextField
-                      label="Jenis Layanan"
-                      variant="outlined"
-                      className={classes.fieldDisabled}
-                      fullWidth
-                      disabled
-                      value={dataProyek && jenisLayanan.find(d => d.value === dataProyek.KODELAYANAN) ? jenisLayanan.find(d => d.value === dataProyek.KODELAYANAN).label : ""}
-                    />
-                  </Grid>
-                  <Grid item xs>
-                    <TextField
-                      label="Jenis Aplikasi"
-                      variant="outlined"
-                      className={classes.fieldDisabled}
-                      fullWidth
-                      disabled
-                      value={dataProyek && jenisAplikasi.find(d => d.value === dataProyek.KODEAPLIKASI) ? jenisAplikasi.find(d => d.value === dataProyek.KODEAPLIKASI).label : ""}
-                    />
-                  </Grid>
-                </Grid>
-              </Grid>
-              <Grid item xs={6}>
-                <TextField
-                  label="Nama Aplikasi"
-                  variant="outlined"
-                  className={classes.fieldDisabled}
-                  fullWidth
-                  disabled
-                  value={dataProyek && dataProyek.APLIKASI ? dataProyek.APLIKASI.NAMAAPLIKASI : ""}
-                />
-                <TextField
-                  label="Nama Modul"
-                  variant="outlined"
-                  className={classes.fieldDisabled}
-                  fullWidth
-                  disabled
-                  value={dataProyek && dataProyek.MODUL ? dataProyek.MODUL.NAMAMODUL : ""}
-                />
+            <Grid item xs={6}>
+              <TextField
+                label="Nama Aplikasi"
+                variant="outlined"
+                className={classes.fieldDisabled}
+                fullWidth
+                disabled
+                value={dataProyek && dataProyek.APLIKASI ? dataProyek.APLIKASI.NAMAAPLIKASI : ""}
+              />
+              <TextField
+                label="Nama Modul"
+                variant="outlined"
+                className={classes.fieldDisabled}
+                fullWidth
+                disabled
+                value={dataProyek && dataProyek.MODUL ? dataProyek.MODUL.NAMAMODUL : ""}
+              />
 
-              </Grid>
             </Grid>
           </Grid>
-        </Paper>
+        </Grid>
+        {/* </Paper> */}
       </Grid>
     </Grid>
   );
