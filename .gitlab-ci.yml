@@ -18,9 +18,9 @@ init:
 build_dev:
   stage: build
   before_script:
-    - export REACT_APP_HOST=$HOST
-    - export REACT_APP_HOST_API=$HOST
-    - export REACT_APP_HOST_LOGIN=$HOST_LOGIN
+    - export REACT_APP_HOST=$HOST_DEV
+    - export REACT_APP_HOST_API=$HOST_DEV
+    - export REACT_APP_HOST_LOGIN=$HOST_DEV_LOGIN
   script: 
     - npm run build
     - cp -f ~/project/wait/wait .
