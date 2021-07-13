@@ -150,6 +150,7 @@ export default function UserRequirement(props) {
                       size="small"
                       value={d.kebutuhan}
                       onChange={(event) => handleChange(event.target.value, i, "kebutuhan")}
+                      required
                       error={error[i].kebutuhan.error}
                       helperText={error[i].kebutuhan.text}
                     />
@@ -162,6 +163,7 @@ export default function UserRequirement(props) {
                       size="small"
                       value={d.rincian}
                       onChange={(event) => handleChange(event.target.value, i, "rincian")}
+                      required
                       error={error[i].rincian.error}
                       helperText={error[i].rincian.text}
                     />
@@ -173,6 +175,7 @@ export default function UserRequirement(props) {
                       size="small"
                       value={d.useCase}
                       onChange={(event) => handleChange(event.target.value, i, "useCase")}
+                      required
                       error={error[i].useCase.error}
                       helperText={error[i].useCase.text}
                     />
