@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Grid, Typography, Button, TextField, IconButton, Paper, makeStyles } from '@material-ui/core';
-import { AddBoxOutlined, RemoveCircleOutline } from '@material-ui/icons';
+import { RemoveCircleOutline, AddCircleOutline } from '@material-ui/icons';
 import AlertDialog from '../../components/AlertDialog';
 
 const useStyles = makeStyles((theme) => ({
@@ -55,22 +55,37 @@ export default function UserRequirement(props) {
   }, [data, proyek]);
 
   const handleChange = (value, index, key) => {
+    let newArrayError = [...error];
+    newArrayError[index] = { ...newArrayError[index], [key]: value ? noErr : err };
+    setError(newArrayError);
+
     let newArray = [...data];
     newArray[index] = { ...newArray[index], [key]: value };
-    // console.log(newArray[index]);
     setData(newArray);
   };
 
   const addRow = () => {
+    let newArrayError = [...error];
+    newArrayError.push(defaultError);
+    setError(newArrayError);
+
     let newArray = [...data];
     newArray.push(defaultData);
     setData(newArray);
   };
 
   const deleteRow = (index) => {
+    let newArrayError = [...error];
+    newArrayError.splice(index, 1);
+    setError(newArrayError);
+
     let newArray = [...data];
     newArray.splice(index, 1);
     setData(newArray);
+  };
+
+  const simpan = () => {
+    console.log("simpan");
   };
 
   return (
@@ -106,7 +121,7 @@ export default function UserRequirement(props) {
               </Grid>
               <Grid item xs container justify="flex-end">
                 <IconButton size="small" onClick={addRow}>
-                  <AddBoxOutlined />
+                  <AddCircleOutline />
                 </IconButton>
               </Grid>
             </Grid>
@@ -135,6 +150,8 @@ export default function UserRequirement(props) {
                       size="small"
                       value={d.kebutuhan}
                       onChange={(event) => handleChange(event.target.value, i, "kebutuhan")}
+                      error={error[i].kebutuhan.error}
+                      helperText={error[i].kebutuhan.text}
                     />
                   </Grid>
                   <Grid key={"grid-rincian-" + i} item xs={5}>
@@ -145,6 +162,8 @@ export default function UserRequirement(props) {
                       size="small"
                       value={d.rincian}
                       onChange={(event) => handleChange(event.target.value, i, "rincian")}
+                      error={error[i].rincian.error}
+                      helperText={error[i].rincian.text}
                     />
                   </Grid>
                   <Grid key={"grid-use-case-" + i} item xs={2}>
@@ -154,6 +173,8 @@ export default function UserRequirement(props) {
                       size="small"
                       value={d.useCase}
                       onChange={(event) => handleChange(event.target.value, i, "useCase")}
+                      error={error[i].useCase.error}
+                      helperText={error[i].useCase.text}
                     />
                   </Grid>
                   <Grid item xs={1} container justify="center">
@@ -170,7 +191,7 @@ export default function UserRequirement(props) {
 
       </Grid>
       <Grid item container direction="row" justify="flex-end">
-        <Button variant="contained" color="primary">
+        <Button onClick={simpan} variant="contained" color="primary">
           {"Simpan"}
         </Button>
       </Grid>

@@ -10,7 +10,7 @@ function AddTextFiels(props) {
 
   return (
     <FormControl component="fieldset" fullWidth error={error} style={{ marginBottom: 10 }}>
-      <FormLabel component="legend">{label} <IconButton onClick={onAdd}><AddCircleOutline /></IconButton></FormLabel>
+      <FormLabel component="legend">{label} <IconButton onClick={onAdd} size="small"><AddCircleOutline /></IconButton></FormLabel>
       <Grid container direction="column" justify="flex-start" spacing={1} style={{ paddingLeft: 10 }}>
         {data.map((d, i) =>
           <Grid item key={"grid-" + i}>
@@ -89,12 +89,12 @@ export default function Charter(props) {
   // set first data
   useEffect(() => {
     if (!data) {
-      // get charter from api
+      // get charter by id proyek from api
       // jika charter sudah ada datanya
       if (false) {
         setEdit(true);
         // diganti dengan data dari api
-        setData(defaultData);
+        setData("ganti dengan data dari response");
         setTujuan([""]);
         setScope([""]);
         setTarget([""]);
@@ -102,7 +102,7 @@ export default function Charter(props) {
         setData(defaultData);
       }
     }
-  }, [data]);
+  }, [data, proyek]);
 
   const handleChangeDate = (value, jenis) => {
     setData(prev => ({ ...prev, [jenis]: value }));
@@ -170,7 +170,7 @@ export default function Charter(props) {
     console.log("simpan");
   };
 
-  console.log(proyek);
+  // console.log(proyek);
   return (
     <Grid container spacing={3} direction="column" >
       <AlertDialog
