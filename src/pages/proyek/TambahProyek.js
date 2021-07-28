@@ -7,14 +7,12 @@ import { getModulByAplikasiId, createModul } from '../../gateways/api/ModulAPI';
 import { useHistory } from "react-router-dom";
 import { getLayananUnused } from '../../gateways/api/LayananAPI';
 import { createProyek, getProyekById, updateProyek } from '../../gateways/api/ProyekAPI';
-import { AddCircle } from '@material-ui/icons';
+import { AddCircleOutline } from '@material-ui/icons';
 import AlertDialog from '../../components/AlertDialog';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
     padding: theme.spacing(2),
-    // color: theme.palette.text.secondary,
-    // background: '#90caf9',
   },
   paperStepper: {
     padding: theme.spacing(2),
@@ -38,45 +36,6 @@ const useStyles = makeStyles((theme) => ({
     }
   },
 }));
-
-// const listLayanan = [
-//   {
-//     IDLAYANAN: "1",
-//     nomorLayanan: "XXX/APL/IT0000/MM/2021",
-//     nikPM: "160035",
-//     nikBPO: "180136",
-//     jenisLayanan: "PENGEMBANGAN",
-//     namaAplikasi: "App-01",
-//     keteranganAplikasi: "Ket-App-01",
-//     namaModul: "",
-//     keteranganModul: "",
-//     keteranganLayanan: "Ket-Layanan-01"
-//   },
-//   {
-//     IDLAYANAN: "2",
-//     nomorLayanan: "XYZ/APL/IT0000/MM/2021",
-//     nikPM: "160035",
-//     nikBPO: "160257",
-//     jenisLayanan: "PERUBAHAN",
-//     namaAplikasi: "App-02",
-//     keteranganAplikasi: "Ket-App-02",
-//     namaModul: "Modul-01",
-//     keteranganModul: "Ket-Modul-01",
-//     keteranganLayanan: "Ket-Layanan-02"
-//   },
-//   {
-//     idLayanan: "3",
-//     nomorLayanan: "ZZZ/APL/IT0000/MM/2021",
-//     nikPM: "170084",
-//     nikBPO: "160035",
-//     jenisLayanan: "PENGEMBANGAN",
-//     namaAplikasi: "App-03",
-//     keteranganAplikasi: "Ket-App-03",
-//     namaModul: "Modul-02",
-//     keteranganModul: "Ket-Modul-02",
-//     keteranganLayanan: "Ket-Layanan-03"
-//   },
-// ];
 
 const defaultDataProyek = {
   idProyek: null,
@@ -127,10 +86,8 @@ export default function DetailProyek(props) {
 
   useEffect(() => {
     if (proyek) {
-      // console.log("get-proyek");
       getProyekById(proyek.IDPROYEK)
         .then((response) => {
-          // console.log(response.data);
           setEdit(true);
           setDataProyek({
             idProyek: response.data.IDPROYEK,
@@ -167,7 +124,6 @@ export default function DetailProyek(props) {
     if (listLayanan.length === 0)
       getLayananUnused(proyek ? proyek.IDPROYEK : null)
         .then((response) => {
-          // console.log(response.data);
           setListLayanan(response.data.map(d => ({
             idLayanan: d.IDLAYANAN,
             nomorLayanan: d.NOLAYANAN,
@@ -188,7 +144,6 @@ export default function DetailProyek(props) {
         });
   }, [listLayanan, proyek]);
 
-  // console.log(dataProyek);
   useEffect(() => {
     if (listAplikasi.length === 0)
       getAplikasi()
@@ -204,9 +159,7 @@ export default function DetailProyek(props) {
   }, [listAplikasi]);
 
   useEffect(() => {
-    // setListModul([]);
     if (dataProyek.aplikasi)
-      // console.log(dataProyek.aplikasi.IDAPLIKASI);
       getModulByAplikasiId(dataProyek.aplikasi.IDAPLIKASI)
         .then((response) => {
           setListModul(response.data);
@@ -218,11 +171,6 @@ export default function DetailProyek(props) {
             setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
         });
   }, [dataProyek.aplikasi]);
-
-  // const handleChangeLayanan = (event, value) => {
-  //   set
-  //   setDataLayanan(v)
-  // }
 
   const validateInputNamaProyek = (value) => {
     if (value.length <= 100) return true;
@@ -260,7 +208,6 @@ export default function DetailProyek(props) {
   };
 
   const handleChangeRadio = (event) => {
-    // console.log(event)
     if (event.target.name === "jenisAplikasi") {
       if (event.target.value === "SAP") {
         setDataProyek(prev => ({ ...prev, jenisLayanan: "PENGEMBANGAN", aplikasi: listAplikasi ? listAplikasi.find(d => d.KODEAPLIKASI === "SAP") : null }));
@@ -272,20 +219,16 @@ export default function DetailProyek(props) {
         setSap(false);
         setDataDialogModul(prev => ({ ...prev, idapl: null }));
       }
-      // setDataProyek(prevDataProyek => ({ ...prevDataProyek, [event.target.name]: event.target.value }))
     }
-    // else {
     setError(prev => ({
       ...prev,
       [event.target.name]: event.target.value ? { error: false, message: "" } : { error: true, message: "Tidak Boleh Kosong" }
     }));
     setDataProyek(prevDataProyek => ({ ...prevDataProyek, [event.target.name]: event.target.value }));
-    // }
   };
 
   const handleChangeAplikasi = (jenis, value) => {
     setListModul([]);
-    // console.log(value);
     setDataDialogModul(prev => ({ ...prev, idapl: value ? value.IDAPLIKASI : null }));
     setDataProyek(prevDataProyek => ({ ...prevDataProyek, modul: null, [jenis]: value }));
   };
@@ -300,8 +243,6 @@ export default function DetailProyek(props) {
 
   const validateAll = () => {
     let valid = true;
-    // console.log(dataLayanan);
-    // console.log(dataProyek);
     const def = { error: false, message: "" };
     const err = { error: true, message: "Tidak Boleh Kosong" };
     setError({
@@ -340,15 +281,10 @@ export default function DetailProyek(props) {
   };
 
   const simpan = () => {
-    // console.log("layanan", dataLayanan)
-    // console.log("proyek", dataProyek)
     if (validateAll()) {
       if (edit) {
-        // console.log("update");
         updateProyek(formatDataCreate())
           .then((response) => {
-            // console.log("update", response.data);
-            // setDataProyek(prev => ({ ...prev, idProyek: response.data.idproyek }));
             setEdit(true);
             setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil ubah", severity: "success" });
           })
@@ -362,7 +298,6 @@ export default function DetailProyek(props) {
       else {
         createProyek(formatDataCreate())
           .then((response) => {
-            // console.log("valid", response.data);
             setDataProyek(prev => ({ ...prev, idProyek: response.data.idproyek }));
             setEdit(true);
             setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil simpan", severity: "success" });
@@ -376,7 +311,6 @@ export default function DetailProyek(props) {
       }
     }
   };
-  // console.log(dataProyek);
 
   const handleCloseDialog = () => {
     setOpenDialogAplikasi(false);
@@ -426,12 +360,8 @@ export default function DetailProyek(props) {
   const saveDialog = () => {
     if (validateDataDialog())
       if (openDialogAplikasi) {
-        // console.log("aplikasi", dataDialogAplikasi);
         createAplikasi(dataDialogAplikasi)
           .then((response) => {
-            // console.log("valid", response.data);
-            // setDataProyek(prev => ({ ...prev, idProyek: response.data.idproyek }));
-            // setEdit(true);
             setListAplikasi([]);
             handleCloseDialog();
             setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil simpan", severity: "success" });
@@ -444,12 +374,8 @@ export default function DetailProyek(props) {
           });
       }
       else if (openDialogModul) {
-        // console.log("modul", dataDialogModul);
         createModul(dataDialogModul)
           .then((response) => {
-            // console.log("valid", response.data);
-            // setDataProyek(prev => ({ ...prev, idProyek: response.data.idproyek }));
-            // setEdit(true);
             setDataProyek(prev => ({ ...prev, aplikasi: { ...prev.aplikasi } }));
             handleCloseDialog();
             setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil simpan", severity: "success" });
@@ -510,6 +436,7 @@ export default function DetailProyek(props) {
                       fullWidth
                       variant="outlined"
                       className={classes.field}
+                      required
                       error={error.layanan.error}
                       helperText={error.layanan.message}
                     />
@@ -605,6 +532,7 @@ export default function DetailProyek(props) {
                 fullWidth
                 variant="outlined"
                 className={classes.field}
+                required
                 error={error.layanan.error}
                 helperText={error.layanan.message}
               />
@@ -621,6 +549,7 @@ export default function DetailProyek(props) {
                 fullWidth
                 onChange={handleChangeTextField}
                 value={dataProyek && dataProyek.namaProyek ? dataProyek.namaProyek : ""}
+                required
                 error={error.namaProyek.error}
                 helperText={error.namaProyek.message}
               />
@@ -635,12 +564,12 @@ export default function DetailProyek(props) {
                 fullWidth
                 onChange={handleChangeTextField}
                 value={dataProyek && dataProyek.namaUri ? dataProyek.namaUri : ""}
+                required
                 error={error.namaUri.error}
                 helperText={error.namaUri.message}
               />
             </Grid>
           </Grid>
-          {/* <Grid item> */}
           <TextField
             id="deskripsi"
             label="Deskripsi Proyek"
@@ -659,9 +588,7 @@ export default function DetailProyek(props) {
             {error.jenisAplikasi.error && <FormHelperText id="my-helper-text">{error.jenisAplikasi.message}</FormHelperText>}
           </FormControl>
         </Grid>
-        {/* <Grid item xs={6} container direction="column" justify="flex-start" alignItems="flex-start" alignContent="flex-start"> */}
         <Grid item xs={6} >
-          {/* <Grid item xs style={{ background: "grey" }}> */}
           <FormControl component="fieldset" className={classes.radio} fullWidth error={error.jenisLayanan.error} disabled={sap}>
             <FormLabel component="legend">Jenis Layanan</FormLabel>
             <RadioGroup row aria-label="jenisLayanan" name="jenisLayanan" value={dataProyek && dataProyek.jenisLayanan ? dataProyek.jenisLayanan : ""} onChange={handleChangeRadio}>
@@ -669,10 +596,7 @@ export default function DetailProyek(props) {
             </RadioGroup>
             <FormHelperText id="my-helper-text">{error.jenisLayanan.message}</FormHelperText>
           </FormControl>
-          {/* </Grid> */}
           {dataProyek && dataProyek.jenisAplikasi && !sap &&
-            // <Grid item xs container direction="row" alignItems="center" style={{ background: "yellow" }}>
-            // <Grid item xs>
             <Grid container direction="row" justify="space-between" alignItems="center" spacing={1}>
               <Grid item xs>
                 <Autocomplete id="aplikasi"
@@ -701,14 +625,12 @@ export default function DetailProyek(props) {
               </Grid>
               <Grid item xs={1}>
                 <IconButton onClick={() => setOpenDialogAplikasi(true)}>
-                  <AddCircle />
+                  <AddCircleOutline />
                 </IconButton>
               </Grid>
             </Grid>
           }
           {dataProyek && dataProyek.jenisAplikasi &&
-            // <Grid item xs container direction="row" style={{ background: "grey" }}>
-            //   <Grid item xs>
             <Grid container direction="row" alignItems="center" spacing={1}>
               <Grid item xs>
                 <Autocomplete id="modul"
@@ -737,7 +659,7 @@ export default function DetailProyek(props) {
               </Grid>
               <Grid item xs={1}>
                 {dataDialogModul.idapl && <IconButton onClick={() => setOpenDialogModul(true)} >
-                  <AddCircle />
+                  <AddCircleOutline />
                 </IconButton>}
               </Grid>
             </Grid>
@@ -758,7 +680,6 @@ export default function DetailProyek(props) {
       >
         <DialogTitle id="max-width-dialog-title">{openDialogAplikasi ? "Tambah Aplikasi" : openDialogModul ? "Tambah Modul" : ""}</DialogTitle>
         <DialogContent dividers>
-          {/* <DialogContentText>{"subtitle"}</DialogContentText> */}
           {openDialogAplikasi ?
             <>
               <Grid container direction="row" spacing={2} justify="space-between">
@@ -775,9 +696,9 @@ export default function DetailProyek(props) {
                         setDataDialogAplikasi(prev => ({ ...prev, [event.target.id]: event.target.value }));
                     }}
                     value={dataDialogAplikasi.kodeapl}
+                    required
                     error={errorDialogAplikasi.kodeapl.error}
                     helperText={errorDialogAplikasi.kodeapl.message}
-                  // style={{ width: "48%", marginRight: 4 }}
                   />
                 </Grid>
                 <Grid item xs>
@@ -793,9 +714,9 @@ export default function DetailProyek(props) {
                         setDataDialogAplikasi(prev => ({ ...prev, [event.target.id]: event.target.value }));
                     }}
                     value={dataDialogAplikasi.namaapl}
+                    required
                     error={errorDialogAplikasi.namaapl.error}
                     helperText={errorDialogAplikasi.namaapl.message}
-                  // style={{ width: "48%", marginLeft: 4 }}
                   />
                 </Grid>
               </Grid>
@@ -812,6 +733,7 @@ export default function DetailProyek(props) {
                     setDataDialogAplikasi(prev => ({ ...prev, [event.target.id]: event.target.value }));
                 }}
                 value={dataDialogAplikasi.ketapl}
+                required
                 error={errorDialogAplikasi.ketapl.error}
                 helperText={errorDialogAplikasi.ketapl.message}
               />
@@ -831,6 +753,7 @@ export default function DetailProyek(props) {
                         setDataDialogModul(prev => ({ ...prev, [event.target.id]: event.target.value }));
                     }}
                     value={dataDialogModul.namamodul}
+                    required
                     error={errorDialogModul.namamodul.error}
                     helperText={errorDialogModul.namamodul.message}
                   />
@@ -848,6 +771,7 @@ export default function DetailProyek(props) {
                         setDataDialogModul(prev => ({ ...prev, [event.target.id]: event.target.value }));
                     }}
                     value={dataDialogModul.ketmodul}
+                    required
                     error={errorDialogModul.ketmodul.error}
                     helperText={errorDialogModul.ketmodul.message}
                   />

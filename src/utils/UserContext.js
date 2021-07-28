@@ -40,7 +40,7 @@ export function useFindUser() {
     if (params.get("access_token")) {
       getValidTokenFromInfo()
         .then((response) => {
-          console.log(response.data.token);
+          // console.log(response.data.token);
           setAuthApi("Bearer " + response.data.token);
           const dataEcnrypt = Crypto.AES.encrypt(response.data.token, "encrypt-token-for-cookie").toString();
           cookies.set('auth', dataEcnrypt, { path: '/' });
@@ -52,7 +52,7 @@ export function useFindUser() {
     }
     // if cookies has set for auth
     else {
-      console.log(getAuth());
+      // console.log(getAuth());
       setAuthApi(getAuth());
       findUser();
     }
