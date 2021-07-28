@@ -5,6 +5,22 @@ import { AddCircleOutline, RemoveCircleOutline, CheckBoxOutlineBlank, CheckBox }
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import { Autocomplete } from '@material-ui/lab';
 
+const dummyKegiatan = [
+  { id: 1, kegiatan: "Initiation", target: "Dokumen 1" },
+  { id: 2, kegiatan: "Development", target: "Dokumen 2" },
+  { id: 3, kegiatan: "Testing", target: "Dokumen 3" },
+  { id: 4, kegiatan: "Deploy", target: "Dokumen 4" },
+];
+
+const dummyKaryawan = [
+  { nik: "160035", nama: "M. MUSTAKIM", kodeOrganisasi: "IT1300" },
+  { nik: "160257", nama: "ANITA IKA NURCAHYANI", kodeOrganisasi: "IT1300" },
+  { nik: "170084", nama: "AKBAR HILMAN", kodeOrganisasi: "IT1300" },
+  { nik: "160260", nama: "ERVIN ADHI CAHYA N", kodeOrganisasi: "IT3100" },
+  { nik: "180136", nama: "ANNISA DWIDYA R", kodeOrganisasi: "IT1100" },
+  { nik: "900147", nama: "RINI ASTUTI", kodeOrganisasi: "IT1000" },
+];
+
 const useStyles = makeStyles((theme) => ({
   paper: {
     padding: theme.spacing(2),
@@ -18,18 +34,26 @@ const useStyles = makeStyles((theme) => ({
       color: "rgba(0, 0, 0, 1)" // (default alpha is 0.38)
     }
   },
+  fieldTableDisabled: {
+    "& .MuiInputBase-root.Mui-disabled": {
+      color: "rgba(0, 0, 0, 1)" // (default alpha is 0.38)
+    }
+  },
 }));
 
 const defaultAlert = { openAlertDialog: false, messageAlertDialog: "", severity: "info" };
 
-const defaultData = {};
+const defaultData = { kegiatan: null, pelaksana: [], tanggalMulai: null, tanggalSelesai: null, target: "" };
 
 export default function RencanaPelaksanaan(props) {
   const { proyek } = props;
   const classes = useStyles();
 
   const [edit, setEdit] = useState(false);
+  const [nomor, setNomor] = useState("");
   const [data, setData] = useState();
+  const [listKegiatan, setListKegiatan] = useState();
+  const [listKaryawan, setListKaryawan] = useState();
   const [alertDialog, setAlertDialog] = useState(defaultAlert);
 
   const handleCloseAlertDialog = () => {
@@ -44,6 +68,7 @@ export default function RencanaPelaksanaan(props) {
       if (false) {
         setEdit(true);
         setData("response dari get ureq");
+        setNomor("set dari response");
         // setError("response dari get ureq di looping set defaultError");
       } else {
         setData([defaultData]);
@@ -51,6 +76,48 @@ export default function RencanaPelaksanaan(props) {
       }
     }
   }, [data, proyek]);
+
+  useEffect(() => {
+    if (!listKegiatan) {
+      setListKegiatan(dummyKegiatan);
+    }
+  }, [listKegiatan]);
+
+  useEffect(() => {
+    if (!listKaryawan) {
+      setListKaryawan(dummyKaryawan);
+    }
+  }, [listKaryawan]);
+
+  const handleChange = (value, index, jenis) => {
+    let newArray = [...data];
+    if (jenis === "kegiatan") {
+      newArray[index] = { ...newArray[index], [jenis]: value, target: value ? value.target : "" };
+    } else {
+      newArray[index] = { ...newArray[index], [jenis]: value };
+    }
+    setData(newArray);
+  };
+
+  const addRow = () => {
+    // let newArrayError = [...error];
+    // newArrayError.push(defaultError);
+    // setError(newArrayError);
+
+    let newArray = [...data];
+    newArray.push(defaultData);
+    setData(newArray);
+  };
+
+  const deleteRow = (index) => {
+    // let newArrayError = [...error];
+    // newArrayError.splice(index, 1);
+    // setError(newArrayError);
+
+    let newArray = [...data];
+    newArray.splice(index, 1);
+    setData(newArray);
+  };
 
   const simpan = () => {
     console.log("simpan");
@@ -77,7 +144,7 @@ export default function RencanaPelaksanaan(props) {
           fullWidth
           disabled
           className={classes.fieldDisabled}
-          value={""}
+          value={nomor}
         />
       </Grid>
       <Grid item >
@@ -87,16 +154,16 @@ export default function RencanaPelaksanaan(props) {
               <Grid item xs>
                 <Typography variant="h6">Data Rencana</Typography>
               </Grid>
-              <Grid item xs container justify="flex-end">
-                {/* <IconButton size="small" onClick={addRow}> */}
+              {/* <Grid item xs container justify="flex-end">
+                <IconButton size="small" onClick={addRow}>
                 <IconButton size="small" >
                   <AddCircleOutline />
                 </IconButton>
-              </Grid>
+              </Grid> */}
             </Grid>
             <Grid item container direction="column" spacing={1}>
               <Grid item container direction="row" spacing={1} justify="space-between">
-                <Grid item xs={3}>
+                <Grid item xs>
                   <Typography align="center">Kegiatan</Typography>
                 </Grid>
                 <Grid item xs={2}>
@@ -116,32 +183,49 @@ export default function RencanaPelaksanaan(props) {
                 </Grid>
               </Grid>
               {data && data.map((d, i) =>
-                <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justify="space-between" alignItems="center">
-                  <Grid key={"grid-kegiatan-" + i} item xs={3}>
-                    <TextField key={"kegiatan-" + i} id={"kegiatan-" + i} name={"kegiatan-" + i}
-                      variant="outlined"
-                      fullWidth
-                      multiline
-                      size="small"
-                    // value={d.kebutuhan}
-                    // onChange={(event) => handleChange(event.target.value, i, "kebutuhan")}
-                    // error={error[i].kebutuhan.error}
-                    // helperText={error[i].kebutuhan.text}
-                    />
-                  </Grid>
-                  <Grid key={"grid-pelaksana-" + i} item xs={2}>
-                    <Autocomplete id="kantorCabang"
-                      multiple
-                      disableCloseOnSelect
-                      // disabled={disabled}
-                      options={[]}
-                      getOptionLabel={option => option.name}
-                      // onChange={(e, v) => handleChangeAutoComplete(e, v, "kantorCabang")}
+                <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justify="space-between" alignItems="flex-start">
+                  <Grid key={"grid-kegiatan-" + i} item xs>
+                    <Autocomplete key={"kegiatan-" + i} id={"kegiatan-" + i} name={"kegiatan-" + i}
+                      options={listKegiatan}
+                      getOptionLabel={option => option.kegiatan}
+                      onChange={(e, v) => handleChange(v, i, "kegiatan")}
+                      value={d.kegiatan}
                       // onClose={() => {
                       //   setListKantorCabang([]);
                       // }}
                       getOptionSelected={
-                        (option, value) => option.branchId === value.branchId
+                        (option, value) => option.id === value.id
+                      }
+                      renderOption={(option) => (
+                        <React.Fragment>
+                          {option.kegiatan}
+                        </React.Fragment>
+                      )}
+                      renderInput={params => (
+                        <TextField
+                          {...params}
+                          fullWidth
+                          variant="outlined"
+                          size="small"
+                        // error={error.kantorCabang.error}
+                        // helperText={error.kantorCabang.text}
+                        />
+                      )}
+                    />
+                  </Grid>
+                  <Grid key={"grid-pelaksana-" + i} item xs={2}>
+                    <Autocomplete key={"pelaksana-" + i} id={"pelaksana-" + i} name={"pelaksana-" + i}
+                      multiple
+                      disableCloseOnSelect
+                      options={listKaryawan}
+                      value={d.pelaksana}
+                      getOptionLabel={option => option.nik}
+                      onChange={(e, v) => handleChange(v, i, "pelaksana")}
+                      // onClose={() => {
+                      //   setListKantorCabang([]);
+                      // }}
+                      getOptionSelected={
+                        (option, value) => option.nik === value.nik
                       }
                       renderOption={(option, { selected }) => (
                         <React.Fragment>
@@ -151,17 +235,15 @@ export default function RencanaPelaksanaan(props) {
                             style={{ marginRight: 6 }}
                             checked={selected}
                           />
-                          {option.name}, {option.kanwil}
+                          {option.nik}, {option.nama}
                         </React.Fragment>
                       )}
                       renderInput={params => (
                         <TextField
                           {...params}
-                          // label="Kantor Cabang"
                           fullWidth
                           variant="outlined"
                           size="small"
-                        // required
                         // error={error.kantorCabang.error}
                         // helperText={error.kantorCabang.text}
                         />
@@ -169,16 +251,13 @@ export default function RencanaPelaksanaan(props) {
                     />
                   </Grid>
                   <Grid key={"grid-mulai-" + i} item xs={2}>
-                    <KeyboardDatePicker
+                    <KeyboardDatePicker key={"mulai-" + i} id={"mulai-" + i} name={"mulai-" + i}
                       fullWidth
                       clearable
-                      id={"tanggalMulai" + i}
                       format="DD/MM/YYYY"
                       size="small"
-                      // label="Tanggal Mulai"
-                      // value={d.tanggalMulai}
-                      // onChange={(value) => handleChangeDate(value, i, "tanggalMulai")}
-                      // required
+                      value={d.tanggalMulai}
+                      onChange={(value) => handleChange(value, i, "tanggalMulai")}
                       // error={error[i].tanggalMulai.error}
                       // helperText={error[i].tanggalMulai.text}
                       // disabled={disabled}
@@ -187,16 +266,13 @@ export default function RencanaPelaksanaan(props) {
                     />
                   </Grid>
                   <Grid key={"grid-selesai-" + i} item xs={2}>
-                    <KeyboardDatePicker
+                    <KeyboardDatePicker key={"selesai-" + i} id={"selesai-" + i} name={"selesai-" + i}
                       fullWidth
                       clearable
-                      id={"tanggalSelesai" + i}
                       format="DD/MM/YYYY"
                       size="small"
-                      // label="Tanggal Mulai"
-                      // value={d.tanggalMulai}
-                      // onChange={(value) => handleChangeDate(value, i, "tanggalMulai")}
-                      // required
+                      value={d.tanggalSelesai}
+                      onChange={(value) => handleChange(value, i, "tanggalSelesai")}
                       // error={error[i].tanggalMulai.error}
                       // helperText={error[i].tanggalMulai.text}
                       // disabled={disabled}
@@ -206,24 +282,30 @@ export default function RencanaPelaksanaan(props) {
                   </Grid>
                   <Grid key={"grid-target-" + i} item xs={2}>
                     <TextField key={"target-" + i} id={"target-" + i} name={"target-" + i}
+                      multiline
                       variant="outlined"
                       fullWidth
                       size="small"
-                    // value={d.useCase}
+                      value={d.target}
+                      disabled
+                      className={classes.fieldTableDisabled}
                     // onChange={(event) => handleChange(event.target.value, i, "useCase")}
                     // error={error[i].useCase.error}
                     // helperText={error[i].useCase.text}
                     />
                   </Grid>
                   <Grid item xs={1} container justify="center">
-                    {/* <IconButton size="small" onClick={() => deleteRow(i)}> */}
-                    <IconButton size="small" >
+                    <IconButton size="small" onClick={() => deleteRow(i)}>
                       <RemoveCircleOutline />
                     </IconButton>
                   </Grid>
                 </Grid>
               )}
-
+              <Grid item xs container justify="center">
+                <Button fullWidth aria-label="add row action plan" size="small" onClick={addRow} >
+                  <AddCircleOutline />
+                </Button>
+              </Grid>
             </Grid>
           </Grid>
         </Paper>

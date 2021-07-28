@@ -6,10 +6,10 @@ import { KeyboardDatePicker } from '@material-ui/pickers';
 import { AddCircleOutline, RemoveCircleOutline } from '@material-ui/icons';
 
 function AddTextFiels(props) {
-  const { label, error, helperText, data, onAdd, onChange, onDelete } = props;
+  const { required, label, error, helperText, data, onAdd, onChange, onDelete } = props;
 
   return (
-    <FormControl component="fieldset" fullWidth error={error} style={{ marginBottom: 10 }}>
+    <FormControl required={required} component="fieldset" fullWidth error={error} style={{ marginBottom: 10 }}>
       <FormLabel component="legend">{label} <IconButton onClick={onAdd} size="small"><AddCircleOutline /></IconButton></FormLabel>
       <Grid container direction="column" justify="flex-start" spacing={1} style={{ paddingLeft: 10 }}>
         {data.map((d, i) =>
@@ -257,11 +257,11 @@ export default function Charter(props) {
           </Grid>
         </Grid>
         <Grid item xs>
-          <AddTextFiels label="Tujuan" error={error.tujuan.error} helperText={error.tujuan.text}
+          <AddTextFiels required label="Tujuan" error={error.tujuan.error} helperText={error.tujuan.text}
             data={tujuan} onAdd={addTujuan} onChange={changeTujuan} onDelete={deleteTujuan} />
-          <AddTextFiels label="Ruang Lingkup" error={error.scope.error} helperText={error.scope.text}
+          <AddTextFiels required label="Ruang Lingkup" error={error.scope.error} helperText={error.scope.text}
             data={scope} onAdd={addScope} onChange={changeScope} onDelete={deleteScope} />
-          <AddTextFiels label="Target / Hasil Capaian" error={error.target.error} helperText={error.target.text}
+          <AddTextFiels required label="Target / Hasil Capaian" error={error.target.error} helperText={error.target.text}
             data={target} onAdd={addTarget} onChange={changeTarget} onDelete={deleteTarget} />
         </Grid>
       </Grid>

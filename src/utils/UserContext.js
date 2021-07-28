@@ -43,6 +43,7 @@ export function useFindUser() {
           // console.log(response.data.token);
           setAuthApi("Bearer " + response.data.token);
           const dataEcnrypt = Crypto.AES.encrypt(response.data.token, "encrypt-token-for-cookie").toString();
+          // console.log("en", dataEcnrypt);
           cookies.set('auth', dataEcnrypt, { path: '/' });
           findUser();
         })

@@ -26,7 +26,7 @@ const err = { error: true, text: "Tidak boleh kosong." };
 const noErr = { error: false, text: "" };
 const defaultError = { kebutuhan: noErr, rincian: noErr, useCase: noErr };
 
-export default function UserRequirement(props) {
+export default function Resource(props) {
   const { proyek } = props;
   const classes = useStyles();
   const [edit, setEdit] = useState(false);
