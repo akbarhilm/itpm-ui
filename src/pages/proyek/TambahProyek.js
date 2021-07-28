@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Grid, makeStyles, Typography, TextField, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Paper, Button, Divider, FormHelperText, IconButton, Dialog, DialogTitle, DialogContent, DialogActions } from '@material-ui/core';
+import { Grid, makeStyles, Typography, TextField, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Paper, Button, Divider, FormHelperText, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { jenisLayanan, jenisAplikasi } from '../../utils/DataEnum';
 import { getAplikasi, createAplikasi } from '../../gateways/api/AplikasiAPI';
@@ -52,8 +52,11 @@ const defaultError = {
   layanan: { error: false, message: "" },
   namaProyek: { error: false, message: "" },
   namaUri: { error: false, message: "" },
+  deskripsi: { error: false, message: "" },
   jenisLayanan: { error: false, message: "" },
   jenisAplikasi: { error: false, message: "" },
+  aplikasi: { error: false, message: "" },
+  modul: { error: false, message: "" },
 };
 
 const defaultAlert = { openAlertDialog: false, messageAlertDialog: "", severity: "info" };
@@ -65,6 +68,7 @@ export default function DetailProyek(props) {
 
   const [listLayanan, setListLayanan] = useState([]);
   const [dataLayanan, setDataLayanan] = useState(null);
+  const [loadingButton, setLoadingButton] = useState({ submit: false, submitDialog: false });
   const [sap, setSap] = useState(false);
   const [dataProyek, setDataProyek] = useState(defaultDataProyek);
   const [listAplikasi, setListAplikasi] = useState([]);
@@ -231,10 +235,12 @@ export default function DetailProyek(props) {
     setListModul([]);
     setDataDialogModul(prev => ({ ...prev, idapl: value ? value.IDAPLIKASI : null }));
     setDataProyek(prevDataProyek => ({ ...prevDataProyek, modul: null, [jenis]: value }));
+    setError(prev => ({ ...prev, modul: { error: false, message: "" }, [jenis]: value ? { error: false, message: "" } : { error: true, message: "Tidak Boleh Kosong" } }));
   };
 
   const handleChangeModul = (jenis, value) => {
     setDataProyek(prevDataProyek => ({ ...prevDataProyek, [jenis]: value }));
+    setError(prev => ({ ...prev, [jenis]: value ? { error: false, message: "" } : { error: true, message: "Tidak Boleh Kosong" } }));
   };
 
   const handleBackToProyek = () => {
@@ -251,13 +257,19 @@ export default function DetailProyek(props) {
       namaUri: !dataProyek.namaUri ? err : def,
       jenisLayanan: !dataProyek.jenisLayanan ? err : def,
       jenisAplikasi: !dataProyek.jenisAplikasi ? err : def,
+      aplikasi: !dataProyek.aplikasi ? err : def,
+      modul: !dataProyek.modul ? err : def,
+      deskripsi: !dataProyek.deskripsi ? err : def,
     });
     if (
       !(dataLayanan && dataLayanan.idLayanan) ||
       !dataProyek.namaProyek ||
       !dataProyek.namaUri ||
       !dataProyek.jenisLayanan ||
-      !dataProyek.jenisAplikasi
+      !dataProyek.jenisAplikasi ||
+      !dataProyek.aplikasi ||
+      !dataProyek.modul ||
+      !dataProyek.deskripsi
     )
       valid = false;
 
@@ -281,14 +293,17 @@ export default function DetailProyek(props) {
   };
 
   const simpan = () => {
+    setLoadingButton(prev => ({ ...prev, submit: true }));
     if (validateAll()) {
       if (edit) {
         updateProyek(formatDataCreate())
           .then((response) => {
             setEdit(true);
             setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil ubah", severity: "success" });
+            setLoadingButton(prev => ({ ...prev, submit: false }));
           })
           .catch((error) => {
+            setLoadingButton(prev => ({ ...prev, submit: false }));
             if (error.response)
               setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data, severity: "error" });
             else
@@ -301,14 +316,19 @@ export default function DetailProyek(props) {
             setDataProyek(prev => ({ ...prev, idProyek: response.data.idproyek }));
             setEdit(true);
             setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil simpan", severity: "success" });
+            setLoadingButton(prev => ({ ...prev, submit: false }));
           })
           .catch((error) => {
+            setLoadingButton(prev => ({ ...prev, submit: false }));
             if (error.response)
               setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data, severity: "error" });
             else
               setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
           });
       }
+    } else {
+      setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Data tidak valid. Silahkan cek data yang anda input", severity: "warning" });
+      setLoadingButton(prev => ({ ...prev, submit: false }));
     }
   };
 
@@ -358,15 +378,18 @@ export default function DetailProyek(props) {
   };
 
   const saveDialog = () => {
-    if (validateDataDialog())
+    setLoadingButton(prev => ({ ...prev, submitDialog: true }));
+    if (validateDataDialog()) {
       if (openDialogAplikasi) {
         createAplikasi(dataDialogAplikasi)
           .then((response) => {
             setListAplikasi([]);
             handleCloseDialog();
             setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil simpan", severity: "success" });
+            setLoadingButton(prev => ({ ...prev, submitDialog: false }));
           })
           .catch((error) => {
+            setLoadingButton(prev => ({ ...prev, submitDialog: false }));
             if (error.response)
               setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data, severity: "error" });
             else
@@ -379,14 +402,20 @@ export default function DetailProyek(props) {
             setDataProyek(prev => ({ ...prev, aplikasi: { ...prev.aplikasi } }));
             handleCloseDialog();
             setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil simpan", severity: "success" });
+            setLoadingButton(prev => ({ ...prev, submitDialog: false }));
           })
           .catch((error) => {
+            setLoadingButton(prev => ({ ...prev, submitDialog: false }));
             if (error.response)
               setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data, severity: "error" });
             else
               setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
           });
       }
+    } else {
+      setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Data tidak valid. Silahkan cek data yang anda input", severity: "warning" });
+      setLoadingButton(prev => ({ ...prev, submitDialog: false }));
+    }
   };
 
   return (
@@ -579,6 +608,9 @@ export default function DetailProyek(props) {
             fullWidth
             onChange={handleChangeTextField}
             value={dataProyek && dataProyek.deskripsi ? dataProyek.deskripsi : ""}
+            required
+            error={error.deskripsi.error}
+            helperText={error.deskripsi.message}
           />
           <FormControl component="fieldset" className={classes.radio} fullWidth error={error.jenisAplikasi.error}>
             <FormLabel component="legend">Jenis Aplikasi</FormLabel>
@@ -619,6 +651,9 @@ export default function DetailProyek(props) {
                       fullWidth
                       variant="outlined"
                       className={classes.field}
+                      required
+                      error={error.aplikasi.error}
+                      helperText={error.aplikasi.message}
                     />
                   )}
                 />
@@ -653,6 +688,9 @@ export default function DetailProyek(props) {
                       fullWidth
                       variant="outlined"
                       className={classes.field}
+                      required
+                      error={error.modul.error}
+                      helperText={error.modul.message}
                     />
                   )}
                 />
@@ -668,7 +706,7 @@ export default function DetailProyek(props) {
       </Grid>
       <Divider />
       <Grid item container direction="row" justify="flex-end">
-        <Button variant="contained" color="primary" onClick={simpan}>{edit ? "Ubah" : "Simpan"}</Button>
+        <Button variant="contained" color="primary" onClick={loadingButton.submit ? null : simpan} >{loadingButton.submit ? <CircularProgress color="inherit" size={20} /> : edit ? "Ubah" : "Simpan"}</Button>
         <Button variant="contained" color="inherit" onClick={handleBackToProyek} style={{ marginLeft: 10 }} >{"Kembali"}</Button>
       </Grid>
       <Dialog
@@ -780,7 +818,7 @@ export default function DetailProyek(props) {
           }
         </DialogContent>
         <DialogActions>
-          <Button variant="contained" color="primary" onClick={saveDialog} >Simpan</Button>
+          <Button variant="contained" color="primary" onClick={loadingButton.submitDialog ? null : saveDialog} >{loadingButton.submitDialog ? <CircularProgress color="inherit" size={20} /> : "Simpan"}</Button>
           <Button variant="contained" color="inherit" onClick={handleCloseDialog} >Batal</Button>
         </DialogActions>
       </Dialog>
