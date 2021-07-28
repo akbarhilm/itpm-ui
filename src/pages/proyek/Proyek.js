@@ -17,7 +17,7 @@ export default function Proyek(props) {
   const { user } = useContext(UserContext);
   const history = useHistory();
 
-  // const [refresh, setRefresh] = useState(Boolean(user));
+  const [refresh, setRefresh] = useState(Boolean(user));
   const [totalPages, setTotalPages] = useState(0);
   const [page, setPage] = useState(1);
   const [dataSearch, setDataSearch] = useState();
@@ -54,10 +54,17 @@ export default function Proyek(props) {
   }, []);
 
   useEffect(() => {
-    if (user) {
+    if (refresh) {
+      history.push("/");
+      setRefresh(false);
+    }
+  }, [refresh, history]);
+
+  useEffect(() => {
+    if (!refresh) {
       getProyek();
     }
-  }, [user, getProyek]);
+  }, [refresh, getProyek]);
 
   const handleChangePage = (event, value) => {
     setPage(value);
