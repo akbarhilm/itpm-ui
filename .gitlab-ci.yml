@@ -66,7 +66,7 @@ staging_test:
   only:
     - test
 
-deploy_dev:
+deploy_test:
   stage: deploy
   script:
     - ssh $USER@$HOST_TEST "cd ~/project/itpm && ./shutdown"
@@ -74,4 +74,3 @@ deploy_dev:
   only:
     - test
   when: manual
-  
