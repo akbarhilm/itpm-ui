@@ -7,13 +7,10 @@ import AlertDialog from '../../components/AlertDialog';
 const useStyles = makeStyles((theme) => ({
   paper: {
     padding: theme.spacing(2),
-    // color: theme.palette.text.secondary,
-    // background: '#90caf9',
   },
   paperStepper: {
     padding: theme.spacing(2),
     color: theme.palette.text.secondary,
-    // background: '#90caf9',
   },
   field: {
     margin: "6px 0px 6px 0px",
@@ -42,12 +39,10 @@ export default function DetailProyek(props) {
     setAlertDialog({ ...alertDialog, openAlertDialog: false });
   };
 
-  // console.log(proyek);
   useEffect(() => {
     if (proyek) {
       getProyekById(proyek.IDPROYEK)
         .then((response) => {
-          // console.log(response.data);
           setDataProyek(response.data);
         })
         .catch((error) => {
@@ -58,7 +53,6 @@ export default function DetailProyek(props) {
         });
       getStepperProyekById(proyek.IDPROYEK)
         .then((response) => {
-          // console.log(response.data);
           setStepper(response.data);
         })
         .catch((error) => {
@@ -104,7 +98,6 @@ export default function DetailProyek(props) {
         </Paper>
       </Grid>
       <Grid item >
-        {/* <Paper className={classes.paper}> */}
         <Grid container direction="column" spacing={4}>
           <Grid item >
             <Typography variant="h4" align="center">{dataProyek ? dataProyek.NAMAPROYEK : ""}</Typography>
@@ -186,7 +179,6 @@ export default function DetailProyek(props) {
             </Grid>
           </Grid>
         </Grid>
-        {/* </Paper> */}
       </Grid>
     </Grid>
   );
