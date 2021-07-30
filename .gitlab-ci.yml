@@ -1,0 +1,75 @@
+stages:
+  - init
+  - build
+  - staging
+  - deploy
+
+cache:
+  paths:
+    - node_modules/
+
+init:
+  stage: init
+  script:
+    - npm install
+  only:
+    - dev
+    - test
+
+build_dev:
+  stage: build
+  before_script:
+    - export REACT_APP_HOST=$HOST_DEV
+    - export REACT_APP_HOST_API=$HOST_DEV
+    - export REACT_APP_HOST_LOGIN=$HOST_DEV_LOGIN
+  script: 
+    - npm run build
+    - cp -f ~/project/wait/wait .
+    - docker build -t $DOCKER_REPOSITORY/dev-apps/itpm-ui .
+  only:
+    - dev
+
+staging_dev:
+  stage: staging
+  script:
+    - docker push $DOCKER_REPOSITORY/dev-apps/itpm-ui
+    - docker rmi $DOCKER_REPOSITORY/dev-apps/itpm-ui
+  only:
+    - dev
+
+deploy_dev:
+  stage: deploy
+  script:
+    - ssh $USER@$HOST_DEV "cd ~/project/itpm && ./shutdown"
+    - ssh $USER@$HOST_DEV "cd ~/project/itpm && ./startup"
+  only:
+    - dev
+
+build_test:
+  stage: build
+  before_script:
+    - export REACT_APP_HOST=$HOST_TEST
+    - export REACT_APP_HOST_API=$HOST_TEST
+    - export REACT_APP_HOST_LOGIN=$HOST_TEST_LOGIN
+  script: 
+    - npm run build
+    - cp -f ~/project/wait/wait .
+    - docker build -t $DOCKER_REPOSITORY/test-apps/itpm-ui .
+  only:
+    - test
+
+staging_test:
+  stage: staging
+  script:
+    - docker push $DOCKER_REPOSITORY/test-apps/itpm-ui
+    - docker rmi $DOCKER_REPOSITORY/test-apps/itpm-ui
+  only:
+    - test
+
+deploy_test:
+  stage: deploy
+  script:
+    - ssh $USER@$HOST_TEST "cd ~/project/itpm && ./shutdown"
+    - ssh $USER@$HOST_TEST "cd ~/project/itpm && ./startup"
+  only:
+    - test
