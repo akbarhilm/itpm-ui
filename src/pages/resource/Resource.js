@@ -20,11 +20,11 @@ const useStyles = makeStyles((theme) => ({
 
 const defaultAlert = { openAlertDialog: false, messageAlertDialog: "", severity: "info" };
 
-const defaultData = { kebutuhan: "", rincian: "", useCase: "" };
+const defaultData = { deskripsi: "", satuan: "", jumlah: "" };
 
 const err = { error: true, text: "Tidak boleh kosong." };
 const noErr = { error: false, text: "" };
-const defaultError = { kebutuhan: noErr, rincian: noErr, useCase: noErr };
+const defaultError = { deskripsi: noErr, satuan: noErr, jumlah: noErr };
 
 export default function Resource(props) {
   const { proyek } = props;
@@ -101,7 +101,7 @@ export default function Resource(props) {
       />
       <Grid item>
         <Typography variant="h4" gutterBottom>
-          {edit ? "Ubah Kebutuhan Pengguna" : "Tambah Kebutuhan Pengguna"}
+          {edit ? "Ubah Kebutuhan Sumber Daya" : "Tambah Kebutuhan Sumber Daya"}
         </Typography>
       </Grid>
       <Grid item xs={6}>
@@ -119,24 +119,19 @@ export default function Resource(props) {
           <Grid container direction="column" spacing={2}>
             <Grid item container direction="row" justify="space-between">
               <Grid item xs>
-                <Typography variant="h6">Data Requirement</Typography>
+                <Typography variant="h6">Sumber Daya Lain</Typography>
               </Grid>
-              {/* <Grid item xs container justify="flex-end">
-                <IconButton size="small" onClick={addRow}>
-                  <AddCircleOutline />
-                </IconButton>
-              </Grid> */}
             </Grid>
             <Grid item container direction="column" spacing={1}>
               <Grid item container direction="row" spacing={1} justify="space-between">
-                <Grid item xs={4}>
-                  <Typography align="center">Kebutuhan Sistem</Typography>
+                <Grid item xs>
+                  <Typography align="center">Deskripsi Kebutuhan</Typography>
                 </Grid>
-                <Grid item xs={5}>
-                  <Typography align="center">Rincian Kebutuhan</Typography>
+                <Grid item xs={3}>
+                  <Typography align="center">Ukuran Satuan</Typography>
                 </Grid>
                 <Grid item xs={2}>
-                  <Typography align="center">Use Case</Typography>
+                  <Typography align="center">Jumlah</Typography>
                 </Grid>
                 <Grid item xs={1}>
                   <Typography align="center">Actions</Typography>
@@ -144,42 +139,42 @@ export default function Resource(props) {
               </Grid>
               {data && data.map((d, i) =>
                 <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justify="space-between" alignItems="center">
-                  <Grid key={"grid-kebutuhan-" + i} item xs={4}>
-                    <TextField key={"kebutuhan-" + i} id={"kebutuhan-" + i} name={"kebutuhan-" + i}
+                  <Grid key={"grid-deskripsi-" + i} item xs>
+                    <TextField key={"deskripsi-" + i} id={"deskripsi-" + i} name={"deskripsi-" + i}
                       variant="outlined"
                       fullWidth
                       multiline
                       size="small"
-                      value={d.kebutuhan}
-                      onChange={(event) => handleChange(event.target.value, i, "kebutuhan")}
+                      value={d.deskripsi}
+                      onChange={(event) => handleChange(event.target.value, i, "deskripsi")}
                       required
-                      error={error[i].kebutuhan.error}
-                      helperText={error[i].kebutuhan.text}
+                      error={error[i].deskripsi.error}
+                      helperText={error[i].deskripsi.text}
                     />
                   </Grid>
-                  <Grid key={"grid-rincian-" + i} item xs={5}>
-                    <TextField key={"rincian-" + i} id={"rincian-" + i} name={"rincian-" + i}
+                  <Grid key={"grid-satuan-" + i} item xs={3}>
+                    <TextField key={"satuan-" + i} id={"satuan-" + i} name={"satuan-" + i}
                       variant="outlined"
                       fullWidth
                       multiline
                       size="small"
-                      value={d.rincian}
-                      onChange={(event) => handleChange(event.target.value, i, "rincian")}
+                      value={d.satuan}
+                      onChange={(event) => handleChange(event.target.value, i, "satuan")}
                       required
-                      error={error[i].rincian.error}
-                      helperText={error[i].rincian.text}
+                      error={error[i].satuan.error}
+                      helperText={error[i].satuan.text}
                     />
                   </Grid>
-                  <Grid key={"grid-use-case-" + i} item xs={2}>
-                    <TextField key={"use-case-" + i} id={"use-case-" + i} name={"use-case-" + i}
+                  <Grid key={"grid-jumlah-" + i} item xs={2}>
+                    <TextField key={"jumlah-" + i} id={"jumlah-" + i} name={"jumlah-" + i}
                       variant="outlined"
                       fullWidth
                       size="small"
-                      value={d.useCase}
-                      onChange={(event) => handleChange(event.target.value, i, "useCase")}
+                      value={d.jumlah}
+                      onChange={(event) => handleChange(event.target.value, i, "jumlah")}
                       required
-                      error={error[i].useCase.error}
-                      helperText={error[i].useCase.text}
+                      error={error[i].jumlah.error}
+                      helperText={error[i].jumlah.text}
                     />
                   </Grid>
                   <Grid item xs={1} container justify="center">

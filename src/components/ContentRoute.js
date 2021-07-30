@@ -13,6 +13,7 @@ import Charter from "../pages/charter/Charter";
 import { MuiPickersUtilsProvider } from "@material-ui/pickers";
 import UserRequirement from "../pages/ureq/UserRequirement";
 import RencanaPelaksanaan from "../pages/rencana/RencanaPelaksanaan";
+import Resource from "../pages/resource/Resource";
 // import { MuiPickersUtilsProvider } from "@material-ui/pickers";
 // import moment from 'moment';
 
@@ -73,6 +74,9 @@ export default function Content(props) {
           </PrivateRoute>
           <PrivateRoute exact path='/:namauri/rencana' >
             <RencanaPelaksanaan proyek={proyek} />
+          </PrivateRoute>
+          <PrivateRoute exact path='/:namauri/resource' >
+            <Resource proyek={proyek} />
           </PrivateRoute>
         </Switch>
         {/* </Paper> */}
