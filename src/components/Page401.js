@@ -1,29 +1,26 @@
 import React from "react";
-import { Typography, makeStyles } from "@material-ui/core";
+// import { Typography, makeStyles } from "@material-ui/core";
+import ErrorPage from "./ErrorPage";
 
-const useStyles = makeStyles((theme) => ({
-  container: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    height: `100%`,
-    marginTop: theme.spacing(20),
-    marginBottom: theme.spacing(20),
-  },
-  login: {
-    marginTop: 20,
-  },
-}));
+// const useStyles = makeStyles((theme) => ({
+//   container: {
+//     display: "flex",
+//     flexDirection: "column",
+//     alignItems: "center",
+//     justifyContent: "center",
+//     height: `100%`,
+//     marginTop: theme.spacing(20),
+//     marginBottom: theme.spacing(20),
+//   },
+//   login: {
+//     marginTop: 20,
+//   },
+// }));
 
 export default function Page401() {
-  const classes = useStyles();
+  // const classes = useStyles();
 
   return (
-    <div className={classes.container}>
-      <Typography variant="h4">401</Typography>
-      <Typography variant="subtitle1">Anda Tidak Berhak Mengakses Halaman Ini</Typography>
-      <a className={classes.login} href={process.env.REACT_APP_HOST_LOGIN}>Login</a>
-    </div>
+    <ErrorPage code="401" message="Anda tidak berhak mengakses halaman ini" linkToLogin />
   );
 }

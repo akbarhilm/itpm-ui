@@ -9,11 +9,12 @@ import DetailProyek from "../pages/proyek/DetailProyek";
 import TambahProyek from "../pages/proyek/TambahProyek";
 // import LandingPage from "./LandingPage";
 import PrivateRoute from "./PrivateRoute";
-import Charter from "../pages/charter/Charter";
+// import Charter from "../pages/charter/Charter";
 import { MuiPickersUtilsProvider } from "@material-ui/pickers";
 import UserRequirement from "../pages/ureq/UserRequirement";
 import RencanaPelaksanaan from "../pages/rencana/RencanaPelaksanaan";
 import Resource from "../pages/resource/Resource";
+import CharterRouter from "../pages/charter/CharterRouter";
 // import { MuiPickersUtilsProvider } from "@material-ui/pickers";
 // import moment from 'moment';
 
@@ -64,11 +65,14 @@ export default function Content(props) {
             <TambahProyek proyek={proyek} />
           </PrivateRoute>
           <PrivateRoute exact path='/:namauri' >
-            <DetailProyek proyek={proyek} />
+            <DetailProyek proyek={proyek} setProyek={setProyek} />
           </PrivateRoute>
           <PrivateRoute exact path='/:namauri/charter' >
-            <Charter proyek={proyek} />
+            <CharterRouter proyek={proyek} />
           </PrivateRoute>
+          {/* <PrivateRoute exact path='/:namauri/charter' >
+            <Charter proyek={proyek} />
+          </PrivateRoute> */}
           <PrivateRoute exact path='/:namauri/ureq' >
             <UserRequirement proyek={proyek} />
           </PrivateRoute>

@@ -24,6 +24,8 @@ function App() {
   const classes = useStyles();
 
   const { user, setUser, isLoading } = useFindUser();
+  // const { isLoading, setLoading } = useLoading();
+  // const [auth, setAuth] = useState();
   const [proyek, setProyek] = useState();
   const [menuSideBar, setMenuSideBar] = useState(false);
 

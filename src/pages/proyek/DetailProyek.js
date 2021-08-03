@@ -28,7 +28,7 @@ const labelStepper = ["Charter", "User Requirement", "Rencana Pelaksanaan", "Keb
 const defaultAlert = { openAlertDialog: false, messageAlertDialog: "", severity: "info" };
 
 export default function DetailProyek(props) {
-  const { proyek } = props;
+  const { proyek, setProyek } = props;
   const classes = useStyles();
 
   const [dataProyek, setDataProyek] = useState();
@@ -40,10 +40,11 @@ export default function DetailProyek(props) {
   };
 
   useEffect(() => {
-    if (proyek) {
+    if (!dataProyek) {
       getProyekById(proyek.IDPROYEK)
         .then((response) => {
           setDataProyek(response.data);
+          setProyek(response.data);
         })
         .catch((error) => {
           if (error.response)
@@ -62,7 +63,7 @@ export default function DetailProyek(props) {
             setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
         });
     }
-  }, [proyek]);
+  }, [dataProyek, proyek, setProyek]);
 
   const completeStepper = (data) => {
     if (data === "Charter") return stepper.NOCHARTER;

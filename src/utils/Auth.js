@@ -1,5 +1,7 @@
 import Cookies from "universal-cookie";
 import Crypto from 'crypto-js';
+// import { useContext } from "react";
+// import { UserContext } from "./UserContext";
 
 const cookies = new Cookies();
 
@@ -12,3 +14,8 @@ export function getAuth() {
     return "";
   }
 }
+
+// export function ValidateAuth(otoritas) {
+//   const { auth } = useContext(UserContext);
+//   return
+// }
