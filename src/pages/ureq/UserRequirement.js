@@ -27,7 +27,7 @@ const noErr = { error: false, text: "" };
 const defaultError = { kebutuhan: noErr, rincian: noErr, useCase: noErr };
 
 export default function UserRequirement(props) {
-  const { proyek } = props;
+  const { ureq, proyek } = props;
   const classes = useStyles();
   const [edit, setEdit] = useState(false);
   const [nomor, setNomor] = useState("");
