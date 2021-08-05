@@ -9,5 +9,5 @@ export const createCharter = async (data) => {
 };
 
 export const updateCharter = async (data) => {
-  return await api.post('/proyek/charter/ubah', data);
+  return await api.put('/proyek/charter/ubah', data);
 };

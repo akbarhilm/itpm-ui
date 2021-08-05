@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { Button, CircularProgress, FormControl, FormHelperText, FormLabel, Grid, IconButton, makeStyles, TextField, Typography } from '@material-ui/core';
+import { Button, CircularProgress, FormControl, FormHelperText, FormLabel, Grid, IconButton, makeStyles, TextField, Typography, Divider } from '@material-ui/core';
 import AlertDialog from '../../components/AlertDialog';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import { AddCircleOutline, RemoveCircleOutline } from '@material-ui/icons';
 import moment from 'moment';
-import { createCharter, updateCharter } from '../../gateways/api/CharterAPI';
+import { createCharter, updateCharter, getCharterByIdProyek } from '../../gateways/api/CharterAPI';
 
 function AddTextFiels(props) {
   const { required, label, error, helperText, data, onAdd, onChange, onDelete } = props;
@@ -13,7 +13,7 @@ function AddTextFiels(props) {
   return (
     <FormControl required={required} component="fieldset" fullWidth error={error} style={{ marginBottom: 10 }}>
       <FormLabel component="legend">{label} <IconButton onClick={onAdd} size="small"><AddCircleOutline /></IconButton></FormLabel>
-      <Grid container direction="column" justify="flex-start" spacing={1} style={{ paddingLeft: 10 }}>
+      <Grid container direction="column" justify="flex-start" spacing={1} >
         {data.map((d, i) =>
           <Grid item key={"grid-" + i}>
             <TextField key={"field-" + i} id={i.toString()} name={i.toString()} fullWidth
@@ -89,22 +89,32 @@ export default function Charter(props) {
     setAlertDialog({ ...alertDialog, openAlertDialog: false });
   };
 
+  const formatDataCharter = useCallback((data) => {
+    return {
+      idcharter: data.IDCHARTER,
+      nomor: data.NOCHARTER,
+      tanggalMulai: moment(data.TGLMULAI, "DD/MM/YYYY"),
+      tanggalSelesai: moment(data.TGLSELESAI, "DD/MM/YYYY"),
+      tujuan: data.TUJUAN,
+      scope: data.SCOPE,
+      target: data.TARGET
+    };
+
+  }, []);
+
   // set first data
   useEffect(() => {
-    // if (!data) {
-    // get charter by id proyek from api
-    // jika charter sudah ada datanya
     if (Object.keys(charter).length > 0) {
+      const newData = formatDataCharter(charter);
       setEdit(true);
-      // diganti dengan data dari api
-      // setData("ganti dengan data dari response");
-      // setTujuan([""]);
-      // setScope([""]);
-      // setTarget([""]);
+      setData(newData);
+      setTujuan(newData.tujuan.sort((a, b) => a.KODESORT - b.KODESORT).map(d => d.KETERANGAN));
+      setScope(newData.scope.sort((a, b) => a.KODESORT - b.KODESORT).map(d => d.KETERANGAN));
+      setTarget(newData.target.sort((a, b) => a.KODESORT - b.KODESORT).map(d => d.KETERANGAN));
     } else { // jika belum ada charter
       setData(defaultData);
     }
-  }, [charter]);
+  }, [charter, formatDataCharter]);
 
   const handleChangeDate = (value, jenis) => {
     setData(prev => ({ ...prev, [jenis]: value }));
@@ -183,22 +193,12 @@ export default function Charter(props) {
       return false;
   };
 
-  // setdatapost
-  // idproj
-  // tglmulai
-  // tglselesai
-  // listdetail = [{kodedetail,
-  //       kodesort,
-  //       keterangan,}]
-
-
-
   const simpan = () => {
     if (validateAll()) {
       setLoadingButton(true);
-      const formatTujuan = tujuan.filter(d => d).map((d, i) => ({ kodedetail: "TUJUAN", kodesort: (i + 1).toString(), keterangan: d }));
-      const formatScope = scope.filter(d => d).map((d, i) => ({ kodedetail: "SCOPE", kodesort: (i + 1).toString(), keterangan: d }));
-      const formatTarget = target.filter(d => d).map((d, i) => ({ kodedetail: "TARGET", kodesort: (i + 1).toString(), keterangan: d }));
+      const formatTujuan = tujuan.filter(d => d).map((d, i) => ({ kodedetail: "TUJUAN", kodesort: (i + 1), keterangan: d }));
+      const formatScope = scope.filter(d => d).map((d, i) => ({ kodedetail: "SCOPE", kodesort: (i + 1), keterangan: d }));
+      const formatTarget = target.filter(d => d).map((d, i) => ({ kodedetail: "TARGET", kodesort: (i + 1), keterangan: d }));
       const listdetail = formatTujuan.concat(formatScope, formatTarget);
       const formatData = {
         idcharter: data.idcharter ? data.idcharter : null,
@@ -207,9 +207,8 @@ export default function Charter(props) {
         tglselesai: moment(data.tanggalSelesai).format("DD/MM/YYYY"),
         listdetail: listdetail
       };
-      // console.log(formatData);
-      // setLoadingButton(false);
-      if (edit)
+      if (edit) {
+        // console.log("update", formatData);
         updateCharter(formatData)
           .then((response) => {
             setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil ubah", severity: "success" });
@@ -218,13 +217,28 @@ export default function Charter(props) {
           .catch((error) => {
             setLoadingButton(false);
             if (error.response)
-              setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data, severity: "error" });
+              setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data.message, severity: "error" });
             else
               setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
           });
-      else
+      }
+      else {
+        // console.log("create", formatData);
         createCharter(formatData)
-          .then((response) => {
+          .then(async (response) => {
+            await getCharterByIdProyek(response.data.idproj).then((response) => {
+              const tujuan = response.data.LISTDETAIL.filter(d => d.KODEDETAIL === "TUJUAN");
+              const scope = response.data.LISTDETAIL.filter(d => d.KODEDETAIL === "SCOPE");
+              const target = response.data.LISTDETAIL.filter(d => d.KODEDETAIL === "TARGET");
+              delete response.data.LISTDETAIL;
+              const newData = {
+                ...response.data,
+                TUJUAN: tujuan,
+                SCOPE: scope,
+                TARGET: target
+              };
+              setData(formatDataCharter(newData));
+            });
             setEdit(true);
             setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil simpan", severity: "success" });
             setLoadingButton(false);
@@ -232,18 +246,17 @@ export default function Charter(props) {
           .catch((error) => {
             setLoadingButton(false);
             if (error.response)
-              setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data, severity: "error" });
+              setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data.message, severity: "error" });
             else
               setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
           });
+      }
     }
     else {
       setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Data tidak valid. Silahkan cek data yang anda input", severity: "warning" });
     }
-    // createCharter
   };
 
-  // console.log(proyek);
   return (
     <Grid container spacing={3} direction="column" >
       <AlertDialog
@@ -258,86 +271,88 @@ export default function Charter(props) {
           {edit ? "Ubah Charter" : "Tambah Charter"}
         </Typography>
       </Grid>
-      <Grid item container direction="row" justify="space-between" spacing={2}>
-        <Grid item xs>
-          <TextField id="nomor" label="Nomor Charter" fullWidth
-            value={data ? data.nomor : ""}
-            disabled
-            variant="outlined"
-            className={classes.textFieldDisabled}
-          />
-          <TextField id="namaProyek" label="Nama Proyek" fullWidth
-            value={proyek ? proyek.NAMAPROYEK : ""}
-            disabled
-            variant="outlined"
-            className={classes.textFieldDisabled}
-          />
-          <Grid container direction="row" spacing={2} justify="space-between">
-            <Grid item xs>
-              <TextField id="nikBPO" label="NIK BPO" fullWidth
-                value={proyek ? proyek.NIKREQ : ""}
-                disabled
-                variant="outlined"
-                className={classes.textFieldDisabled}
-              />
-            </Grid>
-            <Grid item xs>
-              <TextField id="nikPM" label="NIK PM" fullWidth
-                value={proyek ? proyek.NIKPM : ""}
-                disabled
-                variant="outlined"
-                className={classes.textFieldDisabled}
-              />
-            </Grid>
+      <Divider />
+      <Grid item container direction="column" spacing={2}>
+        <Grid item xs container direction="row" spacing={2} justify="space-between">
+          <Grid item xs>
+            <TextField id="nomor" label="Nomor Charter" fullWidth
+              value={data ? data.nomor : ""}
+              disabled
+              className={classes.textFieldDisabled}
+            />
           </Grid>
-          <Grid container direction="row" spacing={2} justify="space-between">
-            <Grid item xs>
-              <KeyboardDatePicker
-                fullWidth
-                clearable
-                id="tanggalMulai"
-                format="DD/MM/YYYY"
-                label="Tanggal Mulai"
-                value={data ? data.tanggalMulai : null}
-                onChange={(value) => handleChangeDate(value, "tanggalMulai")}
-                required
-                error={error.tanggalMulai.error}
-                helperText={error.tanggalMulai.text}
-                // disabled={disabled}
-                inputVariant="outlined"
-                className={classes.textField}
-                views={['year', 'month', 'date']}
-              />
-            </Grid>
-            <Grid item xs>
-              <KeyboardDatePicker
-                fullWidth
-                clearable
-                id="tanggalSelesai"
-                format="DD/MM/YYYY"
-                label="Tanggal Selesai"
-                value={data ? data.tanggalSelesai : null}
-                onChange={(value) => handleChangeDate(value, "tanggalSelesai")}
-                required
-                error={error.tanggalSelesai.error}
-                helperText={error.tanggalSelesai.text}
-                // disabled={disabled}
-                inputVariant="outlined"
-                className={classes.textField}
-                views={['year', 'month', 'date']}
-              />
-            </Grid>
+          <Grid item xs>
+            <TextField id="namaProyek" label="Nama Proyek" fullWidth
+              value={proyek ? proyek.NAMAPROYEK : ""}
+              disabled
+              className={classes.textFieldDisabled}
+            />
           </Grid>
         </Grid>
-        <Grid item xs>
-          <AddTextFiels required label="Tujuan" error={error.tujuan.error} helperText={error.tujuan.text}
-            data={tujuan} onAdd={addTujuan} onChange={changeTujuan} onDelete={deleteTujuan} />
-          <AddTextFiels required label="Ruang Lingkup" error={error.scope.error} helperText={error.scope.text}
-            data={scope} onAdd={addScope} onChange={changeScope} onDelete={deleteScope} />
-          <AddTextFiels required label="Target / Hasil Capaian" error={error.target.error} helperText={error.target.text}
-            data={target} onAdd={addTarget} onChange={changeTarget} onDelete={deleteTarget} />
+        <Grid item xs container direction="row" spacing={2} justify="space-between" >
+          <Grid item xs>
+            <TextField id="nikBPO" label="NIK BPO" fullWidth
+              value={proyek ? proyek.NIKREQ : ""}
+              disabled
+              className={classes.textFieldDisabled}
+            />
+          </Grid>
+          <Grid item xs>
+            <TextField id="nikPM" label="NIK PM" fullWidth
+              value={proyek ? proyek.NIKPM : ""}
+              disabled
+              className={classes.textFieldDisabled}
+            />
+          </Grid>
+        </Grid>
+        <Grid item xs container direction="row" spacing={2} justify="space-between" >
+          <Grid item xs>
+            <KeyboardDatePicker
+              fullWidth
+              clearable
+              id="tanggalMulai"
+              format="DD/MM/YYYY"
+              label="Tanggal Mulai"
+              value={data ? data.tanggalMulai : null}
+              onChange={(value) => handleChangeDate(value, "tanggalMulai")}
+              required
+              error={error.tanggalMulai.error}
+              helperText={error.tanggalMulai.text}
+              inputVariant="outlined"
+              className={classes.textField}
+              views={['year', 'month', 'date']}
+            />
+          </Grid>
+          <Grid item xs >
+            <KeyboardDatePicker
+              fullWidth
+              clearable
+              id="tanggalSelesai"
+              format="DD/MM/YYYY"
+              label="Tanggal Selesai"
+              value={data ? data.tanggalSelesai : null}
+              onChange={(value) => handleChangeDate(value, "tanggalSelesai")}
+              required
+              error={error.tanggalSelesai.error}
+              helperText={error.tanggalSelesai.text}
+              inputVariant="outlined"
+              className={classes.textField}
+              views={['year', 'month', 'date']}
+            />
+          </Grid>
+        </Grid>
+        <Grid item xs container spacing={2} >
+          <Grid item xs>
+            <AddTextFiels required label="Tujuan" error={error.tujuan.error} helperText={error.tujuan.text}
+              data={tujuan} onAdd={addTujuan} onChange={changeTujuan} onDelete={deleteTujuan} />
+            <AddTextFiels required label="Ruang Lingkup" error={error.scope.error} helperText={error.scope.text}
+              data={scope} onAdd={addScope} onChange={changeScope} onDelete={deleteScope} />
+            <AddTextFiels required label="Target / Hasil Capaian" error={error.target.error} helperText={error.target.text}
+              data={target} onAdd={addTarget} onChange={changeTarget} onDelete={deleteTarget} />
+          </Grid>
         </Grid>
       </Grid>
+      <Divider />
       <Grid item container justify="flex-end">
         <Button onClick={loadingButton ? null : simpan} color="primary" variant="contained" >
           {loadingButton ? <CircularProgress size={20} color="inherit" /> : edit ? "Ubah" : "Simpan"}

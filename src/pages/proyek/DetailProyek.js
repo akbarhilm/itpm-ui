@@ -48,7 +48,7 @@ export default function DetailProyek(props) {
         })
         .catch((error) => {
           if (error.response)
-            setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data, severity: "error" });
+            setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data.message, severity: "error" });
           else
             setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
         });
@@ -58,7 +58,7 @@ export default function DetailProyek(props) {
         })
         .catch((error) => {
           if (error.response)
-            setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data, severity: "error" });
+            setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data.message, severity: "error" });
           else
             setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
         });
@@ -108,7 +108,7 @@ export default function DetailProyek(props) {
             <Grid item xs={6} container direction="column" >
               <TextField
                 label="Nomor Layanan"
-                variant="outlined"
+                // variant="outlined"
                 className={classes.fieldDisabled}
                 fullWidth
                 disabled
@@ -118,7 +118,7 @@ export default function DetailProyek(props) {
                 <Grid item xs>
                   <TextField
                     label="NIK BPO"
-                    variant="outlined"
+                    // variant="outlined"
                     className={classes.fieldDisabled}
                     fullWidth
                     disabled
@@ -128,7 +128,7 @@ export default function DetailProyek(props) {
                 <Grid item xs>
                   <TextField
                     label="NIK PM"
-                    variant="outlined"
+                    // variant="outlined"
                     className={classes.fieldDisabled}
                     fullWidth
                     disabled
@@ -140,7 +140,7 @@ export default function DetailProyek(props) {
                 <Grid item xs>
                   <TextField
                     label="Jenis Layanan"
-                    variant="outlined"
+                    // variant="outlined"
                     className={classes.fieldDisabled}
                     fullWidth
                     disabled
@@ -150,7 +150,7 @@ export default function DetailProyek(props) {
                 <Grid item xs>
                   <TextField
                     label="Jenis Aplikasi"
-                    variant="outlined"
+                    // variant="outlined"
                     className={classes.fieldDisabled}
                     fullWidth
                     disabled
@@ -162,19 +162,19 @@ export default function DetailProyek(props) {
             <Grid item xs={6}>
               <TextField
                 label="Nama Aplikasi"
-                variant="outlined"
+                // variant="outlined"
                 className={classes.fieldDisabled}
                 fullWidth
                 disabled
-                value={dataProyek && dataProyek.APLIKASI ? dataProyek.APLIKASI.NAMAAPLIKASI : ""}
+                value={dataProyek && dataProyek.APLIKASI ? dataProyek.APLIKASI.NAMAAPLIKASI : "-"}
               />
               <TextField
                 label="Nama Modul"
-                variant="outlined"
+                // variant="outlined"
                 className={classes.fieldDisabled}
                 fullWidth
                 disabled
-                value={dataProyek && dataProyek.MODUL ? dataProyek.MODUL.NAMAMODUL : ""}
+                value={dataProyek && dataProyek.MODUL ? dataProyek.MODUL.NAMAMODUL : "-"}
               />
 
             </Grid>

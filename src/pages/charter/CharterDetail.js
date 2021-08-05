@@ -1,5 +1,33 @@
 import React from 'react';
-import { Grid, makeStyles, Paper, Typography } from '@material-ui/core';
+import { Grid, makeStyles, Typography, TextField, FormControl, FormLabel, Divider } from '@material-ui/core';
+import PropTypes from 'prop-types';
+
+function ListDetail(props) {
+  const { label, data, classes } = props;
+
+  return (
+    <FormControl component="fieldset" fullWidth style={{ marginBottom: 10 }}>
+      <FormLabel component="legend">{label}</FormLabel>
+      <Grid container direction="column" justify="flex-start" >
+        {data.map((d, i) =>
+          <Grid item key={"grid-" + i}>
+            <TextField key={"field-" + i} id={i.toString()} name={i.toString()} fullWidth
+              multiline
+              value={d.KETERANGAN}
+              disabled
+              className={classes.textFieldDisabled}
+            />
+          </Grid>
+        )}
+      </Grid>
+    </FormControl>
+  );
+}
+
+ListDetail.propTypes = {
+  label: PropTypes.string,
+  data: PropTypes.array.isRequired
+};
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -7,56 +35,90 @@ const useStyles = makeStyles((theme) => ({
     margin: "auto",
     maxWidth: "100%",
   },
+  textFieldDisabled: {
+    margin: "6px 0px 6px 0px",
+    "& .MuiInputBase-root.Mui-disabled": {
+      color: "rgba(0, 0, 0, 1)" // (default alpha is 0.38)
+    }
+  },
 }));
 
 export default function CharterDetail(props) {
-  const { charter, proyek } = props;
+  const { charter, proyek, approval } = props;
   const classes = useStyles();
-  // console.log(charter);
 
   return (
     <Grid container spacing={3} direction="column" >
-      <Grid item xs>
+      {!approval && <Grid item xs>
         <Typography variant="h4" gutterBottom>
           {"Detail Charter"}
         </Typography>
-      </Grid>
-      <Grid item xs={12}>
-        <Paper className={classes.paper}>
-
-          <Grid  >
-            <Typography variant="h6">{"Nomor Charter : "}</Typography>
-            <Typography style={{ marginLeft: 20 }} gutterBottom>{charter.NOCHARTER || "-"}</Typography>
-
-            <Typography variant="h6">{"Nama Proyek : "}</Typography>
-            <Typography style={{ marginLeft: 20 }} gutterBottom>{proyek.NAMAPROYEK || "-"}</Typography>
-
-            <Typography variant="h6">{"NIK BPO : "}</Typography>
-            <Typography style={{ marginLeft: 20 }} gutterBottom>{proyek.NIKREQ || "-"}</Typography>
-
-            <Typography variant="h6">{"NIK PM : "}</Typography>
-            <Typography style={{ marginLeft: 20 }} gutterBottom>{proyek.NIKPM || "-"}</Typography>
-
-            <Typography variant="h6">{"Periode : "}</Typography>
-            <Typography style={{ marginLeft: 20 }} gutterBottom>{(charter.TGLMULAI || "-") + " s/d " + (charter.TGLSELESAI || "-")}</Typography>
-
-            <Typography variant="h6">{"Tujuan : "}</Typography>
-            {(charter.TUJUAN && charter.TUJUAN.map((d, i) =>
-              <Typography key={"tujuan-" + i} style={{ marginLeft: 20 }} gutterBottom>{i + ". " + d.KETERANGAN}</Typography>
-            )) || <Typography style={{ marginLeft: 20 }} gutterBottom>{"-"}</Typography>}
-
-            <Typography variant="h6">{"Ruang Lingkup : "}</Typography>
-            {(charter.SCOPE && charter.SCOPE.map((d, i) =>
-              <Typography key={"scope-" + i} style={{ marginLeft: 20 }} gutterBottom>{i + ". " + d.KETERANGAN}</Typography>
-            )) || <Typography style={{ marginLeft: 20 }} gutterBottom>{"-"}</Typography>}
-
-            <Typography variant="h6">{"Target / Hasil Capaian : "}</Typography>
-            {(charter.TARGET && charter.TARGET.map((d, i) =>
-              <Typography key={"target-" + i} style={{ marginLeft: 20 }} gutterBottom>{i + ". " + d.KETERANGAN}</Typography>
-            )) || <Typography style={{ marginLeft: 20 }} gutterBottom>{"-"}</Typography>}
-
+      </Grid>}
+      {!approval && <Divider />}
+      <Grid item xs container spacing={2} direction="column">
+        <Grid item xs container direction="row" spacing={2} justify="space-between">
+          <Grid item xs={6}>
+            <TextField id="nomor" label="Nomor Charter" fullWidth
+              value={charter.NOCHARTER || "-"}
+              disabled
+              className={classes.textFieldDisabled}
+            />
           </Grid>
-        </Paper>
+          <Grid item xs={6}>
+            <TextField id="namaProyek" label="Nama Proyek" fullWidth
+              value={proyek.NAMAPROYEK || "-"}
+              disabled
+              className={classes.textFieldDisabled}
+            />
+          </Grid>
+        </Grid>
+        <Grid item xs container direction="row" spacing={2} justify="space-between">
+          <Grid item xs={6}>
+            <TextField id="nikBPO" label="NIK BPO" fullWidth
+              value={proyek.NIKREQ || "-"}
+              disabled
+              className={classes.textFieldDisabled}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <TextField id="nikPM" label="NIK PM" fullWidth
+              value={proyek.NIKPM || "-"}
+              disabled
+              className={classes.textFieldDisabled}
+            />
+          </Grid>
+        </Grid>
+        <Grid item xs container direction="row" spacing={2} justify="space-between">
+          <Grid item xs={6}>
+            <TextField id="tglMulai" label="Tanggal Mulai" fullWidth
+              value={charter.TGLMULAI || "-"}
+              disabled
+              className={classes.textFieldDisabled}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <TextField id="tglSelesai" label="Tanggal Selesai" fullWidth
+              value={charter.TGLSELESAI || "-"}
+              disabled
+              className={classes.textFieldDisabled}
+            />
+          </Grid>
+        </Grid>
+        <Grid item xs container spacing={2}>
+          <Grid item xs>
+            <ListDetail label="Tujuan" classes={classes} data={charter.TUJUAN} />
+          </Grid>
+        </Grid>
+        <Grid item xs container spacing={2}>
+          <Grid item xs>
+            <ListDetail label="Ruang Lingkup" classes={classes} data={charter.SCOPE} />
+          </Grid>
+        </Grid>
+        <Grid item xs container spacing={2}>
+          <Grid item xs>
+            <ListDetail label="Target / Hasil Capaian" classes={classes} data={charter.TARGET} />
+          </Grid>
+        </Grid>
       </Grid>
     </Grid>
   );
