@@ -73,4 +73,3 @@ deploy_test:
     - ssh $USER@$HOST_TEST "cd ~/project/itpm && ./startup"
   only:
     - test
-  when: manual
