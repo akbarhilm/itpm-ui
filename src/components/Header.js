@@ -179,7 +179,7 @@ export default function Header(props) {
                   <MenuItem onClick={handleClose}>
                     <ExitToAppIcon fontSize="small" />
                     <ListItemText
-                      primary="Log Out"
+                      primary="back to INFO"
                       className={classes.menu}
                       onClick={doLogout}
                     />
