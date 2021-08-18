@@ -214,7 +214,7 @@ export default function DetailProyek(props) {
   const handleChangeRadio = (event) => {
     if (event.target.name === "jenisAplikasi") {
       if (event.target.value === "SAP") {
-        setDataProyek(prev => ({ ...prev, jenisLayanan: "PENGEMBANGAN", aplikasi: listAplikasi ? listAplikasi.find(d => d.KODEAPLIKASI === "SAP") : null }));
+        setDataProyek(prev => ({ ...prev, jenisLayanan: "PERUBAHAN", aplikasi: listAplikasi ? listAplikasi.find(d => d.KODEAPLIKASI === "SAP") : null, modul: null }));
         setSap(true);
         setDataDialogModul(prev => ({ ...prev, idapl: listAplikasi ? listAplikasi.find(d => d.KODEAPLIKASI === "SAP").IDAPLIKASI : null }));
       }
