@@ -5,7 +5,7 @@ import AlertDialog from '../../components/AlertDialog';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import { AddCircleOutline, RemoveCircleOutline } from '@material-ui/icons';
 import moment from 'moment';
-import { createCharter, updateCharter, getCharterByIdProyek } from '../../gateways/api/CharterAPI';
+import { createCharter, updateCharter } from '../../gateways/api/CharterAPI';
 
 function AddTextFiels(props) {
   const { required, label, error, helperText, data, onAdd, onChange, onDelete } = props;
@@ -225,20 +225,20 @@ export default function Charter(props) {
       else {
         // console.log("create", formatData);
         createCharter(formatData)
-          .then(async (response) => {
-            await getCharterByIdProyek(response.data.IDPROJ).then((response) => {
-              const tujuan = response.data.LISTDETAIL.filter(d => d.KODEDETAIL === "TUJUAN");
-              const scope = response.data.LISTDETAIL.filter(d => d.KODEDETAIL === "SCOPE");
-              const target = response.data.LISTDETAIL.filter(d => d.KODEDETAIL === "TARGET");
-              delete response.data.LISTDETAIL;
-              const newData = {
-                ...response.data,
-                TUJUAN: tujuan,
-                SCOPE: scope,
-                TARGET: target
-              };
-              setData(formatDataCharter(newData));
-            });
+          .then((response) => {
+            // await getCharterByIdProyek(response.data.IDPROJ).then((response) => {
+            const tujuan = response.data.LISTDETAIL.filter(d => d.KODEDETAIL === "TUJUAN");
+            const scope = response.data.LISTDETAIL.filter(d => d.KODEDETAIL === "SCOPE");
+            const target = response.data.LISTDETAIL.filter(d => d.KODEDETAIL === "TARGET");
+            delete response.data.LISTDETAIL;
+            const newData = {
+              ...response.data,
+              TUJUAN: tujuan,
+              SCOPE: scope,
+              TARGET: target
+            };
+            setData(formatDataCharter(newData));
+            // });
             setEdit(true);
             setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil simpan", severity: "success" });
             setLoadingButton(false);
