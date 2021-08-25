@@ -226,7 +226,7 @@ export default function Charter(props) {
         // console.log("create", formatData);
         createCharter(formatData)
           .then(async (response) => {
-            await getCharterByIdProyek(response.data.idproj).then((response) => {
+            await getCharterByIdProyek(response.data.IDPROJ).then((response) => {
               const tujuan = response.data.LISTDETAIL.filter(d => d.KODEDETAIL === "TUJUAN");
               const scope = response.data.LISTDETAIL.filter(d => d.KODEDETAIL === "SCOPE");
               const target = response.data.LISTDETAIL.filter(d => d.KODEDETAIL === "TARGET");
