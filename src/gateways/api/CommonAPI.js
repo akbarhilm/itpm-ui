@@ -11,3 +11,11 @@ export const getAuthFromAPI = async () => {
 export const getMenuSideBar = async (id) => {
   return await api.get('/profil/menu/proyek/nik/' + id);
 };
+
+export const getAllKegiatan = async () => {
+  return await api.get('/proyek/kegiatan');
+};
+
+export const getAllKaryawan = async () => {
+  return await api.get('/profil/karyawan');
+};

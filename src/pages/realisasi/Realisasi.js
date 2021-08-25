@@ -4,7 +4,6 @@ import AlertDialog from '../../components/AlertDialog';
 import { AddCircleOutline, RemoveCircleOutline, CheckBoxOutlineBlank, CheckBox } from '@material-ui/icons';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import { Autocomplete } from '@material-ui/lab';
-import { getAllKaryawan } from '../../gateways/api/CommonAPI';
 
 const dummyKegiatan = [
   { id: 1, kegiatan: "Initiation", target: "Dokumen 1" },
@@ -50,8 +49,8 @@ const err = { error: true, text: "Tidak boleh kosong." };
 const noErr = { error: false, text: "" };
 const defaultError = { kegiatan: noErr, pelaksana: noErr, tanggalMulai: noErr, tanggalSelesai: noErr };
 
-export default function RencanaPelaksanaan(props) {
-  const { plan, proyek } = props;
+export default function Realisasi(props) {
+  const { realisasi, proyek } = props;
   const classes = useStyles();
 
   const [loadingButton, setLoadingButton] = useState(false);
@@ -72,7 +71,7 @@ export default function RencanaPelaksanaan(props) {
     // if (!data) {
     // console.log(proyek);
     // get ureq then
-    if (Object.keys(plan).length > 0) {
+    if (Object.keys(realisasi).length > 0) {
       setEdit(true);
       setData("response dari get ureq");
       setNomor("set dari response");
@@ -82,7 +81,7 @@ export default function RencanaPelaksanaan(props) {
       setError([defaultError]);
     }
     // }
-  }, [plan]);
+  }, [realisasi]);
 
   useEffect(() => {
     if (!listKegiatan) {
@@ -92,10 +91,7 @@ export default function RencanaPelaksanaan(props) {
 
   useEffect(() => {
     if (!listKaryawan) {
-      getAllKaryawan()
-        .then((response) => {
-          setListKaryawan(dummyKaryawan);
-        });
+      setListKaryawan(dummyKaryawan);
     }
   }, [listKaryawan]);
 
@@ -193,13 +189,13 @@ export default function RencanaPelaksanaan(props) {
       />
       <Grid item>
         <Typography variant="h4" gutterBottom>
-          {edit ? "Ubah Rencana Pelaksanaan" : "Tambah Rencana Pelaksanaan"}
+          {edit ? "Ubah Realisasi" : "Tambah Realisasi"}
         </Typography>
       </Grid>
       <Divider />
       <Grid item xs={6}>
         <TextField id="nomor"
-          label="Nomor Rencana Pelaksanaan"
+          label="Nomor Realisasi"
           fullWidth
           disabled
           className={classes.fieldDisabled}
@@ -211,7 +207,7 @@ export default function RencanaPelaksanaan(props) {
           <Grid container direction="column" spacing={2}>
             <Grid item container direction="row" justify="space-between">
               <Grid item xs>
-                <Typography variant="h6">Data Rencana</Typography>
+                <Typography variant="h6">Data Realisasi</Typography>
               </Grid>
               {/* <Grid item xs container justify="flex-end">
                 <IconButton size="small" onClick={addRow}>
@@ -225,7 +221,7 @@ export default function RencanaPelaksanaan(props) {
                 <Grid item xs>
                   <Typography align="center">Kegiatan</Typography>
                 </Grid>
-                <Grid item xs={2}>
+                <Grid item xs>
                   <Typography align="center">Pelaksana</Typography>
                 </Grid>
                 <Grid item xs={2}>
@@ -234,9 +230,9 @@ export default function RencanaPelaksanaan(props) {
                 <Grid item xs={2}>
                   <Typography align="center">Tanggal Selesai</Typography>
                 </Grid>
-                <Grid item xs={2}>
+                {/* <Grid item xs={2}>
                   <Typography align="center">Target</Typography>
-                </Grid>
+                </Grid> */}
                 <Grid item xs={1}>
                   <Typography align="center">Actions</Typography>
                 </Grid>
@@ -244,7 +240,7 @@ export default function RencanaPelaksanaan(props) {
               {data && data.map((d, i) =>
                 <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justify="space-between" alignItems="flex-start">
                   <Grid key={"grid-kegiatan-" + i} item xs>
-                    <Autocomplete key={"kegiatan-" + i} id={"kegiatan-" + i} name={"kegiatan-" + i}
+                    {/* <Autocomplete key={"kegiatan-" + i} id={"kegiatan-" + i} name={"kegiatan-" + i}
                       options={listKegiatan}
                       getOptionLabel={option => option.kegiatan}
                       onChange={(e, v) => handleChange(v, i, "kegiatan")}
@@ -270,13 +266,23 @@ export default function RencanaPelaksanaan(props) {
                           helperText={error[i].kegiatan.text}
                         />
                       )}
+                    /> */}
+                    <TextField key={"kegiatan-" + i} id={"kegiatan-" + i} name={"kegiatan-" + i}
+                      fullWidth
+                      size="small"
+                      value={d.kegiatan ? d.kegiatan : ""}
+                      disabled
+                      className={classes.fieldTableDisabled}
+                    // onChange={(event) => handleChange(event.target.value, i, "useCase")}
+                    // error={error[i].useCase.error}
+                    // helperText={error[i].useCase.text}
                     />
                   </Grid>
-                  <Grid key={"grid-pelaksana-" + i} item xs={2}>
+                  <Grid key={"grid-pelaksana-" + i} item xs>
                     <Autocomplete key={"pelaksana-" + i} id={"pelaksana-" + i} name={"pelaksana-" + i}
                       multiple
                       disableCloseOnSelect
-                      options={listKaryawan ? listKaryawan : []}
+                      options={listKaryawan}
                       value={d.pelaksana}
                       getOptionLabel={option => option.nik}
                       onChange={(e, v) => handleChange(v, i, "pelaksana")}
@@ -339,7 +345,7 @@ export default function RencanaPelaksanaan(props) {
                       views={['year', 'month', 'date']}
                     />
                   </Grid>
-                  <Grid key={"grid-target-" + i} item xs={2}>
+                  {/* <Grid key={"grid-target-" + i} item xs={2}>
                     <TextField key={"target-" + i} id={"target-" + i} name={"target-" + i}
                       multiline
                       fullWidth
@@ -351,7 +357,7 @@ export default function RencanaPelaksanaan(props) {
                     // error={error[i].useCase.error}
                     // helperText={error[i].useCase.text}
                     />
-                  </Grid>
+                  </Grid> */}
                   <Grid item xs={1} container justify="center">
                     <IconButton size="small" onClick={() => deleteRow(i)}>
                       <RemoveCircleOutline />
@@ -360,7 +366,7 @@ export default function RencanaPelaksanaan(props) {
                 </Grid>
               )}
               <Grid item xs container justify="center">
-                <Button fullWidth aria-label="add row action plan" size="small" onClick={addRow} >
+                <Button fullWidth aria-label="add row action" size="small" onClick={addRow} >
                   <AddCircleOutline />
                 </Button>
               </Grid>

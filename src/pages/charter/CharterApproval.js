@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Grid, Typography, Divider, Button, CircularProgress } from '@material-ui/core';
 import CharterDetail from './CharterDetail';
-import { getCharterByIdProyek } from '../../gateways/api/CharterAPI';
+import { getCharterByIdProyek, approveCharter } from '../../gateways/api/CharterAPI';
 import AlertDialog from '../../components/AlertDialog';
 
 const defaultAlert = { openAlertDialog: false, messageAlertDialog: "", severity: "info" };
@@ -18,14 +18,18 @@ export default function CharterApproval(props) {
 
   const approve = () => {
     setLoadingButton(true);
-    setTimeout(async () => {
-      await getCharterByIdProyek("proyek.IDPROYEK")
-        .then((response) => {
-          setApproved(response.data.KODEAPPROVE === "1");
-        });
-      setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil disetujui", severity: "success" });
-      setLoadingButton(false);
-    }, 2000);
+    // console.log(charter);
+    approveCharter({ idcharter: charter.IDCHARTER })
+      // setTimeout
+      .then(async () => {
+        await getCharterByIdProyek(proyek.IDPROYEK)
+          .then((response) => {
+            setApproved(response.data.KODEAPPROVE === "1");
+          });
+        setAlertDialog({ openAlertDialog: true, messageAlertDialog: ("Berhasil " + (approved ? "batal setuju" : "disetujui")), severity: "success" });
+        setLoadingButton(false);
+      });
+    // , 2000);
   };
 
   return (

@@ -11,3 +11,7 @@ export const createCharter = async (data) => {
 export const updateCharter = async (data) => {
   return await api.put('/proyek/charter/ubah', data);
 };
+
+export const approveCharter = async (data) => {
+  return await api.put('/proyek/charter/approve', data);
+};

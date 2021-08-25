@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Grid, Typography, Button, TextField, IconButton, Paper, makeStyles } from '@material-ui/core';
+import { Grid, Typography, Button, TextField, IconButton, Paper, makeStyles, Divider, CircularProgress } from '@material-ui/core';
 import { RemoveCircleOutline, AddCircleOutline } from '@material-ui/icons';
 import AlertDialog from '../../components/AlertDialog';
+import { createUreq, updateUreq } from '../../gateways/api/UreqAPI';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -29,6 +30,7 @@ const defaultError = { kebutuhan: noErr, rincian: noErr, useCase: noErr };
 export default function UserRequirement(props) {
   const { ureq, proyek } = props;
   const classes = useStyles();
+  const [loadingButton, setLoadingButton] = useState(false);
   const [edit, setEdit] = useState(false);
   const [nomor, setNomor] = useState("");
   const [data, setData] = useState();
@@ -40,21 +42,26 @@ export default function UserRequirement(props) {
   };
 
   useEffect(() => {
-    // setListModul([]);
-    if (!data) {
-      // console.log(proyek);
-      // get ureq then
-      if (false) {
-        setEdit(true);
-        setData("response dari get ureq");
-        setError("response dari get ureq di looping set defaultError");
-        setNomor("set dari response");
-      } else {
-        setData([defaultData]);
-        setError([defaultError]);
-      }
+    if (Object.keys(ureq).length > 0) {
+      setEdit(true);
+      let newData = [];
+      let newError = [];
+      ureq.LISTDETAIL.forEach(d => {
+        newError.push(defaultError);
+        newData.push({
+          kebutuhan: d.NAMAUREQ,
+          rincian: d.KETUREQ,
+          useCase: d.USECASE
+        });
+      });
+      setData(newData);
+      setError(newError);
+      setNomor(ureq.NOUREQ);
+    } else {
+      setData([defaultData]);
+      setError([defaultError]);
     }
-  }, [data, proyek]);
+  }, [ureq]);
 
   const handleChange = (value, index, key) => {
     let newArrayError = [...error];
@@ -86,8 +93,85 @@ export default function UserRequirement(props) {
     setData(newArray);
   };
 
+  const validateAll = () => {
+    setError(prev =>
+      prev.map((er, i) => {
+        const newObj = {
+          kebutuhan: data[i].kebutuhan ? noErr : err,
+          rincian: data[i].rincian ? noErr : err,
+          useCase: data[i].useCase ? noErr : err
+        };
+        return newObj;
+      })
+    );
+    if (data.every(dt => dt.kebutuhan && dt.rincian && dt.useCase)) return true;
+    else return false;
+  };
+
   const simpan = () => {
-    console.log("simpan");
+    setLoadingButton(true);
+    if (data.length > 0) {
+      if (validateAll()) {
+        const listdetail = data.map((dt, index) => ({
+          namaureq: dt.kebutuhan,
+          ketureq: dt.rincian,
+          usecase: dt.useCase,
+          prioritas: (index + 1)
+        }));
+        const formatData = {
+          idproj: proyek.IDPROYEK,
+          listdetail: listdetail
+        };
+        if (edit) {
+          updateUreq(formatData)
+            .then((response) => {
+              setData(response.data.LISTDETAIL.map(d => ({ kebutuhan: d.NAMAUREQ, rincian: d.KETUREQ, useCase: d.USECASE })));
+              setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil ubah", severity: "success" });
+              setLoadingButton(false);
+            })
+            .catch((error) => {
+              setLoadingButton(false);
+              if (error.response)
+                setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data.message, severity: "error" });
+              else
+                setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
+            });
+        } else {
+          createUreq(formatData)
+            .then((response) => {
+              let newData = [];
+              let newError = [];
+              response.data.LISTDETAIL.forEach(d => {
+                newError.push(defaultError);
+                newData.push({
+                  kebutuhan: d.NAMAUREQ,
+                  rincian: d.KETUREQ,
+                  useCase: d.USECASE
+                });
+              });
+              setData(newData);
+              setError(newError);
+              setNomor(response.data.NOUREQ);
+              setEdit(true);
+              setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil simpan", severity: "success" });
+              setLoadingButton(false);
+            })
+            .catch((error) => {
+              setLoadingButton(false);
+              if (error.response)
+                setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data.message, severity: "error" });
+              else
+                setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
+            });
+        }
+      } else {
+        setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Silahkan periksa data yang anda masukkan.", severity: "warning" });
+        setLoadingButton(false);
+      }
+    } else {
+      setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Data kosong. Silahkan periksa data yang anda masukkan.", severity: "warning" });
+      setLoadingButton(false);
+    }
   };
 
   return (
@@ -104,10 +188,10 @@ export default function UserRequirement(props) {
           {edit ? "Ubah Kebutuhan Pengguna" : "Tambah Kebutuhan Pengguna"}
         </Typography>
       </Grid>
+      <Divider />
       <Grid item xs={6}>
         <TextField id="nomor"
-          label="Nomor"
-          variant="outlined"
+          label="Nomor Kebutuhan Pengguna"
           fullWidth
           disabled
           className={classes.fieldDisabled}
@@ -121,11 +205,6 @@ export default function UserRequirement(props) {
               <Grid item xs>
                 <Typography variant="h6">Data Requirement</Typography>
               </Grid>
-              {/* <Grid item xs container justify="flex-end">
-                <IconButton size="small" onClick={addRow}>
-                  <AddCircleOutline />
-                </IconButton>
-              </Grid> */}
             </Grid>
             <Grid item container direction="column" spacing={1}>
               <Grid item container direction="row" spacing={1} justify="space-between">
@@ -197,11 +276,11 @@ export default function UserRequirement(props) {
             </Grid>
           </Grid>
         </Paper>
-
       </Grid>
+      <Divider />
       <Grid item container direction="row" justify="flex-end">
-        <Button onClick={simpan} variant="contained" color="primary">
-          {"Simpan"}
+        <Button onClick={loadingButton ? null : simpan} variant="contained" color="primary">
+          {loadingButton ? <CircularProgress size={20} color="inherit" /> : edit ? "Ubah" : "Simpan"}
         </Button>
       </Grid>
     </Grid>

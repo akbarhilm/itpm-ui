@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Grid, Typography, Button, TextField, IconButton, Paper, makeStyles } from '@material-ui/core';
+import { Grid, Typography, Button, TextField, IconButton, Paper, makeStyles, CircularProgress, Divider } from '@material-ui/core';
 import { RemoveCircleOutline, AddCircleOutline } from '@material-ui/icons';
 import AlertDialog from '../../components/AlertDialog';
 
@@ -27,8 +27,10 @@ const noErr = { error: false, text: "" };
 const defaultError = { deskripsi: noErr, satuan: noErr, jumlah: noErr };
 
 export default function Resource(props) {
-  const { proyek } = props;
+  const { resource, proyek } = props;
   const classes = useStyles();
+
+  const [loadingButton, setLoadingButton] = useState(false);
   const [edit, setEdit] = useState(false);
   const [nomor, setNomor] = useState("");
   const [data, setData] = useState();
@@ -41,20 +43,20 @@ export default function Resource(props) {
 
   useEffect(() => {
     // setListModul([]);
-    if (!data) {
-      // console.log(proyek);
-      // get ureq then
-      if (false) {
-        setEdit(true);
-        setData("response dari get ureq");
-        setError("response dari get ureq di looping set defaultError");
-        setNomor("set dari response");
-      } else {
-        setData([defaultData]);
-        setError([defaultError]);
-      }
+    // if (!data) {
+    // console.log(proyek);
+    // get ureq then
+    if (Object.keys(resource).length > 0) {
+      setEdit(true);
+      setData("response dari get ureq");
+      setNomor("set dari response");
+      // setError("response dari get ureq di looping set defaultError");
+    } else {
+      setData([defaultData]);
+      setError([defaultError]);
     }
-  }, [data, proyek]);
+    // }
+  }, [resource]);
 
   const handleChange = (value, index, key) => {
     let newArrayError = [...error];
@@ -87,7 +89,33 @@ export default function Resource(props) {
   };
 
   const simpan = () => {
-    console.log("simpan");
+    setLoadingButton(true);
+    // if (data.length > 0) {
+    // if (validateAll()) {
+    // const listdetail = data.map(dt => ({
+    //   idplan: dt.idplan ? dt.idplan : null,
+    //   kegiatan: dt.kegiatan,
+    //   pelaksana: dt.pelaksana,
+    //   tanggalMulai: dt.tanggalMulai,
+    //   tanggalSelesai: dt.tanggalSelesai
+    // }));
+    // const formatData = {
+    //   idproyek: proyek.IDPROYEK,
+    //   listdetail: listdetail
+    // };
+    setTimeout(() => {
+      console.log("simpan");
+      console.log("format data", proyek);
+      setLoadingButton(false);
+    }, 2000);
+    // } else {
+    //   setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Silahkan periksa data yang anda masukkan.", severity: "warning" });
+    //   setLoadingButton(false);
+    // }
+    // } else {
+    //   setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Data kosong. Silahkan periksa data yang anda masukkan.", severity: "warning" });
+    //   setLoadingButton(false);
+    // }
   };
 
   return (
@@ -104,10 +132,10 @@ export default function Resource(props) {
           {edit ? "Ubah Kebutuhan Sumber Daya" : "Tambah Kebutuhan Sumber Daya"}
         </Typography>
       </Grid>
+      <Divider />
       <Grid item xs={6}>
         <TextField id="nomor"
-          label="Nomor"
-          variant="outlined"
+          label="Nomor Kebutuhan Sumber Daya"
           fullWidth
           disabled
           className={classes.fieldDisabled}
@@ -194,9 +222,10 @@ export default function Resource(props) {
         </Paper>
 
       </Grid>
+      <Divider />
       <Grid item container direction="row" justify="flex-end">
-        <Button onClick={simpan} variant="contained" color="primary">
-          {"Simpan"}
+        <Button onClick={loadingButton ? null : simpan} variant="contained" color="primary">
+          {loadingButton ? <CircularProgress size={20} color="inherit" /> : edit ? "Ubah" : "Simpan"}
         </Button>
       </Grid>
     </Grid>

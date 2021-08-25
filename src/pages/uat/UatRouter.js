@@ -2,17 +2,17 @@ import React, { useContext, useEffect, useState } from 'react';
 import { CircularProgress } from '@material-ui/core';
 import ErrorPage from '../../components/ErrorPage';
 import { UserContext } from '../../utils/UserContext';
-import UserRequirement from "./UserRequirement";
-import UserRequirementDetail from "./UserRequirementDetail";
-import { getUreqByIdProyek } from '../../gateways/api/UreqAPI';
+import { getUatByIdProyek } from '../../gateways/api/UatAPI';
+import UatDetail from './UatDetail';
+import Uat from './Uat';
 import { getStepperProyekById } from '../../gateways/api/ProyekAPI';
 
-export default function UserRequirementRouter(props) {
+export default function UatRouter(props) {
   const { proyek } = props;
   const { user } = useContext(UserContext);
 
   const [loading, setLoading] = useState(true);
-  const [ureq, setUreq] = useState(null);
+  const [uat, setUat] = useState(null);
   const [status, setStatus] = useState(null);
 
   const otoritas = user.NIK === proyek.NIKREQ ? "BPO" : user.NIK === proyek.NIKPM ? "PM" : "PMO";
@@ -20,33 +20,29 @@ export default function UserRequirementRouter(props) {
 
   useEffect(() => {
     async function fetchData() {
-      await getUreqByIdProyek(proyek.IDPROYEK)
+      await getUatByIdProyek(proyek.IDPROYEK)
         .then((response) => {
-          setUreq(response.data);
-          // setLoading(false);
+          setUat(response.data);
         });
-      // .catch(() => setLoading(false));
       await getStepperProyekById(proyek.IDPROYEK)
         .then((response) => {
           setStatus(response.data);
-          // setLoading(false);
         });
-      // .catch(() => setLoading(false));
       setLoading(false);
     }
-    if (!ureq) {
+    if (!uat) {
       setLoading(true);
       fetchData();
     }
-  }, [ureq, proyek]);
+  }, [uat, proyek]);
 
   if (loading)
     return <CircularProgress />;
-  else if (otoritas === "PM" && ureq && status && status.APPROVECHARTER)
-    return <UserRequirement ureq={ureq} proyek={proyek} />;
-  else if (ureq && Object.keys(ureq).length === 0)
-    return <ErrorPage code="" message={status && !status.APPROVECHARTER && otoritas === "PM" ? "Charter belum disetujui" : "Kebutuhan Pengguna belum diinput"} />;
+  else if (otoritas === "PM" && uat && status && status.NOREAL)
+    return <Uat uat={uat} proyek={proyek} />;
+  else if (uat && Object.keys(uat).length === 0)
+    return <ErrorPage code="" message={otoritas === "PM" ? "Realisasi belum diinput" : "UAT (User Acceptence Test) belum diinput"} />;
   else
-    return <UserRequirementDetail ureq={ureq} proyek={proyek} />;
+    return <UatDetail uat={uat} proyek={proyek} />;
 
 };

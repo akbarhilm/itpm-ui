@@ -2,17 +2,17 @@ import React, { useContext, useEffect, useState } from 'react';
 import { CircularProgress } from '@material-ui/core';
 import ErrorPage from '../../components/ErrorPage';
 import { UserContext } from '../../utils/UserContext';
-import UserRequirement from "./UserRequirement";
-import UserRequirementDetail from "./UserRequirementDetail";
-import { getUreqByIdProyek } from '../../gateways/api/UreqAPI';
+import { getResourceByIdProyek } from '../../gateways/api/ResourceAPI';
+import Resource from './Resource';
+import ResourceDetail from './ResourceDetail';
 import { getStepperProyekById } from '../../gateways/api/ProyekAPI';
 
-export default function UserRequirementRouter(props) {
+export default function RencanaPelaksanaanRouter(props) {
   const { proyek } = props;
   const { user } = useContext(UserContext);
 
   const [loading, setLoading] = useState(true);
-  const [ureq, setUreq] = useState(null);
+  const [resource, setResource] = useState(null);
   const [status, setStatus] = useState(null);
 
   const otoritas = user.NIK === proyek.NIKREQ ? "BPO" : user.NIK === proyek.NIKPM ? "PM" : "PMO";
@@ -20,33 +20,29 @@ export default function UserRequirementRouter(props) {
 
   useEffect(() => {
     async function fetchData() {
-      await getUreqByIdProyek(proyek.IDPROYEK)
+      await getResourceByIdProyek(proyek.IDPROYEK)
         .then((response) => {
-          setUreq(response.data);
-          // setLoading(false);
+          setResource(response.data);
         });
-      // .catch(() => setLoading(false));
       await getStepperProyekById(proyek.IDPROYEK)
         .then((response) => {
           setStatus(response.data);
-          // setLoading(false);
         });
-      // .catch(() => setLoading(false));
       setLoading(false);
     }
-    if (!ureq) {
+    if (!resource) {
       setLoading(true);
       fetchData();
     }
-  }, [ureq, proyek]);
+  }, [resource, proyek]);
 
   if (loading)
     return <CircularProgress />;
-  else if (otoritas === "PM" && ureq && status && status.APPROVECHARTER)
-    return <UserRequirement ureq={ureq} proyek={proyek} />;
-  else if (ureq && Object.keys(ureq).length === 0)
-    return <ErrorPage code="" message={status && !status.APPROVECHARTER && otoritas === "PM" ? "Charter belum disetujui" : "Kebutuhan Pengguna belum diinput"} />;
+  else if (otoritas === "PM" && resource && status && status.NOPLAN)
+    return <Resource resource={resource} proyek={proyek} />;
+  else if (resource && Object.keys(resource).length === 0)
+    return <ErrorPage code="" message={otoritas === "PM" ? "Rencana Pelaksanaan belum diinput" : "Kebutuhan Sumber Daya belum diinput"} />;
   else
-    return <UserRequirementDetail ureq={ureq} proyek={proyek} />;
+    return <ResourceDetail resource={resource} proyek={proyek} />;
 
 };
