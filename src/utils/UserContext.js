@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState } from 'react';
-import { getUser } from '../gateways/api/CommonAPI';
+import { getAuthFromAPI, getUser } from '../gateways/api/CommonAPI';
 import { setAuthApi } from './ApiConfig';
 import Cookies from "universal-cookie";
 import { getAuth } from './Auth';
@@ -18,13 +18,21 @@ export function useFindUser() {
     const params = new URLSearchParams(window.location.search);
 
     async function findUser() {
+      let user = {};
+      // let auth = null;
       await getUser()
         .then(res => {
-          setUser(res.data);
-          setLoading(false);
-        }).catch(err => {
-          setLoading(false);
+          // setUser(res.data);
+          user = res.data;
         });
+      await getAuthFromAPI()
+        .then(res => {
+          // setUser(res.data);
+          user.OTORITAS = res.data.map(d => d.KODEAUTH);
+        });
+      if (Object.keys(user).length > 0)
+        setUser(user);
+      setLoading(false);
     }
 
     async function getValidTokenFromInfo() {
@@ -43,6 +51,7 @@ export function useFindUser() {
           // console.log(response.data.token);
           setAuthApi("Bearer " + response.data.token);
           const dataEcnrypt = Crypto.AES.encrypt(response.data.token, "encrypt-token-for-cookie").toString();
+          // console.log("en", dataEcnrypt);
           cookies.set('auth', dataEcnrypt, { path: '/' });
           findUser();
         })
@@ -54,13 +63,14 @@ export function useFindUser() {
     else {
       // console.log(getAuth());
       setAuthApi(getAuth());
-      findUser();
+      findUser().catch(() => setLoading(false));
     }
   }, []);
 
   return {
     user,
     setUser,
-    isLoading
+    isLoading,
+    setLoading
   };
 }

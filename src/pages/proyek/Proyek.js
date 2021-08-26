@@ -47,7 +47,7 @@ export default function Proyek(props) {
       .catch((error) => {
         setLoading(false);
         if (error.response)
-          setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data, severity: "error" });
+          setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data.message, severity: "error" });
         else
           setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
       });

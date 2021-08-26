@@ -117,7 +117,7 @@ export default function DetailProyek(props) {
         })
         .catch((error) => {
           if (error.response)
-            setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data, severity: "error" });
+            setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data.message, severity: "error" });
           else
             setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
         });
@@ -142,7 +142,7 @@ export default function DetailProyek(props) {
         })
         .catch((error) => {
           if (error.response)
-            setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data, severity: "error" });
+            setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data.message, severity: "error" });
           else
             setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
         });
@@ -156,7 +156,7 @@ export default function DetailProyek(props) {
         })
         .catch((error) => {
           if (error.response)
-            setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data, severity: "error" });
+            setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data.message, severity: "error" });
           else
             setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
         });
@@ -170,7 +170,7 @@ export default function DetailProyek(props) {
         })
         .catch((error) => {
           if (error.response)
-            setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data, severity: "error" });
+            setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data.message, severity: "error" });
           else
             setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
         });
@@ -305,7 +305,7 @@ export default function DetailProyek(props) {
           .catch((error) => {
             setLoadingButton(prev => ({ ...prev, submit: false }));
             if (error.response)
-              setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data, severity: "error" });
+              setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data.message, severity: "error" });
             else
               setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
           });
@@ -321,7 +321,7 @@ export default function DetailProyek(props) {
           .catch((error) => {
             setLoadingButton(prev => ({ ...prev, submit: false }));
             if (error.response)
-              setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data, severity: "error" });
+              setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data.message, severity: "error" });
             else
               setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
           });
@@ -391,7 +391,7 @@ export default function DetailProyek(props) {
           .catch((error) => {
             setLoadingButton(prev => ({ ...prev, submitDialog: false }));
             if (error.response)
-              setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data, severity: "error" });
+              setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data.message, severity: "error" });
             else
               setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
           });
@@ -407,7 +407,7 @@ export default function DetailProyek(props) {
           .catch((error) => {
             setLoadingButton(prev => ({ ...prev, submitDialog: false }));
             if (error.response)
-              setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data, severity: "error" });
+              setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data.message, severity: "error" });
             else
               setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
           });
