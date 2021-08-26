@@ -11,13 +11,13 @@ import TambahProyek from "../pages/proyek/TambahProyek";
 import PrivateRoute from "./PrivateRoute";
 // import Charter from "../pages/charter/Charter";
 import { MuiPickersUtilsProvider } from "@material-ui/pickers";
-import ResourceRouter from "../pages/resource/ResourceRouter";
+// import ResourceRouter from "../pages/resource/ResourceRouter";
 import CharterRouter from "../pages/charter/CharterRouter";
-import RisikoRouter from "../pages/risiko/RisikoRouter";
+// import RisikoRouter from "../pages/risiko/RisikoRouter";
 import UserRequirementRouter from "../pages/ureq/UserRequirementRouter";
 import RencanaPelaksanaanRouter from "../pages/rencana/RencanaPelaksanaanRouter";
-import RealisasiRouter from "../pages/realisasi/RealisasiRouter";
-import UatRouter from "../pages/uat/UatRouter";
+// import RealisasiRouter from "../pages/realisasi/RealisasiRouter";
+// import UatRouter from "../pages/uat/UatRouter";
 // import { MuiPickersUtilsProvider } from "@material-ui/pickers";
 // import moment from 'moment';
 
@@ -73,16 +73,13 @@ export default function Content(props) {
           <PrivateRoute exact path='/:namauri/charter' >
             <CharterRouter proyek={proyek} />
           </PrivateRoute>
-          {/* <PrivateRoute exact path='/:namauri/charter' >
-            <Charter proyek={proyek} />
-          </PrivateRoute> */}
           <PrivateRoute exact path='/:namauri/ureq' >
             <UserRequirementRouter proyek={proyek} />
           </PrivateRoute>
           <PrivateRoute exact path='/:namauri/rencana' >
             <RencanaPelaksanaanRouter proyek={proyek} />
           </PrivateRoute>
-          <PrivateRoute exact path='/:namauri/resource' >
+          {/* <PrivateRoute exact path='/:namauri/resource' >
             <ResourceRouter proyek={proyek} />
           </PrivateRoute>
           <PrivateRoute exact path='/:namauri/risiko' >
@@ -93,7 +90,7 @@ export default function Content(props) {
           </PrivateRoute>
           <PrivateRoute exact path='/:namauri/uat' >
             <UatRouter proyek={proyek} />
-          </PrivateRoute>
+          </PrivateRoute> */}
         </Switch>
         {/* </Paper> */}
       </div>

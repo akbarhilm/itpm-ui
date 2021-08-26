@@ -1,26 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Grid, Typography, Button, TextField, makeStyles, Paper, IconButton, Checkbox, Divider, CircularProgress } from '@material-ui/core';
 import AlertDialog from '../../components/AlertDialog';
 import { AddCircleOutline, RemoveCircleOutline, CheckBoxOutlineBlank, CheckBox } from '@material-ui/icons';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import { Autocomplete } from '@material-ui/lab';
-import { getAllKaryawan } from '../../gateways/api/CommonAPI';
+import { getAllKaryawan, getAllKegiatan } from '../../gateways/api/CommonAPI';
+import moment from 'moment';
+import { createRencanaPelaksanaan, updateRencanaPelaksanaan } from '../../gateways/api/PlanAPI';
+import { groupBy } from '../../utils/Common';
 
-const dummyKegiatan = [
-  { id: 1, kegiatan: "Initiation", target: "Dokumen 1" },
-  { id: 2, kegiatan: "Development", target: "Dokumen 2" },
-  { id: 3, kegiatan: "Testing", target: "Dokumen 3" },
-  { id: 4, kegiatan: "Deploy", target: "Dokumen 4" },
-];
+// const dummyKegiatan = [
+//   { id: 1, kegiatan: "Initiation", target: "Dokumen 1" },
+//   { id: 2, kegiatan: "Development", target: "Dokumen 2" },
+//   { id: 3, kegiatan: "Testing", target: "Dokumen 3" },
+//   { id: 4, kegiatan: "Deploy", target: "Dokumen 4" },
+// ];
 
-const dummyKaryawan = [
-  { nik: "160035", nama: "M. MUSTAKIM", kodeOrganisasi: "IT1300" },
-  { nik: "160257", nama: "ANITA IKA NURCAHYANI", kodeOrganisasi: "IT1300" },
-  { nik: "170084", nama: "AKBAR HILMAN", kodeOrganisasi: "IT1300" },
-  { nik: "160260", nama: "ERVIN ADHI CAHYA N", kodeOrganisasi: "IT3100" },
-  { nik: "180136", nama: "ANNISA DWIDYA R", kodeOrganisasi: "IT1100" },
-  { nik: "900147", nama: "RINI ASTUTI", kodeOrganisasi: "IT1000" },
-];
+// const dummyKaryawan = [
+//   { nik: "160035", nama: "M. MUSTAKIM", kodeOrganisasi: "IT1300" },
+//   { nik: "160257", nama: "ANITA IKA NURCAHYANI", kodeOrganisasi: "IT1300" },
+//   { nik: "170084", nama: "AKBAR HILMAN", kodeOrganisasi: "IT1300" },
+//   { nik: "160260", nama: "ERVIN ADHI CAHYA N", kodeOrganisasi: "IT3100" },
+//   { nik: "180136", nama: "ANNISA DWIDYA R", kodeOrganisasi: "IT1100" },
+//   { nik: "900147", nama: "RINI ASTUTI", kodeOrganisasi: "IT1000" },
+// ];
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -44,7 +47,7 @@ const useStyles = makeStyles((theme) => ({
 
 const defaultAlert = { openAlertDialog: false, messageAlertDialog: "", severity: "info" };
 
-const defaultData = { kegiatan: null, pelaksana: [], tanggalMulai: null, tanggalSelesai: null, target: "" };
+const defaultData = { kegiatan: null, pelaksana: [], tanggalMulai: null, tanggalSelesai: null, target: "", disabled: false };
 
 const err = { error: true, text: "Tidak boleh kosong." };
 const noErr = { error: false, text: "" };
@@ -67,26 +70,48 @@ export default function RencanaPelaksanaan(props) {
     setAlertDialog({ ...alertDialog, openAlertDialog: false });
   };
 
+  const formatNewData = useCallback((listdetail) => {
+    const grouped = groupBy(listdetail, x => x.IDKEGIATAN);
+    const newData = [];
+    grouped.forEach((value, key, map) => {
+      const pelaksana = listKaryawan ? value.map(v => listKaryawan.filter(kar => kar.nik === v.NIKPELAKSANA)[0]) : [];
+      const kegiatan = listKegiatan ? listKegiatan.filter(keg => keg.id === key)[0] : null;
+      newData.push({
+        kegiatan: kegiatan,
+        pelaksana: pelaksana,
+        tanggalMulai: moment(value[0].TGLMULAI, "DD/MM/YYYY"),
+        tanggalSelesai: moment(value[0].TGLSELESAI, "DD/MM/YYYY"),
+        target: kegiatan ? kegiatan.target : "",
+        disabled: value[0].REALISASI
+      });
+    });
+    return newData;
+  }, [listKaryawan, listKegiatan]);
+
   useEffect(() => {
-    // setListModul([]);
-    // if (!data) {
-    // console.log(proyek);
-    // get ureq then
     if (Object.keys(plan).length > 0) {
+      const newData = formatNewData(plan.LISTDETAIL);
       setEdit(true);
-      setData("response dari get ureq");
-      setNomor("set dari response");
-      // setError("response dari get ureq di looping set defaultError");
+      setNomor(plan.NOPLAN);
+      setData(newData);
+      setError(newData.map(d => defaultError));
     } else {
       setData([defaultData]);
       setError([defaultError]);
     }
-    // }
-  }, [plan]);
+  }, [plan, formatNewData]);
 
   useEffect(() => {
     if (!listKegiatan) {
-      setListKegiatan(dummyKegiatan);
+      getAllKegiatan()
+        .then((response) => {
+          const orderListKegiatan = response.data.sort((a, b) => a.IDKEGIATAN - b.IDKEGIATAN).map(d => ({
+            id: d.IDKEGIATAN,
+            kegiatan: d.NAMAKEGIATAN,
+            target: d.NAMATARGET
+          }));
+          setListKegiatan(orderListKegiatan);
+        });
     }
   }, [listKegiatan]);
 
@@ -94,7 +119,7 @@ export default function RencanaPelaksanaan(props) {
     if (!listKaryawan) {
       getAllKaryawan()
         .then((response) => {
-          setListKaryawan(dummyKaryawan);
+          setListKaryawan(response.data.filter(d => d.organisasi.includes("IT")));
         });
     }
   }, [listKaryawan]);
@@ -157,21 +182,47 @@ export default function RencanaPelaksanaan(props) {
     if (data.length > 0) {
       if (validateAll()) {
         const listdetail = data.map(dt => ({
-          idplan: dt.idplan ? dt.idplan : null,
-          kegiatan: dt.kegiatan,
-          pelaksana: dt.pelaksana,
-          tanggalMulai: dt.tanggalMulai,
-          tanggalSelesai: dt.tanggalSelesai
+          // idplan: dt.idplan ? dt.idplan : null,
+          idkegiatan: dt.kegiatan.id,
+          pelaksana: dt.pelaksana.map(pel => pel.nik),
+          tglmulai: moment(dt.tanggalMulai).format("DD/MM/YYYY"),
+          tglselesai: moment(dt.tanggalSelesai).format("DD/MM/YYYY")
         }));
         const formatData = {
-          idproyek: proyek.IDPROYEK,
+          idproj: proyek.IDPROYEK,
           listdetail: listdetail
         };
-        setTimeout(() => {
-          console.log("simpan");
-          console.log("format data", formatData);
-          setLoadingButton(false);
-        }, 2000);
+        if (edit) {
+          updateRencanaPelaksanaan(formatData)
+            .then((response) => {
+              setData(formatNewData(response.data.LISTDETAIL));
+              setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil ubah", severity: "success" });
+              setLoadingButton(false);
+            })
+            .catch((error) => {
+              setLoadingButton(false);
+              if (error.response)
+                setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data.message, severity: "error" });
+              else
+                setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
+            });
+        } else {
+          createRencanaPelaksanaan(formatData)
+            .then((response) => {
+              setData(formatNewData(response.data.LISTDETAIL));
+              setNomor(response.data.NOPLAN);
+              setEdit(true);
+              setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil simpan", severity: "success" });
+              setLoadingButton(false);
+            })
+            .catch((error) => {
+              setLoadingButton(false);
+              if (error.response)
+                setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data.message, severity: "error" });
+              else
+                setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
+            });
+        }
       } else {
         setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Silahkan periksa data yang anda masukkan.", severity: "warning" });
         setLoadingButton(false);
@@ -213,12 +264,6 @@ export default function RencanaPelaksanaan(props) {
               <Grid item xs>
                 <Typography variant="h6">Data Rencana</Typography>
               </Grid>
-              {/* <Grid item xs container justify="flex-end">
-                <IconButton size="small" onClick={addRow}>
-                <IconButton size="small" >
-                  <AddCircleOutline />
-                </IconButton>
-              </Grid> */}
             </Grid>
             <Grid item container direction="column" spacing={1}>
               <Grid item container direction="row" spacing={1} justify="space-between">
@@ -245,13 +290,10 @@ export default function RencanaPelaksanaan(props) {
                 <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justify="space-between" alignItems="flex-start">
                   <Grid key={"grid-kegiatan-" + i} item xs>
                     <Autocomplete key={"kegiatan-" + i} id={"kegiatan-" + i} name={"kegiatan-" + i}
-                      options={listKegiatan}
+                      options={listKegiatan || []}
                       getOptionLabel={option => option.kegiatan}
                       onChange={(e, v) => handleChange(v, i, "kegiatan")}
                       value={d.kegiatan}
-                      // onClose={() => {
-                      //   setListKantorCabang([]);
-                      // }}
                       getOptionSelected={
                         (option, value) => option.id === value.id
                       }
@@ -264,25 +306,24 @@ export default function RencanaPelaksanaan(props) {
                         <TextField
                           {...params}
                           fullWidth
-                          variant="outlined"
+                          variant={d.disabled ? "standard" : "outlined"}
                           size="small"
                           error={error[i].kegiatan.error}
                           helperText={error[i].kegiatan.text}
+                          className={d.disabled ? classes.fieldDisabled : null}
                         />
                       )}
+                      disabled={d.disabled}
                     />
                   </Grid>
                   <Grid key={"grid-pelaksana-" + i} item xs={2}>
                     <Autocomplete key={"pelaksana-" + i} id={"pelaksana-" + i} name={"pelaksana-" + i}
                       multiple
                       disableCloseOnSelect
-                      options={listKaryawan ? listKaryawan : []}
+                      options={listKaryawan || []}
                       value={d.pelaksana}
                       getOptionLabel={option => option.nik}
                       onChange={(e, v) => handleChange(v, i, "pelaksana")}
-                      // onClose={() => {
-                      //   setListKantorCabang([]);
-                      // }}
                       getOptionSelected={
                         (option, value) => option.nik === value.nik
                       }
@@ -301,12 +342,13 @@ export default function RencanaPelaksanaan(props) {
                         <TextField
                           {...params}
                           fullWidth
-                          variant="outlined"
+                          variant={d.disabled ? "standard" : "outlined"}
                           size="small"
                           error={error[i].pelaksana.error}
                           helperText={error[i].pelaksana.text}
                         />
                       )}
+                      disabled={d.disabled}
                     />
                   </Grid>
                   <Grid key={"grid-mulai-" + i} item xs={2}>
@@ -319,9 +361,10 @@ export default function RencanaPelaksanaan(props) {
                       onChange={(value) => handleChange(value, i, "tanggalMulai")}
                       error={error[i].tanggalMulai.error}
                       helperText={error[i].tanggalMulai.text}
-                      // disabled={disabled}
-                      inputVariant="outlined"
+                      inputVariant={d.disabled ? "standard" : "outlined"}
                       views={['year', 'month', 'date']}
+                      disabled={d.disabled}
+                      className={d.disabled ? classes.fieldDisabled : null}
                     />
                   </Grid>
                   <Grid key={"grid-selesai-" + i} item xs={2}>
@@ -334,9 +377,10 @@ export default function RencanaPelaksanaan(props) {
                       onChange={(value) => handleChange(value, i, "tanggalSelesai")}
                       error={error[i].tanggalSelesai.error}
                       helperText={error[i].tanggalSelesai.text}
-                      // disabled={disabled}
-                      inputVariant="outlined"
+                      inputVariant={d.disabled ? "standard" : "outlined"}
                       views={['year', 'month', 'date']}
+                      disabled={d.disabled}
+                      className={d.disabled ? classes.fieldDisabled : null}
                     />
                   </Grid>
                   <Grid key={"grid-target-" + i} item xs={2}>
@@ -347,13 +391,10 @@ export default function RencanaPelaksanaan(props) {
                       value={d.target}
                       disabled
                       className={classes.fieldTableDisabled}
-                    // onChange={(event) => handleChange(event.target.value, i, "useCase")}
-                    // error={error[i].useCase.error}
-                    // helperText={error[i].useCase.text}
                     />
                   </Grid>
                   <Grid item xs={1} container justify="center">
-                    <IconButton size="small" onClick={() => deleteRow(i)}>
+                    <IconButton size="small" onClick={() => deleteRow(i)} disabled={d.disabled}>
                       <RemoveCircleOutline />
                     </IconButton>
                   </Grid>
@@ -367,7 +408,6 @@ export default function RencanaPelaksanaan(props) {
             </Grid>
           </Grid>
         </Paper>
-
       </Grid>
       <Divider />
       <Grid item container direction="row" justify="flex-end">
