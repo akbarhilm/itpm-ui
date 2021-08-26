@@ -209,16 +209,16 @@ export default function UserRequirement(props) {
             <Grid item container direction="column" spacing={1}>
               <Grid item container direction="row" spacing={1} justify="space-between">
                 <Grid item xs={4}>
-                  <Typography align="center">Kebutuhan Sistem</Typography>
+                  <Typography align="center" variant="body2"><b>Kebutuhan Sistem</b></Typography>
                 </Grid>
                 <Grid item xs={5}>
-                  <Typography align="center">Rincian Kebutuhan</Typography>
+                  <Typography align="center" variant="body2"><b>Rincian Kebutuhan</b></Typography>
                 </Grid>
                 <Grid item xs={2}>
-                  <Typography align="center">Use Case</Typography>
+                  <Typography align="center" variant="body2"><b>Use Case</b></Typography>
                 </Grid>
                 <Grid item xs={1}>
-                  <Typography align="center">Actions</Typography>
+                  <Typography align="center" variant="body2"><b>Actions</b></Typography>
                 </Grid>
               </Grid>
               {data && data.map((d, i) =>

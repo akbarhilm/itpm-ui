@@ -4,7 +4,7 @@ import AlertDialog from '../../components/AlertDialog';
 import { AddCircleOutline, RemoveCircleOutline, CheckBoxOutlineBlank, CheckBox } from '@material-ui/icons';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import { Autocomplete } from '@material-ui/lab';
-import { getAllKaryawan, getAllKegiatan } from '../../gateways/api/CommonAPI';
+// import { getAllKaryawan, getAllKegiatan } from '../../gateways/api/CommonAPI';
 import moment from 'moment';
 import { createRencanaPelaksanaan, updateRencanaPelaksanaan } from '../../gateways/api/PlanAPI';
 import { groupBy } from '../../utils/Common';
@@ -54,7 +54,7 @@ const noErr = { error: false, text: "" };
 const defaultError = { kegiatan: noErr, pelaksana: noErr, tanggalMulai: noErr, tanggalSelesai: noErr };
 
 export default function RencanaPelaksanaan(props) {
-  const { plan, proyek } = props;
+  const { plan, proyek, kegiatan, karyawan } = props;
   const classes = useStyles();
 
   const [loadingButton, setLoadingButton] = useState(false);
@@ -103,26 +103,15 @@ export default function RencanaPelaksanaan(props) {
 
   useEffect(() => {
     if (!listKegiatan) {
-      getAllKegiatan()
-        .then((response) => {
-          const orderListKegiatan = response.data.sort((a, b) => a.IDKEGIATAN - b.IDKEGIATAN).map(d => ({
-            id: d.IDKEGIATAN,
-            kegiatan: d.NAMAKEGIATAN,
-            target: d.NAMATARGET
-          }));
-          setListKegiatan(orderListKegiatan);
-        });
+      setListKegiatan(kegiatan);
     }
-  }, [listKegiatan]);
+  }, [listKegiatan, kegiatan]);
 
   useEffect(() => {
     if (!listKaryawan) {
-      getAllKaryawan()
-        .then((response) => {
-          setListKaryawan(response.data.filter(d => d.organisasi.includes("IT")));
-        });
+      setListKaryawan(karyawan);
     }
-  }, [listKaryawan]);
+  }, [listKaryawan, karyawan]);
 
   const handleChange = (value, index, key) => {
     let newArrayError = [...error];
@@ -135,6 +124,8 @@ export default function RencanaPelaksanaan(props) {
     let newArray = [...data];
     if (key === "kegiatan") {
       newArray[index] = { ...newArray[index], [key]: value, target: value ? value.target : "" };
+    } else if (key === "tanggalMulai") {
+      newArray[index] = { ...newArray[index], [key]: value, tanggalSelesai: value < newArray[index].tanggalSelesai ? newArray[index].tanggalSelesai : null };
     } else {
       newArray[index] = { ...newArray[index], [key]: value };
     }
@@ -268,22 +259,22 @@ export default function RencanaPelaksanaan(props) {
             <Grid item container direction="column" spacing={1}>
               <Grid item container direction="row" spacing={1} justify="space-between">
                 <Grid item xs>
-                  <Typography align="center">Kegiatan</Typography>
+                  <Typography align="center" variant="body2"><b>Kegiatan</b></Typography>
+                </Grid>
+                <Grid item xs>
+                  <Typography align="center" variant="body2"><b>Pelaksana</b></Typography>
                 </Grid>
                 <Grid item xs={2}>
-                  <Typography align="center">Pelaksana</Typography>
+                  <Typography align="center" variant="body2"><b>Tanggal Mulai</b></Typography>
                 </Grid>
                 <Grid item xs={2}>
-                  <Typography align="center">Tanggal Mulai</Typography>
+                  <Typography align="center" variant="body2"><b>Tanggal Selesai</b></Typography>
                 </Grid>
                 <Grid item xs={2}>
-                  <Typography align="center">Tanggal Selesai</Typography>
-                </Grid>
-                <Grid item xs={2}>
-                  <Typography align="center">Target</Typography>
+                  <Typography align="center" variant="body2"><b>Target</b></Typography>
                 </Grid>
                 <Grid item xs={1}>
-                  <Typography align="center">Actions</Typography>
+                  <Typography align="center" variant="body2"><b>Actions</b></Typography>
                 </Grid>
               </Grid>
               {data && data.map((d, i) =>
@@ -316,7 +307,7 @@ export default function RencanaPelaksanaan(props) {
                       disabled={d.disabled}
                     />
                   </Grid>
-                  <Grid key={"grid-pelaksana-" + i} item xs={2}>
+                  <Grid key={"grid-pelaksana-" + i} item xs>
                     <Autocomplete key={"pelaksana-" + i} id={"pelaksana-" + i} name={"pelaksana-" + i}
                       multiple
                       disableCloseOnSelect
@@ -374,12 +365,13 @@ export default function RencanaPelaksanaan(props) {
                       format="DD/MM/YYYY"
                       size="small"
                       value={d.tanggalSelesai}
+                      minDate={d.tanggalMulai || moment("1900-01-01", "YYYY-MM-DD")}
                       onChange={(value) => handleChange(value, i, "tanggalSelesai")}
                       error={error[i].tanggalSelesai.error}
                       helperText={error[i].tanggalSelesai.text}
                       inputVariant={d.disabled ? "standard" : "outlined"}
                       views={['year', 'month', 'date']}
-                      disabled={d.disabled}
+                      disabled={d.disabled || !d.tanggalMulai}
                       className={d.disabled ? classes.fieldDisabled : null}
                     />
                   </Grid>
