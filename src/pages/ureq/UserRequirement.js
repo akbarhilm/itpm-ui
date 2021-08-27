@@ -63,14 +63,30 @@ export default function UserRequirement(props) {
     }
   }, [ureq]);
 
+  const validateLength255 = (value) => {
+    if (value.length <= 255) return true;
+    else return false;
+  };
+
+  const validateLength150 = (value) => {
+    if (value.length <= 150) return true;
+    else return false;
+  };
+
   const handleChange = (value, index, key) => {
     let newArrayError = [...error];
     newArrayError[index] = { ...newArrayError[index], [key]: value ? noErr : err };
     setError(newArrayError);
 
     let newArray = [...data];
-    newArray[index] = { ...newArray[index], [key]: value };
-    setData(newArray);
+    if (key === "rincian" ?
+      validateLength255(value)
+      : ["kebutuhan", "useCase"].includes(key) ?
+        validateLength150(value)
+        : false) {
+      newArray[index] = { ...newArray[index], [key]: value };
+      setData(newArray);
+    }
   };
 
   const addRow = () => {
