@@ -117,8 +117,16 @@ export default function Charter(props) {
   }, [charter, formatDataCharter]);
 
   const handleChangeDate = (value, jenis) => {
-    setData(prev => ({ ...prev, [jenis]: value }));
     setError(prev => ({ ...prev, [jenis]: value ? noErr : err }));
+    if (jenis === "tanggalMulai")
+      setData(prev => ({ ...prev, [jenis]: value, tanggalSelesai: value < prev.tanggalSelesai ? prev.tanggalSelesai : null }));
+    else
+      setData(prev => ({ ...prev, [jenis]: value }));
+  };
+
+  const validateLength500 = (value) => {
+    if (value.length <= 500) return true;
+    else return false;
   };
 
   const addTujuan = () => {
@@ -129,9 +137,13 @@ export default function Charter(props) {
 
   const changeTujuan = (event) => {
     let newArray = [...tujuan];
-    newArray[parseInt(event.target.name)] = event.target.value;
-    setTujuan(newArray);
-    setError(prev => ({ ...prev, tujuan: newArray.some(na => na) ? noErr : err }));
+    if (validateLength500(event.target.value)) {
+      newArray[parseInt(event.target.name)] = event.target.value;
+      setTujuan(newArray);
+      setError(prev => ({ ...prev, tujuan: newArray.some(na => na) ? noErr : err }));
+    } else if (!newArray[parseInt(event.target.name)]) {
+      setError(prev => ({ ...prev, tujuan: { error: true, text: "Tidak boleh lebih dari 500 karakter." } }));
+    }
   };
 
   const deleteTujuan = (index) => {
@@ -148,9 +160,13 @@ export default function Charter(props) {
 
   const changeScope = (event) => {
     let newArray = [...scope];
-    newArray[parseInt(event.target.name)] = event.target.value;
-    setScope(newArray);
-    setError(prev => ({ ...prev, scope: newArray.some(na => na) ? noErr : err }));
+    if (validateLength500(event.target.value)) {
+      newArray[parseInt(event.target.name)] = event.target.value;
+      setScope(newArray);
+      setError(prev => ({ ...prev, scope: newArray.some(na => na) ? noErr : err }));
+    } else if (!newArray[parseInt(event.target.name)]) {
+      setError(prev => ({ ...prev, tujuan: { error: true, text: "Tidak boleh lebih dari 500 karakter." } }));
+    }
   };
 
   const deleteScope = (index) => {
@@ -167,9 +183,13 @@ export default function Charter(props) {
 
   const changeTarget = (event) => {
     let newArray = [...target];
-    newArray[parseInt(event.target.name)] = event.target.value;
-    setTarget(newArray);
-    setError(prev => ({ ...prev, target: newArray.some(na => na) ? noErr : err }));
+    if (validateLength500(event.target.value)) {
+      newArray[parseInt(event.target.name)] = event.target.value;
+      setTarget(newArray);
+      setError(prev => ({ ...prev, target: newArray.some(na => na) ? noErr : err }));
+    } else if (!newArray[parseInt(event.target.name)]) {
+      setError(prev => ({ ...prev, tujuan: { error: true, text: "Tidak boleh lebih dari 500 karakter." } }));
+    }
   };
 
   const deleteTarget = (index) => {
@@ -331,6 +351,7 @@ export default function Charter(props) {
               format="DD/MM/YYYY"
               label="Tanggal Selesai"
               value={data ? data.tanggalSelesai : null}
+              minDate={(data && data.tanggalMulai) || moment("1900-01-01", "YYYY-MM-DD")}
               onChange={(value) => handleChangeDate(value, "tanggalSelesai")}
               required
               error={error.tanggalSelesai.error}
@@ -338,6 +359,7 @@ export default function Charter(props) {
               inputVariant="outlined"
               className={classes.textField}
               views={['year', 'month', 'date']}
+              disabled={!(data && data.tanggalMulai)}
             />
           </Grid>
         </Grid>
