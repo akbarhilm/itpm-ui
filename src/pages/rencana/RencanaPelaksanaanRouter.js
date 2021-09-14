@@ -7,6 +7,7 @@ import RencanaPelaksanaanDetail from './RencanaPelaksanaanDetail';
 import { getRencanaPelaksanaanByIdProyek } from '../../gateways/api/PlanAPI';
 import { getStepperProyekById } from '../../gateways/api/ProyekAPI';
 import { getAllKegiatan, getAllKaryawan } from '../../gateways/api/CommonAPI';
+import { getCharterByIdProyek } from '../../gateways/api/CharterAPI';
 
 export default function RencanaPelaksanaanRouter(props) {
   const { proyek } = props;
@@ -14,6 +15,7 @@ export default function RencanaPelaksanaanRouter(props) {
 
   const [loading, setLoading] = useState(true);
   const [plan, setPlan] = useState(null);
+  const [tglAwalCharter, setTglAwalCharter] = useState(null);
   const [status, setStatus] = useState(null);
   const [kegiatan, setKegiatan] = useState(null);
   const [karyawan, setKaryawan] = useState(null);
@@ -23,6 +25,11 @@ export default function RencanaPelaksanaanRouter(props) {
 
   useEffect(() => {
     async function fetchData() {
+      await getCharterByIdProyek(proyek.IDPROYEK)
+        .then((response) => {
+          if (Object.keys(response.data).length > 0)
+            setTglAwalCharter(response.data.TGLMULAI);
+        });
       await getRencanaPelaksanaanByIdProyek(proyek.IDPROYEK)
         .then((response) => {
           setPlan(response.data);
@@ -55,7 +62,7 @@ export default function RencanaPelaksanaanRouter(props) {
   if (loading)
     return <CircularProgress />;
   else if (otoritas === "PM" && plan && status && status.NOUREQ)
-    return <RencanaPelaksanaan plan={plan} proyek={proyek} kegiatan={kegiatan} karyawan={karyawan} />;
+    return <RencanaPelaksanaan plan={plan} proyek={proyek} kegiatan={kegiatan} karyawan={karyawan} minDate={tglAwalCharter} />;
   // return <RencanaPelaksanaan plan={plan} proyek={proyek} kegiatan={kegiatan} />;
   else if (plan && Object.keys(plan).length === 0)
     return <ErrorPage code="" message={"Rencana Pelaksanaan belum diinput"} />;
