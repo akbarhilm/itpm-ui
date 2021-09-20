@@ -54,7 +54,7 @@ const noErr = { error: false, text: "" };
 const defaultError = { kegiatan: noErr, pelaksana: noErr, tanggalMulai: noErr, tanggalSelesai: noErr };
 
 export default function RencanaPelaksanaan(props) {
-  const { plan, proyek, kegiatan, karyawan } = props;
+  const { plan, proyek, kegiatan, karyawan, minDate } = props;
   const classes = useStyles();
 
   const [loadingButton, setLoadingButton] = useState(false);
@@ -74,7 +74,7 @@ export default function RencanaPelaksanaan(props) {
     const grouped = groupBy(listdetail, x => x.IDKEGIATAN);
     const newData = [];
     grouped.forEach((value, key, map) => {
-      const pelaksana = listKaryawan ? value.map(v => listKaryawan.filter(kar => kar.nik === v.NIKPELAKSANA)[0]) : [];
+      const pelaksana = listKaryawan ? value.map(v => listKaryawan.filter(kar => kar.nik === v.NIKPELAKSANA)[0] || ({ nik: v.NIKPELAKSANA })) : [];
       const kegiatan = listKegiatan ? listKegiatan.filter(keg => keg.id === key)[0] : null;
       newData.push({
         kegiatan: kegiatan,
@@ -349,6 +349,7 @@ export default function RencanaPelaksanaan(props) {
                       format="DD/MM/YYYY"
                       size="small"
                       value={d.tanggalMulai}
+                      minDate={minDate ? moment(minDate, "DD/MM/YYYY") : moment("1900-01-01", "YYYY-MM-DD")}
                       onChange={(value) => handleChange(value, i, "tanggalMulai")}
                       error={error[i].tanggalMulai.error}
                       helperText={error[i].tanggalMulai.text}

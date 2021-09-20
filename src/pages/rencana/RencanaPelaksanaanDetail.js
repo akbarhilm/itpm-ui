@@ -33,7 +33,7 @@ export default function RencanaPelaksanaanDetail(props) {
       const grouped = groupBy(listdetail, x => x.IDKEGIATAN);
       const newData = [];
       grouped.forEach((value, key, map) => {
-        const pelaksana = karyawan ? value.map(v => karyawan.filter(kar => kar.nik === v.NIKPELAKSANA)[0].nik) : [];
+        const pelaksana = karyawan ? value.map(v => karyawan.filter(kar => kar.nik === v.NIKPELAKSANA).length > 0 ? karyawan.filter(kar => kar.nik === v.NIKPELAKSANA)[0].nik : v.NIKPELAKSANA) : [];
         const keg = kegiatan ? kegiatan.filter(keg => keg.id === key)[0] : null;
         newData.push({
           kegiatan: keg ? keg.kegiatan : "",
