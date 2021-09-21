@@ -6,6 +6,7 @@ import CharterDetail from './CharterDetail';
 import CharterApproval from './CharterApproval';
 import ErrorPage from '../../components/ErrorPage';
 import { UserContext } from '../../utils/UserContext';
+import { getStepperProyekById } from '../../gateways/api/ProyekAPI';
 
 export default function CharterRouter(props) {
   const { proyek } = props;
@@ -13,15 +14,14 @@ export default function CharterRouter(props) {
 
   const [loading, setLoading] = useState(true);
   const [charter, setCharter] = useState(null);
+  const [status, setStatus] = useState(null);
 
   const otoritas = user.NIK === proyek.NIKREQ ? "BPO" : user.NIK === proyek.NIKPM ? "PM" : "PMO";
   // const otoritas = "BPO";
 
   useEffect(() => {
-    if (!charter) {
-      // get charter by id proyek from api
-      setLoading(true);
-      getCharterByIdProyek(proyek.IDPROYEK)
+    async function fetchData() {
+      await getCharterByIdProyek(proyek.IDPROYEK)
         .then((response) => {
           if (Object.keys(response.data).length > 0) {
             const tujuan = response.data.LISTDETAIL.filter(d => d.KODEDETAIL === "TUJUAN");
@@ -37,8 +37,17 @@ export default function CharterRouter(props) {
             setCharter(formatData);
           } else setCharter(response.data);
           setLoading(false);
-        })
-        .catch(() => setLoading(false));
+        });
+      await getStepperProyekById(proyek.IDPROYEK)
+        .then((response) => {
+          setStatus(response.data);
+        });
+      setLoading(false);
+    }
+
+    if (!charter) {
+      setLoading(true);
+      fetchData();
     }
   }, [charter, proyek]);
 
@@ -48,7 +57,7 @@ export default function CharterRouter(props) {
     return <Charter charter={charter} proyek={proyek} />;
   else if (charter && Object.keys(charter).length === 0)
     return <ErrorPage code="" message="Charter belum diinput" />;
-  else if (otoritas === "BPO" && charter && Object.keys(charter).length > 0)
+  else if (otoritas === "BPO" && charter && Object.keys(charter).length > 0 && status && !status.NOUREQ)
     return <CharterApproval charter={charter} proyek={proyek} />;
   else
     return <CharterDetail charter={charter} proyek={proyek} />;
