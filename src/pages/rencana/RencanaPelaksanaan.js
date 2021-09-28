@@ -85,6 +85,8 @@ export default function RencanaPelaksanaan(props) {
         disabled: value[0].REALISASI
       });
     });
+    if (listKaryawan && listKegiatan)
+      newData.sort((a, b) => a.kegiatan.id - b.kegiatan.id);
     return newData;
   }, [listKaryawan, listKegiatan]);
 

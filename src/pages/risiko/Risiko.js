@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Grid, Button, Typography, CircularProgress, makeStyles, TextField, Divider, Paper, IconButton, MenuItem } from '@material-ui/core';
 import AlertDialog from '../../components/AlertDialog';
 import { RemoveCircleOutline, AddCircleOutline } from '@material-ui/icons';
 import { kemungkinan, dampak } from '../../utils/DataEnum';
+import { Autocomplete } from '@material-ui/lab';
+import { updateRisiko, createRisiko } from '../../gateways/api/RisikoAPI';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -19,6 +21,39 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+// const dummyData = {
+//   LISTDETAIL: [
+//     {
+//       ID: "1",
+//       IDPARENT: null,
+//       NAMAFACTOR: "FAKTOR 1",
+//       KODEMUNGKIN: "4",
+//       KODEIMPACT: "4"
+//     },
+//     {
+//       ID: "2",
+//       IDPARENT: null,
+//       NAMAFACTOR: "FAKTOR 2",
+//       KODEMUNGKIN: "3",
+//       KODEIMPACT: "4"
+//     },
+//     {
+//       ID: "3",
+//       IDPARENT: "1",
+//       NAMAFACTOR: "PENANGANAN 1",
+//       KODEMUNGKIN: "2",
+//       KODEIMPACT: "1"
+//     },
+//     {
+//       ID: "4",
+//       IDPARENT: "2",
+//       NAMAFACTOR: "PENANGANAN 2",
+//       KODEMUNGKIN: "2",
+//       KODEIMPACT: "2"
+//     },
+//   ]
+// };
+
 const defaultAlert = { openAlertDialog: false, messageAlertDialog: "", severity: "info" };
 
 const defaultListFaktor = { deskripsi: "", kemungkinan: "", dampak: "", tingkatRisiko: "" };
@@ -30,7 +65,6 @@ const defaultError = { faktor: noErr, deskripsi: noErr, kemungkinan: noErr, damp
 
 export default function Risiko(props) {
   const { risiko, proyek } = props;
-
   const classes = useStyles();
 
   const [loadingButton, setLoadingButton] = useState(false);
@@ -46,27 +80,54 @@ export default function Risiko(props) {
     setAlertDialog({ ...alertDialog, openAlertDialog: false });
   };
 
+  const formatNewDataFaktor = useCallback((listdetail) => {
+    return listdetail.filter(d => !d.IDPARENT).map(df => ({
+      deskripsi: df.NAMAFACTOR,
+      kemungkinan: df.KODEMUNGKIN,
+      dampak: df.KODEIMPACT,
+      tingkatRisiko: hitungTingkatRisiko(parseInt(df.KODEMUNGKIN), parseInt(df.KODEIMPACT))
+    }));
+  }, []);
+
+  const formatNewDataPenanganan = useCallback((listdetail) => {
+    return listdetail.map(d => ({
+      faktor: d.IDPARENT ? listdetail.filter(f => d.IDPARENT === f.IDRISK)[0].NAMAFACTOR : null,
+      deskripsi: d.NAMAFACTOR,
+      kemungkinan: d.KODEMUNGKIN,
+      dampak: d.KODEIMPACT,
+      tingkatRisiko: hitungTingkatRisiko(parseInt(d.KODEMUNGKIN), parseInt(d.KODEIMPACT))
+    })).filter(x => x.faktor);
+  }, []);
+
   useEffect(() => {
-    // setListModul([]);
-    // if (!data) {
-    // console.log(proyek);
-    // get ureq then
     if (Object.keys(risiko).length > 0) {
       setEdit(true);
-      setNomor("nomor risiko");
-      // setListDataFaktor([defaultListFaktor]);
-      // setListDataPenanganan([]);
-      // setErrorFaktor()
-      // setErrorPenanganan()
+      setNomor(risiko.NORISK);
+
+      const dataFaktor = formatNewDataFaktor(risiko.LISTDETAIL);
+      setListDataFaktor(dataFaktor);
+      setErrorFaktor(dataFaktor.map(d => defaultError));
+      const dataPenanganan = formatNewDataPenanganan(risiko.LISTDETAIL);
+      setListDataPenanganan(dataPenanganan);
+      setErrorPenanganan(dataPenanganan.map(d => defaultError));
     } else {
-      // console.log("tes");
+      // const dummyFaktor = formatNewDataFaktor(dummyData.LISTDETAIL);
+      // setListDataFaktor(dummyFaktor);
+      // setErrorFaktor(dummyFaktor.map(d => defaultError));
+      // const dummyPenanganan = formatNewDataPenanganan(dummyData.LISTDETAIL);
+      // setListDataPenanganan(dummyPenanganan);
+      // setErrorPenanganan(dummyPenanganan.map(d => defaultError));
       setListDataFaktor([defaultListFaktor]);
       setListDataPenanganan([]);
       setErrorFaktor([defaultError]);
       setErrorPenanganan([]);
     }
-    // }
-  }, [risiko]);
+  }, [risiko, formatNewDataFaktor, formatNewDataPenanganan]);
+
+  const validateLength255 = (value) => {
+    if (value.length <= 255) return true;
+    else return false;
+  };
 
   const addRowFaktor = () => {
     let newError = [...errorFaktor];
@@ -86,10 +147,13 @@ export default function Risiko(props) {
     let newArray = [...listDataFaktor];
     newArray[index] = { ...newArray[index], [key]: value };
     const riskrate = hitungTingkatRisiko(parseInt(newArray[index].kemungkinan ? newArray[index].kemungkinan : "0"), parseInt(newArray[index].dampak ? newArray[index].dampak : "0"));
-    if (key === "kemungkinan" || key === "dampak")
+    if (key === "kemungkinan" || key === "dampak") {
       newArray[index] = { ...newArray[index], tingkatRisiko: riskrate };
-    setListDataFaktor(newArray);
-    if (value && listDataPenanganan.length === 0)
+      setListDataFaktor(newArray);
+    } else if (key === "deskripsi" && validateLength255(value)) {
+      setListDataFaktor(newArray);
+    }
+    if (key === "deskripsi" && value && listDataPenanganan.length === 0)
       addRowPenanganan();
   };
 
@@ -121,9 +185,12 @@ export default function Risiko(props) {
     let newArray = [...listDataPenanganan];
     newArray[index] = { ...newArray[index], [key]: value };
     const riskrate = hitungTingkatRisiko(parseInt(newArray[index].kemungkinan ? newArray[index].kemungkinan : "0"), parseInt(newArray[index].dampak ? newArray[index].dampak : "0"));
-    if (key === "kemungkinan" || key === "dampak")
+    if (key === "kemungkinan" || key === "dampak") {
       newArray[index] = { ...newArray[index], tingkatRisiko: riskrate };
-    setListDataPenanganan(newArray);
+      setListDataPenanganan(newArray);
+    } else if ((key === "deskripsi" && validateLength255(value)) || key === "faktor") {
+      setListDataPenanganan(newArray);
+    }
   };
 
   const deleteRowPenanganan = (index) => {
@@ -180,6 +247,19 @@ export default function Risiko(props) {
     setLoadingButton(true);
     if (listDataFaktor.every(df => listDataPenanganan.some(dp => dp.faktor === df.deskripsi))) {
       if (validateAll()) {
+        const newFormatFaktor = listDataFaktor.map(df => ({
+          parent: null,
+          namafactor: df.deskripsi,
+          kodemungkin: df.kemungkinan,
+          kodeimpact: df.dampak
+        }));
+        const newFormatPenanganan = listDataPenanganan.map(dp => ({
+          parent: dp.faktor,
+          namafactor: dp.deskripsi,
+          kodemungkin: dp.kemungkinan,
+          kodeimpact: dp.dampak
+        }));
+        // const listdetail = newFormatFaktor.concat(newFormatPenanganan);
         // const listdetail = data.map(dt => ({
         //   idplan: dt.idplan ? dt.idplan : null,
         //   kegiatan: dt.kegiatan,
@@ -187,15 +267,59 @@ export default function Risiko(props) {
         //   tanggalMulai: dt.tanggalMulai,
         //   tanggalSelesai: dt.tanggalSelesai
         // }));
-        // const formatData = {
-        //   idproyek: proyek.IDPROYEK,
-        //   listdetail: listdetail
-        // };
-        setTimeout(() => {
-          console.log("simpan");
-          console.log("proyek", proyek);
-          setLoadingButton(false);
-        }, 2000);
+        const formatData = {
+          idproj: proyek.IDPROYEK,
+          listdetail: {
+            faktor: newFormatFaktor,
+            penanganan: newFormatPenanganan
+          }
+        };
+        if (edit) {
+          updateRisiko(formatData)
+            .then((response) => {
+              const dataFaktor = formatNewDataFaktor(response.data.LISTDETAIL);
+              setListDataFaktor(dataFaktor);
+              setErrorFaktor(dataFaktor.map(d => defaultError));
+              const dataPenanganan = formatNewDataPenanganan(response.data.LISTDETAIL);
+              setListDataPenanganan(dataPenanganan);
+              setErrorPenanganan(dataPenanganan.map(d => defaultError));
+              setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil ubah", severity: "success" });
+              setLoadingButton(false);
+            })
+            .catch((error) => {
+              setLoadingButton(false);
+              if (error.response)
+                setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data.message, severity: "error" });
+              else
+                setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
+            });
+        } else {
+          createRisiko(formatData)
+            .then((response) => {
+              const dataFaktor = formatNewDataFaktor(response.data.LISTDETAIL);
+              setListDataFaktor(dataFaktor);
+              setErrorFaktor(dataFaktor.map(d => defaultError));
+              const dataPenanganan = formatNewDataPenanganan(response.data.LISTDETAIL);
+              setListDataPenanganan(dataPenanganan);
+              setErrorPenanganan(dataPenanganan.map(d => defaultError));
+              setNomor(response.data.NORISK);
+              setEdit(true);
+              setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil simpan", severity: "success" });
+              setLoadingButton(false);
+            })
+            .catch((error) => {
+              setLoadingButton(false);
+              if (error.response)
+                setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data.message, severity: "error" });
+              else
+                setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
+            });
+        }
+        // setTimeout(() => {
+        //   console.log("simpan");
+        //   console.log("proyek", formatData);
+        //   setLoadingButton(false);
+        // }, 2000);
       } else {
         setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Silahkan periksa data yang anda masukkan.", severity: "warning" });
         setLoadingButton(false);
@@ -240,25 +364,25 @@ export default function Risiko(props) {
             </Grid>
             <Grid item container direction="column" spacing={1}>
               <Grid item container direction="row" spacing={1} justify="space-between">
-                <Grid item xs>
-                  <Typography align="center">Deskripsi</Typography>
+                <Grid item xs={5}>
+                  <Typography align="center" variant="body2"><b>Deskripsi</b></Typography>
                 </Grid>
                 <Grid item xs={2}>
-                  <Typography align="center">Kemungkinan</Typography>
+                  <Typography align="center" variant="body2"><b>Kemungkinan</b></Typography>
                 </Grid>
                 <Grid item xs={2}>
-                  <Typography align="center">Dampak</Typography>
+                  <Typography align="center" variant="body2"><b>Dampak</b></Typography>
                 </Grid>
                 <Grid item xs={2}>
-                  <Typography align="center">Tingkat Risiko</Typography>
+                  <Typography align="center" variant="body2"><b>Tingkat Risiko</b></Typography>
                 </Grid>
                 <Grid item xs={1}>
-                  <Typography align="center">Actions</Typography>
+                  <Typography align="center" variant="body2"><b>Actions</b></Typography>
                 </Grid>
               </Grid>
               {listDataFaktor && listDataFaktor.map((d, i) =>
                 <Grid item key={"grid-cont-faktor-" + i} container direction="row" spacing={1} justify="space-between" alignItems="center">
-                  <Grid key={"grid-deskripsi-faktor-" + i} item xs>
+                  <Grid key={"grid-deskripsi-faktor-" + i} item xs={5}>
                     <TextField key={"deskripsi-faktor-" + i} id={"deskripsi-faktor-" + i} name={"deskripsi-faktor-" + i}
                       variant="outlined"
                       fullWidth
@@ -351,28 +475,28 @@ export default function Risiko(props) {
             <Grid item container direction="column" spacing={1}>
               <Grid item container direction="row" spacing={1} justify="space-between">
                 <Grid item xs>
-                  <Typography align="center">Faktor</Typography>
+                  <Typography align="center" variant="body2"><b>Faktor</b></Typography>
                 </Grid>
                 <Grid item xs>
-                  <Typography align="center">Deskripsi</Typography>
+                  <Typography align="center" variant="body2"><b>Deskripsi</b></Typography>
                 </Grid>
                 <Grid item xs={2}>
-                  <Typography align="center">Kemungkinan</Typography>
+                  <Typography align="center" variant="body2"><b>Kemungkinan</b></Typography>
                 </Grid>
                 <Grid item xs={2}>
-                  <Typography align="center">Dampak</Typography>
+                  <Typography align="center" variant="body2"><b>Dampak</b></Typography>
                 </Grid>
                 <Grid item xs={2}>
-                  <Typography align="center">Tingkat Risiko</Typography>
+                  <Typography align="center" variant="body2"><b>Tingkat Risiko</b></Typography>
                 </Grid>
                 <Grid item xs={1}>
-                  <Typography align="center">Actions</Typography>
+                  <Typography align="center" variant="body2"><b>Actions</b></Typography>
                 </Grid>
               </Grid>
               {listDataPenanganan && listDataPenanganan.map((d, i) =>
                 <Grid item key={"grid-cont-penanganan-" + i} container direction="row" spacing={1} justify="space-between" alignItems="center">
                   <Grid key={"grid-factor-penanganan-" + i} item xs>
-                    <TextField key={"factor-penanganan-" + i} id={"factor-penanganan-" + i} name={"factor-penanganan-" + i}
+                    {/* <TextField key={"factor-penanganan-" + i} id={"factor-penanganan-" + i} name={"factor-penanganan-" + i}
                       variant="outlined"
                       fullWidth
                       select
@@ -392,7 +516,32 @@ export default function Risiko(props) {
                           {d.deskripsi}
                         </MenuItem>
                       ))}
-                    </TextField>
+                    </TextField> */}
+                    <Autocomplete key={"factor-penanganan-" + i} id={"factor-penanganan-" + i} name={"factor-penanganan-" + i}
+                      options={listDataFaktor || []}
+                      getOptionLabel={option => option.deskripsi}
+                      onChange={(e, v) => handleChangePenanganan(v.deskripsi, i, "faktor")}
+                      value={d.faktor ? { deskripsi: d.faktor } : null}
+                      getOptionSelected={
+                        (option, value) => option.deskripsi === value.deskripsi
+                      }
+                      renderOption={(option) => (
+                        <React.Fragment>
+                          {option.deskripsi}
+                        </React.Fragment>
+                      )}
+                      renderInput={params => (
+                        <TextField
+                          {...params}
+                          fullWidth
+                          multiline
+                          variant="outlined"
+                          size="small"
+                          error={errorPenanganan[i].faktor.error}
+                          helperText={errorPenanganan[i].faktor.text}
+                        />
+                      )}
+                    />
                   </Grid>
                   <Grid key={"grid-deskripsi-penanganan-" + i} item xs>
                     <TextField key={"deskripsi-penanganan-" + i} id={"deskripsi-penanganan-" + i} name={"deskripsi-penanganan-" + i}

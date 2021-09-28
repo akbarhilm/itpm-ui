@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Grid, Typography, Button, TextField, IconButton, Paper, makeStyles, CircularProgress, Divider } from '@material-ui/core';
 import { RemoveCircleOutline, AddCircleOutline } from '@material-ui/icons';
 import AlertDialog from '../../components/AlertDialog';
+import { updateResource, createResource } from '../../gateways/api/ResourceAPI';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -41,22 +42,45 @@ export default function Resource(props) {
     setAlertDialog({ ...alertDialog, openAlertDialog: false });
   };
 
+  const formatNewData = useCallback((listdetail) => {
+    const newData = [];
+    listdetail.forEach(data => {
+      newData.push({
+        deskripsi: data.NAMARESOURCE,
+        satuan: data.KODEUOM,
+        jumlah: data.QUANTITY
+      });
+    });
+    return newData;
+  }, []);
+
   useEffect(() => {
-    // setListModul([]);
-    // if (!data) {
-    // console.log(proyek);
-    // get ureq then
     if (Object.keys(resource).length > 0) {
       setEdit(true);
-      setData("response dari get ureq");
-      setNomor("set dari response");
-      // setError("response dari get ureq di looping set defaultError");
+      setNomor(resource.NORES);
+      if (resource.LISTDETAIL.length > 0) {
+        const newData = formatNewData(resource.LISTDETAIL);
+        setData(newData);
+        setError(newData.map(d => defaultError));
+      } else {
+        setData([defaultData]);
+        setError([defaultError]);
+      }
     } else {
       setData([defaultData]);
       setError([defaultError]);
     }
-    // }
-  }, [resource]);
+  }, [resource, formatNewData]);
+
+  const validateLength10 = (value) => {
+    if (value.length <= 10) return true;
+    else return false;
+  };
+
+  const validateLength100 = (value) => {
+    if (value.length <= 100) return true;
+    else return false;
+  };
 
   const handleChange = (value, index, key) => {
     let newArrayError = [...error];
@@ -64,8 +88,13 @@ export default function Resource(props) {
     setError(newArrayError);
 
     let newArray = [...data];
-    newArray[index] = { ...newArray[index], [key]: value };
-    setData(newArray);
+    if (key === "jumlah" && !isNaN(value) && (parseInt(value) < 1000 || !value) ? true
+      : key === "deskripsi" && validateLength100(value) ? true
+        : key === "satuan" && validateLength10(value) ? true
+          : false) {
+      newArray[index] = { ...newArray[index], [key]: value };
+      setData(newArray);
+    }
   };
 
   const addRow = () => {
@@ -88,34 +117,77 @@ export default function Resource(props) {
     setData(newArray);
   };
 
+  const validateAll = () => {
+    setError(prev =>
+      prev.map((er, i) => {
+        const newObj = {
+          deskripsi: data[i].deskripsi ? noErr : err,
+          satuan: data[i].satuan ? noErr : err,
+          jumlah: data[i].jumlah ? noErr : err
+        };
+        return newObj;
+      })
+    );
+    if (data.every(dt => dt.deskripsi && dt.satuan && dt.jumlah)) return true;
+    else return false;
+  };
+
   const simpan = () => {
     setLoadingButton(true);
-    // if (data.length > 0) {
-    // if (validateAll()) {
-    // const listdetail = data.map(dt => ({
-    //   idplan: dt.idplan ? dt.idplan : null,
-    //   kegiatan: dt.kegiatan,
-    //   pelaksana: dt.pelaksana,
-    //   tanggalMulai: dt.tanggalMulai,
-    //   tanggalSelesai: dt.tanggalSelesai
-    // }));
-    // const formatData = {
-    //   idproyek: proyek.IDPROYEK,
-    //   listdetail: listdetail
-    // };
-    setTimeout(() => {
-      console.log("simpan");
-      console.log("format data", proyek);
+    if (data.length > 0) {
+      if (validateAll()) {
+        const listdetail = data.map(dt => ({
+          namaresource: dt.deskripsi,
+          kodeuom: dt.satuan,
+          quantity: dt.jumlah,
+        }));
+        const formatData = {
+          idproj: proyek.IDPROYEK,
+          listdetail: listdetail
+        };
+        if (edit) {
+          updateResource(formatData)
+            .then((response) => {
+              setData(formatNewData(response.data.LISTDETAIL));
+              setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil ubah", severity: "success" });
+              setLoadingButton(false);
+            })
+            .catch((error) => {
+              setLoadingButton(false);
+              if (error.response)
+                setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data.message, severity: "error" });
+              else
+                setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
+            });
+        } else {
+          createResource(formatData)
+            .then((response) => {
+              setData(formatNewData(response.data.LISTDETAIL));
+              setEdit(true);
+              setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil simpan", severity: "success" });
+              setLoadingButton(false);
+            })
+            .catch((error) => {
+              setLoadingButton(false);
+              if (error.response)
+                setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data.message, severity: "error" });
+              else
+                setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
+            });
+        }
+        // setTimeout(() => {
+        //   console.log("simpan");
+        //   console.log("format data", formatData);
+        //   setLoadingButton(false);
+        // }, 2000);
+      } else {
+        setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Silahkan periksa data yang anda masukkan.", severity: "warning" });
+        setLoadingButton(false);
+      }
+    } else {
+      setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Data kosong. Silahkan periksa data yang anda masukkan.", severity: "warning" });
       setLoadingButton(false);
-    }, 2000);
-    // } else {
-    //   setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Silahkan periksa data yang anda masukkan.", severity: "warning" });
-    //   setLoadingButton(false);
-    // }
-    // } else {
-    //   setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Data kosong. Silahkan periksa data yang anda masukkan.", severity: "warning" });
-    //   setLoadingButton(false);
-    // }
+    }
   };
 
   return (
@@ -153,16 +225,16 @@ export default function Resource(props) {
             <Grid item container direction="column" spacing={1}>
               <Grid item container direction="row" spacing={1} justify="space-between">
                 <Grid item xs>
-                  <Typography align="center">Deskripsi Kebutuhan</Typography>
+                  <Typography align="center" variant="body2"><b>Deskripsi Kebutuhan</b></Typography>
                 </Grid>
                 <Grid item xs={3}>
-                  <Typography align="center">Ukuran Satuan</Typography>
+                  <Typography align="center" variant="body2"><b>Ukuran Satuan</b></Typography>
                 </Grid>
                 <Grid item xs={2}>
-                  <Typography align="center">Jumlah</Typography>
+                  <Typography align="center" variant="body2"><b>Jumlah</b></Typography>
                 </Grid>
                 <Grid item xs={1}>
-                  <Typography align="center">Actions</Typography>
+                  <Typography align="center" variant="body2"><b>Actions</b></Typography>
                 </Grid>
               </Grid>
               {data && data.map((d, i) =>
@@ -203,6 +275,7 @@ export default function Resource(props) {
                       required
                       error={error[i].jumlah.error}
                       helperText={error[i].jumlah.text}
+                      inputProps={{ style: { textAlign: 'right' } }}
                     />
                   </Grid>
                   <Grid item xs={1} container justify="center">

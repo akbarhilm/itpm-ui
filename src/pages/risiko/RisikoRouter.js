@@ -43,6 +43,6 @@ export default function RisikoRouter(props) {
   else if (risiko && Object.keys(risiko).length === 0)
     return <ErrorPage code="" message={otoritas === "PM" ? "Rencana Pelaksanaan belum diinput" : "Kajian Risiko belum diinput"} />;
   else
-    return <RisikoDetail risiko={risiko} proyek={proyek} />;
+    return <RisikoDetail risiko={risiko} />;
 
 };
