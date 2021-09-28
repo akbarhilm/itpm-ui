@@ -15,6 +15,7 @@ init:
   only:
     - dev
     - test
+    - /-RELEASE$/
 
 build_dev:
   stage: build
@@ -73,3 +74,34 @@ deploy_test:
     - ssh $USER@$HOST_TEST "cd ~/project/itpm && ./startup"
   only:
     - test
+
+build_prod:
+  stage: build
+  before_script:
+    - export REACT_APP_HOST=$HOST_PROD
+    - export REACT_APP_HOST_API=$HOST_PROD
+    - export REACT_APP_HOST_LOGIN=$HOST_PROD_LOGIN
+  script: 
+    - npm run build
+    - cp -f ~/project/wait/wait .
+    - docker build -t $DOCKER_REPOSITORY/prod-apps/itpm-ui .
+  only:
+    - /-RELEASE$/
+
+staging_prod:
+  stage: staging
+  script:
+    - docker push $DOCKER_REPOSITORY/prod-apps/itpm-ui
+    - docker rmi $DOCKER_REPOSITORY/prod-apps/itpm-ui
+  only:
+    - /-RELEASE$/
+
+deploy_prod:
+  stage: deploy
+  script:
+    - ssh $USER@$HOST_PROD "cd ~/project/itpm && ./shutdown"
+    - ssh $USER@$HOST_PROD "cd ~/project/itpm && ./startup"
+  only:
+    - /-RELEASE$/
+  environment:
+    name: produksi
