@@ -4,7 +4,6 @@ import ContentRoute from "./components/ContentRoute";
 import { makeStyles } from '@material-ui/core';
 import Header from './components/Header';
 import MenuSidebar from './components/MenuSidebar';
-// import { token } from './utils/ApiConfig';
 import { UserContext, useFindUser } from './utils/UserContext';
 
 const useStyles = makeStyles((theme) => ({
@@ -14,8 +13,6 @@ const useStyles = makeStyles((theme) => ({
   appBarSpacer: theme.mixins.toolbar,
   content: {
     flexGrow: 1,
-    // height: '100vh',
-    // overflow: 'auto',
     padding: theme.spacing(2)
   },
 }));
@@ -23,14 +20,12 @@ const useStyles = makeStyles((theme) => ({
 function App() {
   const classes = useStyles();
 
-  const { user, setUser, isLoading } = useFindUser();
-  // const { isLoading, setLoading } = useLoading();
-  // const [auth, setAuth] = useState();
+  const { user, setUser, isLoading, karyawan, kegiatan } = useFindUser();
   const [proyek, setProyek] = useState();
   const [menuSideBar, setMenuSideBar] = useState(false);
 
   return (
-    <UserContext.Provider value={{ user, setUser, isLoading }}>
+    <UserContext.Provider value={{ user, setUser, isLoading, karyawan, kegiatan }}>
       <div className={classes.root}>
         <Router>
           {user && <Header setProyek={setProyek} setMenuSideBar={setMenuSideBar} />}

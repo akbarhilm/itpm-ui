@@ -3,16 +3,15 @@ import { CircularProgress } from '@material-ui/core';
 import ErrorPage from '../../components/ErrorPage';
 import { UserContext } from '../../utils/UserContext';
 import { getUatByIdProyek } from '../../gateways/api/UatAPI';
-import UatDetail from './UatDetail';
 import Uat from './Uat';
 import { getStepperProyekById } from '../../gateways/api/ProyekAPI';
 
 export default function UatRouter(props) {
   const { proyek } = props;
-  const { user } = useContext(UserContext);
+  const { user, karyawan: cKaryawan } = useContext(UserContext);
 
   const [loading, setLoading] = useState(true);
-  const [uat, setUat] = useState(null);
+  const [listUat, setListUat] = useState(null);
   const [status, setStatus] = useState(null);
 
   const otoritas = user.NIK === proyek.NIKREQ ? "BPO" : user.NIK === proyek.NIKPM ? "PM" : "PMO";
@@ -22,7 +21,7 @@ export default function UatRouter(props) {
     async function fetchData() {
       await getUatByIdProyek(proyek.IDPROYEK)
         .then((response) => {
-          setUat(response.data);
+          setListUat(response.data);
         });
       await getStepperProyekById(proyek.IDPROYEK)
         .then((response) => {
@@ -30,19 +29,18 @@ export default function UatRouter(props) {
         });
       setLoading(false);
     }
-    if (!uat) {
+    if (!listUat) {
       setLoading(true);
       fetchData();
     }
-  }, [uat, proyek]);
+  }, [listUat, proyek, cKaryawan]);
 
   if (loading)
     return <CircularProgress />;
-  else if (otoritas === "PM" && uat && status && status.NOREAL)
-    return <Uat uat={uat} proyek={proyek} />;
-  else if (uat && Object.keys(uat).length === 0)
+  else if (otoritas === "PM" && status && status.NOREAL)
+    return <Uat otoritas={otoritas} listUat={listUat} proyek={proyek} />;
+  else if (listUat && listUat.length === 0)
     return <ErrorPage code="" message={otoritas === "PM" ? "Realisasi belum diinput" : "UAT (User Acceptence Test) belum diinput"} />;
   else
-    return <UatDetail uat={uat} proyek={proyek} />;
-
+    return <Uat otoritas={otoritas} listUat={listUat} proyek={proyek} />;
 };
