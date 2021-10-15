@@ -1,5 +1,9 @@
 import api from '../../utils/ApiConfig';
 
-export const getBastByIdProyek = async (id) => {
-  return await api.get('/proyek/risk/' + id);
+export const createBast = async (data) => {
+  return await api.post('/proyek/ba/tambah', data);
+};
+
+export const approveBast = async (data) => {
+  return await api.post('/proyek/ba/approve', data);
 };

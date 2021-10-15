@@ -156,15 +156,21 @@ export default function Uat(props) {
                   </Grid>
                   <Grid item xs={1} container justify="center">
                     {d.approveUser || (d.approveQA && otoritas !== "BPO") || (!d.approveQA && otoritas !== "PM") ?
-                      <IconButton size="small" onClick={() => detail(d)}>
-                        <InfoOutlined />
-                      </IconButton> : null}
-                    {!d.approveQA && otoritas === "PM" && <IconButton size="small" onClick={() => edit(d)}>
-                      <EditOutlined />
-                    </IconButton>}
-                    {d.approveQA && otoritas === "BPO" && !d.approveUser && <IconButton size="small" onClick={() => approve(d)}>
-                      <AssignmentTurnedInOutlined />
-                    </IconButton>}
+                      <Tooltip title="Detail">
+                        <IconButton size="small" onClick={() => detail(d)}>
+                          <InfoOutlined />
+                        </IconButton>
+                      </Tooltip> : null}
+                    {!d.approveQA && otoritas === "PM" && <Tooltip title="Ubah Data">
+                      <IconButton size="small" onClick={() => edit(d)}>
+                        <EditOutlined />
+                      </IconButton>
+                    </Tooltip>}
+                    {d.approveQA && otoritas === "BPO" && !d.approveUser && <Tooltip title="Persetujuan UAT">
+                      <IconButton size="small" onClick={() => approve(d)}>
+                        <AssignmentTurnedInOutlined />
+                      </IconButton>
+                    </Tooltip>}
                   </Grid>
                 </Grid>
               )}
@@ -234,4 +240,4 @@ export default function Uat(props) {
       </Dialog>
     </Grid >
   );
-};
+};;

@@ -18,6 +18,7 @@ import UserRequirementRouter from "../pages/ureq/UserRequirementRouter";
 import RencanaPelaksanaanRouter from "../pages/rencana/RencanaPelaksanaanRouter";
 import RealisasiRouter from "../pages/realisasi/RealisasiRouter";
 import UatRouter from "../pages/uat/UatRouter";
+import BastRouter from "../pages/bast/BastRouter";
 // import UatAdd from "../pages/uat/UatAdd";
 // import { MuiPickersUtilsProvider } from "@material-ui/pickers";
 // import moment from 'moment';
@@ -87,6 +88,9 @@ export default function Content(props) {
           </PrivateRoute>
           <PrivateRoute exact path='/:namauri/uat' >
             <UatRouter proyek={proyek} />
+          </PrivateRoute>
+          <PrivateRoute exact path='/:namauri/bast' >
+            <BastRouter proyek={proyek} />
           </PrivateRoute>
         </Switch>
       </div>
