@@ -54,7 +54,7 @@ export default function RencanaPelaksanaanRouter(props) {
 
   if (loading)
     return <CircularProgress />;
-  else if (otoritas === "PM" && plan && status && status.NOUREQ)
+  else if (otoritas === "PM" && plan && status && status.NOUREQ && !status.NOBA)
     return <RencanaPelaksanaan plan={plan} proyek={proyek} kegiatan={kegiatan} karyawan={karyawan} minDate={tglAwalCharter} />;
   else if (plan && Object.keys(plan).length === 0)
     return <ErrorPage code="" message={"Rencana Pelaksanaan belum diinput"} />;

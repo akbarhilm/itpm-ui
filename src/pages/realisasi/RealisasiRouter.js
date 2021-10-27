@@ -48,7 +48,7 @@ export default function RealisasiRouter(props) {
 
   if (loading)
     return <CircularProgress />;
-  else if (otoritas === "PM" && realisasi && status && status.NOPLAN)
+  else if (otoritas === "PM" && realisasi && status && status.NOPLAN && !status.NOBA)
     return <Realisasi realisasi={realisasi} proyek={proyek} karyawan={karyawan} kegiatan={kegiatan} plan={plan} />;
   else if (realisasi && Object.keys(realisasi).length === 0)
     return <ErrorPage code="" message={otoritas === "PM" ? "Rencana Pelaksanaan belum diinput" : "Realisasi belum diinput"} />;

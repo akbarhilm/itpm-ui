@@ -127,7 +127,6 @@ export default function Bast(props) {
     approveBast({ idproj: proyek.IDPROYEK })
       .then((response) => {
         setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil simpan", severity: "success" });
-        setLoadingButton(false);
       })
       .catch((error) => {
         setLoadingButton(false);
@@ -148,7 +147,7 @@ export default function Bast(props) {
       <AlertDialog
         open={alertDialog.openAlertDialog}
         id="alert-dialog"
-        onClose={alertDialog.severity === "success" ? () => { handleCloseAlertDialog(); refresh(null); } : handleCloseAlertDialog}
+        onClose={alertDialog.severity === "success" ? () => { handleCloseAlertDialog(); refresh(null); setLoadingButton(false); } : handleCloseAlertDialog}
         message={alertDialog.messageAlertDialog}
         severity={alertDialog.severity}
       />
