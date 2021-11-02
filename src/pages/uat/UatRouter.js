@@ -38,9 +38,9 @@ export default function UatRouter(props) {
   if (loading)
     return <CircularProgress />;
   else if (otoritas === "PM" && status && status.NOREAL)
-    return <Uat otoritas={otoritas} listUat={listUat} proyek={proyek} />;
+    return <Uat otoritas={otoritas} listUat={listUat} proyek={proyek} status={status} />;
   else if (listUat && listUat.length === 0)
     return <ErrorPage code="" message={otoritas === "PM" ? "Realisasi belum diinput" : "UAT (User Acceptence Test) belum diinput"} />;
   else
-    return <Uat otoritas={otoritas} listUat={listUat} proyek={proyek} />;
+    return <Uat otoritas={otoritas} listUat={listUat} proyek={proyek} status={status} />;
 };

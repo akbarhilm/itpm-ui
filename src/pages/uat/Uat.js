@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Grid, Typography, TextField, makeStyles, Divider, Paper, IconButton, Checkbox, Dialog, DialogContent, Tooltip, DialogTitle } from '@material-ui/core';
 import { AddCircleOutline, InfoOutlined, EditOutlined, Close, AssignmentTurnedInOutlined } from '@material-ui/icons';
 import UatAdd from './UatAdd';
-import { getUatByIdProyek, getUatByIdUat } from '../../gateways/api/UatAPI';
+import { approveQA, getUatByIdProyek, getUatByIdUat } from '../../gateways/api/UatAPI';
 import UatDetail from './UatDetail';
 import UatApproval from './UatApproval';
+import AlertDialog from '../../components/AlertDialog';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -26,8 +27,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const defaultAlert = { openAlertDialog: false, messageAlertDialog: "", severity: "info" };
+
 export default function Uat(props) {
-  const { otoritas, listUat, proyek } = props;
+  const { otoritas, listUat, proyek, status } = props;
   const classes = useStyles();
 
   const [refreshData, setRefreshData] = useState(false);
@@ -37,6 +40,11 @@ export default function Uat(props) {
   const [openDialogEdit, setOpenDialogEdit] = useState(false);
   const [openDialogDetail, setOpenDialogDetail] = useState(false);
   const [openDialogApproval, setOpenDialogApproval] = useState(false);
+  const [alertDialog, setAlertDialog] = useState(defaultAlert);
+
+  const handleCloseAlertDialog = () => {
+    setAlertDialog({ ...alertDialog, openAlertDialog: false });
+  };
 
   const handleCloseDialogAdd = () => {
     setOpenDialogAdd(false);
@@ -97,8 +105,30 @@ export default function Uat(props) {
       });
   };
 
+  // dibutuhkan untuk approve qc, jika nanti ada aplikasi qa bisa dihapus/tidak dibutuhkan lagi
+  const approveQC = (uat) => {
+    approveQA({ iduat: uat.id })
+      .then(response => {
+        setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil simpan", severity: "success" });
+      })
+      .catch(error => {
+        if (error.response)
+          setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data.message, severity: "error" });
+        else
+          setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
+      });
+  };
+
   return (
     <Grid container direction="column" spacing={2}>
+      {/* alert ini dibutuhkan untuk approve qc, jika nanti ada aplikasi qa bisa dihapus/tidak dibutuhkan lagi */}
+      <AlertDialog
+        open={alertDialog.openAlertDialog}
+        id="alert-dialog"
+        onClose={alertDialog.severity === "success" ? () => { handleCloseAlertDialog(); setRefreshData(true); } : handleCloseAlertDialog}
+        message={alertDialog.messageAlertDialog}
+        severity={alertDialog.severity}
+      />
       <Grid item>
         <Typography variant="h4" gutterBottom>
           {"UAT (User Acceptence Test)"}
@@ -108,7 +138,7 @@ export default function Uat(props) {
       <Grid item >
         <Paper className={classes.paper}>
           <Grid container direction="column" spacing={2}>
-            {otoritas === "PM" && data.every(d => d.approveUser) && <Grid item container justify="flex-end" >
+            {otoritas === "PM" && data.every(d => d.approveUser) && !status.APPROVEBA && <Grid item container justify="flex-end" >
               <Tooltip title="Tambah Data">
                 <IconButton onClick={add} >
                   <AddCircleOutline />
@@ -166,6 +196,12 @@ export default function Uat(props) {
                         <EditOutlined />
                       </IconButton>
                     </Tooltip>}
+                    { // jika nanti sudah ada aplikasi qa, ini tidak dibutuhkan lagi
+                      !d.approveQA && otoritas === "PM" && <Tooltip title="Setuju QC">
+                        <IconButton size="small" onClick={() => approveQC(d)}>
+                          <AssignmentTurnedInOutlined />
+                        </IconButton>
+                      </Tooltip>}
                     {d.approveQA && otoritas === "BPO" && !d.approveUser && <Tooltip title="Persetujuan UAT">
                       <IconButton size="small" onClick={() => approve(d)}>
                         <AssignmentTurnedInOutlined />
