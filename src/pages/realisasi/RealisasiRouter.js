@@ -7,11 +7,10 @@ import Realisasi from './Realisasi';
 import RealisasiDetail from './RealisasiDetail';
 import { getStepperProyekById } from '../../gateways/api/ProyekAPI';
 import { getRencanaPelaksanaanByIdProyek } from '../../gateways/api/PlanAPI';
-import { getAllKegiatan, getAllKaryawan } from '../../gateways/api/CommonAPI';
 
 export default function RealisasiRouter(props) {
   const { proyek } = props;
-  const { user } = useContext(UserContext);
+  const { user, karyawan: cKaryawan, kegiatan: cKegiatan } = useContext(UserContext);
 
   const [loading, setLoading] = useState(true);
   const [plan, setPlan] = useState(null);
@@ -37,25 +36,19 @@ export default function RealisasiRouter(props) {
         .then((response) => {
           setStatus(response.data);
         });
-      await getAllKegiatan()
-        .then((response) => {
-          setKegiatan(response.data);
-        });
-      await getAllKaryawan()
-        .then((response) => {
-          setKaryawan(response.data.filter(d => d.organisasi.includes("IT")));
-        });
+      setKegiatan(cKegiatan);
+      setKaryawan(cKaryawan.filter(d => d.organisasi.includes("IT")));
       setLoading(false);
     }
     if (!realisasi) {
       setLoading(true);
       fetchData();
     }
-  }, [realisasi, proyek]);
+  }, [realisasi, proyek, cKegiatan, cKaryawan]);
 
   if (loading)
     return <CircularProgress />;
-  else if (otoritas === "PM" && realisasi && status && status.NOPLAN)
+  else if (otoritas === "PM" && realisasi && status && status.NOPLAN && !status.NOBA)
     return <Realisasi realisasi={realisasi} proyek={proyek} karyawan={karyawan} kegiatan={kegiatan} plan={plan} />;
   else if (realisasi && Object.keys(realisasi).length === 0)
     return <ErrorPage code="" message={otoritas === "PM" ? "Rencana Pelaksanaan belum diinput" : "Realisasi belum diinput"} />;

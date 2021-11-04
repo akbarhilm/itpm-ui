@@ -1,18 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Grid, Typography, Button, TextField, makeStyles, Divider, CircularProgress } from '@material-ui/core';
+import { Grid, Typography, TextField, makeStyles, Divider, Paper, IconButton, Checkbox, Dialog, DialogContent, Tooltip, DialogTitle } from '@material-ui/core';
+import { AddCircleOutline, InfoOutlined, EditOutlined, Close, AssignmentTurnedInOutlined } from '@material-ui/icons';
+import UatAdd from './UatAdd';
+import { approveQA, getUatByIdProyek, getUatByIdUat } from '../../gateways/api/UatAPI';
+import UatDetail from './UatDetail';
+import UatApproval from './UatApproval';
 import AlertDialog from '../../components/AlertDialog';
-// import { AddCircleOutline, RemoveCircleOutline, CheckBoxOutlineBlank, CheckBox } from '@material-ui/icons';
-// import { KeyboardDatePicker } from '@material-ui/pickers';
-// import { Autocomplete } from '@material-ui/lab';
-
-const dummyKaryawan = [
-  { nik: "160035", nama: "M. MUSTAKIM", kodeOrganisasi: "IT1300" },
-  { nik: "160257", nama: "ANITA IKA NURCAHYANI", kodeOrganisasi: "IT1300" },
-  { nik: "170084", nama: "AKBAR HILMAN", kodeOrganisasi: "IT1300" },
-  { nik: "160260", nama: "ERVIN ADHI CAHYA N", kodeOrganisasi: "IT3100" },
-  { nik: "180136", nama: "ANNISA DWIDYA R", kodeOrganisasi: "IT1100" },
-  { nik: "900147", nama: "RINI ASTUTI", kodeOrganisasi: "IT1000" },
-];
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -36,165 +29,251 @@ const useStyles = makeStyles((theme) => ({
 
 const defaultAlert = { openAlertDialog: false, messageAlertDialog: "", severity: "info" };
 
-const defaultData = { kegiatan: null, pelaksana: [], tanggalMulai: null, tanggalSelesai: null, target: "" };
-
-// const err = { error: true, text: "Tidak boleh kosong." };
-// const noErr = { error: false, text: "" };
-// const defaultError = { kegiatan: noErr, pelaksana: noErr, tanggalMulai: noErr, tanggalSelesai: noErr };
-
-export default function Realisasi(props) {
-  const { uat, proyek } = props;
+export default function Uat(props) {
+  const { otoritas, listUat, proyek, status } = props;
   const classes = useStyles();
 
-  const [loadingButton, setLoadingButton] = useState(false);
-  const [edit, setEdit] = useState(false);
-  const [nomor, setNomor] = useState("");
-  const [data, setData] = useState();
-  // const [error, setError] = useState();
-  const [listKaryawan, setListKaryawan] = useState();
+  const [refreshData, setRefreshData] = useState(false);
+  const [data, setData] = useState([]);
+  const [detailUat, setDetailUat] = useState();
+  const [openDialogAdd, setOpenDialogAdd] = useState(false);
+  const [openDialogEdit, setOpenDialogEdit] = useState(false);
+  const [openDialogDetail, setOpenDialogDetail] = useState(false);
+  const [openDialogApproval, setOpenDialogApproval] = useState(false);
   const [alertDialog, setAlertDialog] = useState(defaultAlert);
 
   const handleCloseAlertDialog = () => {
     setAlertDialog({ ...alertDialog, openAlertDialog: false });
   };
 
-  useEffect(() => {
-    // setListModul([]);
-    // if (!data) {
-    // console.log(proyek);
-    // get ureq then
-    if (Object.keys(uat).length > 0) {
-      setEdit(true);
-      setData("response dari get ureq");
-      setNomor("set dari response");
-      // setError("response dari get ureq di looping set defaultError");
-    } else {
-      setData([defaultData]);
-      // setError([defaultError]);
-    }
-    // }
-  }, [uat]);
-
-  useEffect(() => {
-    if (!listKaryawan) {
-      setListKaryawan(dummyKaryawan);
-    }
-  }, [listKaryawan]);
-
-  // const handleChange = (value, index, key) => {
-  //   let newArrayError = [...error];
-  //   if (key === "pelaksana")
-  //     newArrayError[index] = { ...newArrayError[index], [key]: value.length > 0 ? noErr : err };
-  //   else
-  //     newArrayError[index] = { ...newArrayError[index], [key]: value ? noErr : err };
-  //   setError(newArrayError);
-
-  //   let newArray = [...data];
-  //   if (key === "kegiatan") {
-  //     newArray[index] = { ...newArray[index], [key]: value, target: value ? value.target : "" };
-  //   } else {
-  //     newArray[index] = { ...newArray[index], [key]: value };
-  //   }
-  //   setData(newArray);
-  // };
-
-  // const addRow = () => {
-  //   let newArrayError = [...error];
-  //   newArrayError.push(defaultError);
-  //   setError(newArrayError);
-
-  //   let newArray = [...data];
-  //   newArray.push(defaultData);
-  //   setData(newArray);
-  // };
-
-  // const deleteRow = (index) => {
-  //   let newArrayError = [...error];
-  //   newArrayError.splice(index, 1);
-  //   setError(newArrayError);
-
-  //   let newArray = [...data];
-  //   newArray.splice(index, 1);
-  //   setData(newArray);
-  // };
-
-  const validateAll = () => {
-    // setError(prev =>
-    //   prev.map((er, i) => {
-    //     const newObj = {
-    //       kegiatan: data[i].kegiatan ? noErr : err,
-    //       pelaksana: data[i].pelaksana.length > 0 ? noErr : err,
-    //       tanggalMulai: data[i].tanggalMulai ? noErr : err,
-    //       tanggalSelesai: data[i].tanggalSelesai ? noErr : err
-    //     };
-    //     return newObj;
-    //   })
-    // );
-    if (data.every(dt => dt.kegiatan && dt.pelaksana.length > 0 && dt.tanggalMulai && dt.tanggalSelesai)) return true;
-    else return false;
+  const handleCloseDialogAdd = () => {
+    setOpenDialogAdd(false);
   };
 
-  const simpan = () => {
-    setLoadingButton(true);
-    if (data.length > 0) {
-      if (validateAll()) {
-        const listdetail = data.map(dt => ({
-          idplan: dt.idplan ? dt.idplan : null,
-          kegiatan: dt.kegiatan,
-          pelaksana: dt.pelaksana,
-          tanggalMulai: dt.tanggalMulai,
-          tanggalSelesai: dt.tanggalSelesai
-        }));
-        const formatData = {
-          idproyek: proyek.IDPROYEK,
-          listdetail: listdetail
-        };
-        setTimeout(() => {
-          console.log("simpan");
-          console.log("format data", formatData);
-          setLoadingButton(false);
-        }, 2000);
-      } else {
-        setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Silahkan periksa data yang anda masukkan.", severity: "warning" });
-        setLoadingButton(false);
-      }
-    } else {
-      setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Data kosong. Silahkan periksa data yang anda masukkan.", severity: "warning" });
-      setLoadingButton(false);
+  useEffect(() => {
+    if (listUat) {
+      setData(listUat.map(d => ({
+        id: d.IDUAT,
+        nomor: d.NOUAT,
+        approveQA: d.APROVEQA === "1" ? true : false,
+        approveUser: d.APROVEUSER === "1" ? true : false
+      })));
     }
+  }, [listUat]);
+
+  useEffect(() => {
+    if (refreshData) {
+      getUatByIdProyek(proyek.IDPROYEK)
+        .then((response) => {
+          setData(response.data.map(d => ({
+            id: d.IDUAT,
+            nomor: d.NOUAT,
+            approveQA: d.APROVEQA === "1" ? true : false,
+            approveUser: d.APROVEUSER === "1" ? true : false
+          })));
+          setRefreshData(false);
+        })
+        .catch(() => setRefreshData(false));
+    }
+  }, [refreshData, proyek]);
+
+  const add = () => {
+    setOpenDialogAdd(true);
+  };
+
+  const edit = (uat) => {
+    getUatByIdUat(uat.id)
+      .then((response) => {
+        setDetailUat(response.data);
+        setOpenDialogEdit(true);
+      });
+  };
+
+  const detail = (uat) => {
+    getUatByIdUat(uat.id)
+      .then((response) => {
+        setDetailUat(response.data);
+        setOpenDialogDetail(true);
+      });
+  };
+
+  const approve = (uat) => {
+    getUatByIdUat(uat.id)
+      .then((response) => {
+        setDetailUat(response.data);
+        setOpenDialogApproval(true);
+      });
+  };
+
+  // dibutuhkan untuk approve qc, jika nanti ada aplikasi qa bisa dihapus/tidak dibutuhkan lagi
+  const approveQC = (uat) => {
+    approveQA({ iduat: uat.id })
+      .then(response => {
+        setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil simpan", severity: "success" });
+      })
+      .catch(error => {
+        if (error.response)
+          setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data.message, severity: "error" });
+        else
+          setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
+      });
   };
 
   return (
     <Grid container direction="column" spacing={2}>
+      {/* alert ini dibutuhkan untuk approve qc, jika nanti ada aplikasi qa bisa dihapus/tidak dibutuhkan lagi */}
       <AlertDialog
         open={alertDialog.openAlertDialog}
         id="alert-dialog"
-        onClose={handleCloseAlertDialog}
+        onClose={alertDialog.severity === "success" ? () => { handleCloseAlertDialog(); setRefreshData(true); } : handleCloseAlertDialog}
         message={alertDialog.messageAlertDialog}
         severity={alertDialog.severity}
       />
       <Grid item>
         <Typography variant="h4" gutterBottom>
-          {edit ? "Ubah UAT (User Acceptence Test)" : "Tambah UAT (User Acceptence Test)"}
+          {"UAT (User Acceptence Test)"}
         </Typography>
       </Grid>
       <Divider />
-      <Grid item xs={6}>
-        <TextField id="nomor"
-          label="Nomor UAT"
-          fullWidth
-          disabled
-          className={classes.fieldDisabled}
-          value={nomor}
-        />
-      </Grid>
-
-      <Divider />
-      <Grid item container direction="row" justify="flex-end">
-        <Button onClick={loadingButton ? null : simpan} variant="contained" color="primary">
-          {loadingButton ? <CircularProgress size={20} color="inherit" /> : edit ? "Ubah" : "Simpan"}
-        </Button>
-      </Grid>
-    </Grid>
+      <Grid item >
+        <Paper className={classes.paper}>
+          <Grid container direction="column" spacing={2}>
+            {otoritas === "PM" && data.every(d => d.approveUser) && !status.APPROVEBA && <Grid item container justify="flex-end" >
+              <Tooltip title="Tambah Data">
+                <IconButton onClick={add} >
+                  <AddCircleOutline />
+                </IconButton>
+              </Tooltip>
+            </Grid>}
+            <Grid item container direction="column" spacing={1}>
+              <Grid item container direction="row" spacing={2} justify="space-between">
+                <Grid item xs>
+                  <Typography align="center" variant="body2"><b>Nomor UAT</b></Typography>
+                </Grid>
+                <Grid item xs={2}>
+                  <Typography align="center" variant="body2"><b>Persetujuan QC</b></Typography>
+                </Grid>
+                <Grid item xs={2}>
+                  <Typography align="center" variant="body2"><b>Persetujuan User</b></Typography>
+                </Grid>
+                <Grid item xs={1}>
+                  <Typography align="center" variant="body2"><b>Actions</b></Typography>
+                </Grid>
+              </Grid>
+              {data && data.map((d, i) =>
+                <Grid item key={"grid-cont-" + i} container direction="row" spacing={2} justify="space-between" alignItems="center">
+                  <Grid key={"grid-nomor-" + i} item xs>
+                    <TextField key={"nomor-" + i} id={"nomor-" + i} name={"nomor-" + i}
+                      fullWidth
+                      multiline
+                      size="small"
+                      value={d.nomor}
+                      disabled
+                      className={classes.fieldDisabled}
+                    />
+                  </Grid>
+                  <Grid key={"grid-qc-" + i} item xs={2} container justify="center" >
+                    <Checkbox key={"qc-" + i} id={"qc-" + i} name={"qc-" + i}
+                      disabled
+                      checked={d.approveQA}
+                    />
+                  </Grid>
+                  <Grid key={"grid-user-" + i} item xs={2} container justify="center" >
+                    <Checkbox key={"user-" + i} id={"user-" + i} name={"user-" + i}
+                      disabled
+                      checked={d.approveUser}
+                    />
+                  </Grid>
+                  <Grid item xs={1} container justify="center">
+                    {d.approveUser || (d.approveQA && otoritas !== "BPO") || (!d.approveQA && otoritas !== "PM") ?
+                      <Tooltip title="Detail">
+                        <IconButton size="small" onClick={() => detail(d)}>
+                          <InfoOutlined />
+                        </IconButton>
+                      </Tooltip> : null}
+                    {!d.approveQA && otoritas === "PM" && <Tooltip title="Ubah Data">
+                      <IconButton size="small" onClick={() => edit(d)}>
+                        <EditOutlined />
+                      </IconButton>
+                    </Tooltip>}
+                    { // jika nanti sudah ada aplikasi qa, ini tidak dibutuhkan lagi
+                      !d.approveQA && otoritas === "PM" && <Tooltip title="Setuju QC">
+                        <IconButton size="small" onClick={() => approveQC(d)}>
+                          <AssignmentTurnedInOutlined />
+                        </IconButton>
+                      </Tooltip>}
+                    {d.approveQA && otoritas === "BPO" && !d.approveUser && <Tooltip title="Persetujuan UAT">
+                      <IconButton size="small" onClick={() => approve(d)}>
+                        <AssignmentTurnedInOutlined />
+                      </IconButton>
+                    </Tooltip>}
+                  </Grid>
+                </Grid>
+              )}
+            </Grid>
+          </Grid>
+        </Paper>
+      </Grid >
+      < Dialog open={openDialogAdd} onClose={handleCloseDialogAdd} maxWidth="lg" fullWidth >
+        <DialogTitle disableTypography >
+          <Grid container justify="flex-end">
+            <IconButton
+              size="small"
+              onClick={handleCloseDialogAdd}
+            >
+              <Close />
+            </IconButton>
+          </Grid>
+        </DialogTitle>
+        <DialogContent>
+          <UatAdd proyek={proyek} uat={({})} onClose={handleCloseDialogAdd} refresh={() => setRefreshData(true)} />
+        </DialogContent>
+      </Dialog >
+      <Dialog open={openDialogEdit} onClose={() => setOpenDialogEdit(false)} maxWidth="lg" fullWidth >
+        <DialogTitle disableTypography >
+          <Grid container justify="flex-end">
+            <IconButton
+              size="small"
+              onClick={() => setOpenDialogEdit(false)}
+            >
+              <Close />
+            </IconButton>
+          </Grid>
+        </DialogTitle>
+        <DialogContent>
+          <UatAdd proyek={proyek} uat={detailUat} onClose={() => setOpenDialogEdit(false)} />
+        </DialogContent>
+      </Dialog>
+      <Dialog open={openDialogDetail} onClose={() => setOpenDialogDetail(false)} maxWidth="lg" fullWidth >
+        <DialogTitle disableTypography >
+          <Grid container justify="flex-end">
+            <IconButton
+              size="small"
+              onClick={() => setOpenDialogDetail(false)}
+            >
+              <Close />
+            </IconButton>
+          </Grid>
+        </DialogTitle>
+        <DialogContent>
+          <UatDetail proyek={proyek} uat={detailUat} />
+        </DialogContent>
+      </Dialog>
+      <Dialog open={openDialogApproval} onClose={() => setOpenDialogApproval(false)} maxWidth="lg" fullWidth >
+        <DialogTitle disableTypography >
+          <Grid container justify="flex-end">
+            <IconButton
+              size="small"
+              onClick={() => setOpenDialogApproval(false)}
+            >
+              <Close />
+            </IconButton>
+          </Grid>
+        </DialogTitle>
+        <DialogContent>
+          <UatApproval proyek={proyek} uat={detailUat} onClose={() => setOpenDialogApproval(false)} refresh={() => setRefreshData(true)} />
+        </DialogContent>
+      </Dialog>
+    </Grid >
   );
-};
+};;

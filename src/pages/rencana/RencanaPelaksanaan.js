@@ -4,26 +4,9 @@ import AlertDialog from '../../components/AlertDialog';
 import { AddCircleOutline, RemoveCircleOutline, CheckBoxOutlineBlank, CheckBox } from '@material-ui/icons';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import { Autocomplete } from '@material-ui/lab';
-// import { getAllKaryawan, getAllKegiatan } from '../../gateways/api/CommonAPI';
 import moment from 'moment';
 import { createRencanaPelaksanaan, updateRencanaPelaksanaan } from '../../gateways/api/PlanAPI';
 import { groupBy } from '../../utils/Common';
-
-// const dummyKegiatan = [
-//   { id: 1, kegiatan: "Initiation", target: "Dokumen 1" },
-//   { id: 2, kegiatan: "Development", target: "Dokumen 2" },
-//   { id: 3, kegiatan: "Testing", target: "Dokumen 3" },
-//   { id: 4, kegiatan: "Deploy", target: "Dokumen 4" },
-// ];
-
-// const dummyKaryawan = [
-//   { nik: "160035", nama: "M. MUSTAKIM", kodeOrganisasi: "IT1300" },
-//   { nik: "160257", nama: "ANITA IKA NURCAHYANI", kodeOrganisasi: "IT1300" },
-//   { nik: "170084", nama: "AKBAR HILMAN", kodeOrganisasi: "IT1300" },
-//   { nik: "160260", nama: "ERVIN ADHI CAHYA N", kodeOrganisasi: "IT3100" },
-//   { nik: "180136", nama: "ANNISA DWIDYA R", kodeOrganisasi: "IT1100" },
-//   { nik: "900147", nama: "RINI ASTUTI", kodeOrganisasi: "IT1000" },
-// ];
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -175,7 +158,6 @@ export default function RencanaPelaksanaan(props) {
     if (data.length > 0) {
       if (validateAll()) {
         const listdetail = data.map(dt => ({
-          // idplan: dt.idplan ? dt.idplan : null,
           idkegiatan: dt.kegiatan.id,
           pelaksana: dt.pelaksana.map(pel => pel.nik),
           tglmulai: moment(dt.tanggalMulai).format("DD/MM/YYYY"),
@@ -310,39 +292,48 @@ export default function RencanaPelaksanaan(props) {
                     />
                   </Grid>
                   <Grid key={"grid-pelaksana-" + i} item xs>
-                    <Autocomplete key={"pelaksana-" + i} id={"pelaksana-" + i} name={"pelaksana-" + i}
-                      multiple
-                      disableCloseOnSelect
-                      options={listKaryawan || []}
-                      value={d.pelaksana}
-                      getOptionLabel={option => option.nik}
-                      onChange={(e, v) => handleChange(v, i, "pelaksana")}
-                      getOptionSelected={
-                        (option, value) => option.nik === value.nik
-                      }
-                      renderOption={(option, { selected }) => (
-                        <React.Fragment>
-                          <Checkbox
-                            icon={<CheckBoxOutlineBlank fontSize="small" />}
-                            checkedIcon={<CheckBox fontSize="small" />}
-                            style={{ marginRight: 6 }}
-                            checked={selected}
+                    {d.disabled ?
+                      <TextField key={"pelaksana-" + i} id={"pelaksana-" + i} name={"pelaksana-" + i}
+                        multiline
+                        fullWidth
+                        size="small"
+                        value={d.pelaksana.map(d => d.nik)}
+                        disabled
+                        className={classes.fieldTableDisabled}
+                      />
+                      : <Autocomplete key={"pelaksana-" + i} id={"pelaksana-" + i} name={"pelaksana-" + i}
+                        multiple
+                        disableCloseOnSelect
+                        options={listKaryawan || []}
+                        value={d.pelaksana}
+                        getOptionLabel={option => option.nik}
+                        onChange={(e, v) => handleChange(v, i, "pelaksana")}
+                        getOptionSelected={
+                          (option, value) => option.nik === value.nik
+                        }
+                        renderOption={(option, { selected }) => (
+                          <React.Fragment>
+                            <Checkbox
+                              icon={<CheckBoxOutlineBlank fontSize="small" />}
+                              checkedIcon={<CheckBox fontSize="small" />}
+                              style={{ marginRight: 6 }}
+                              checked={selected}
+                            />
+                            {option.nik}, {option.nama}
+                          </React.Fragment>
+                        )}
+                        renderInput={params => (
+                          <TextField
+                            {...params}
+                            fullWidth
+                            variant={d.disabled ? "standard" : "outlined"}
+                            size="small"
+                            error={error[i].pelaksana.error}
+                            helperText={error[i].pelaksana.text}
                           />
-                          {option.nik}, {option.nama}
-                        </React.Fragment>
-                      )}
-                      renderInput={params => (
-                        <TextField
-                          {...params}
-                          fullWidth
-                          variant={d.disabled ? "standard" : "outlined"}
-                          size="small"
-                          error={error[i].pelaksana.error}
-                          helperText={error[i].pelaksana.text}
-                        />
-                      )}
-                      disabled={d.disabled}
-                    />
+                        )}
+                        disabled={d.disabled}
+                      />}
                   </Grid>
                   <Grid key={"grid-mulai-" + i} item xs={2}>
                     <KeyboardDatePicker key={"mulai-" + i} id={"mulai-" + i} name={"mulai-" + i}

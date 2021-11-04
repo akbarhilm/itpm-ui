@@ -17,5 +17,9 @@ export const getAllKegiatan = async () => {
 };
 
 export const getAllKaryawan = async () => {
-  return await api.get('/profil/karyawan');
+  return await api.get('/profil/Allkaryawan');
+};
+
+export const getKaryawanIT = async () => {
+  return await api.get('/profil/karyawanIT');
 };
