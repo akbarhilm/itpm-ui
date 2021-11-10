@@ -128,7 +128,7 @@ export default function DetailProyek(props) {
     if (listLayanan.length === 0)
       getLayananUnused(proyek ? proyek.IDPROYEK : null)
         .then((response) => {
-          setListLayanan(response.data.map(d => ({
+          setListLayanan(response.data.sort((a, b) => b.IDLAYANAN - a.IDLAYANAN).map(d => ({
             idLayanan: d.IDLAYANAN,
             nomorLayanan: d.NOLAYANAN,
             nikPM: d.NIKPM,

@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState } from 'react';
-import { getAuthFromAPI, getUser } from '../gateways/api/CommonAPI';
+import { getAllKaryawan, getAllKegiatan, getAuthFromAPI, getUser } from '../gateways/api/CommonAPI';
 import { setAuthApi } from './ApiConfig';
 import Cookies from "universal-cookie";
 import { getAuth } from './Auth';
@@ -11,28 +11,38 @@ export const UserContext = createContext(null);
 
 export function useFindUser() {
   const [user, setUser] = useState(null);
+  const [karyawan, setKaryawan] = useState(null);
+  const [kegiatan, setKegiatan] = useState(null);
   const [isLoading, setLoading] = useState(true);
 
   useEffect(() => {
     const cookies = new Cookies();
     const params = new URLSearchParams(window.location.search);
 
+    async function getReference() {
+      await getAllKegiatan()
+        .then((response) => {
+          setKegiatan(response.data);
+        });
+      await getAllKaryawan()
+        .then((response) => {
+          setKaryawan(response.data);
+        });
+      setLoading(false);
+    }
+
     async function findUser() {
       let user = {};
-      // let auth = null;
       await getUser()
         .then(res => {
-          // setUser(res.data);
           user = res.data;
         });
       await getAuthFromAPI()
         .then(res => {
-          // setUser(res.data);
           user.OTORITAS = res.data.map(d => d.KODEAUTH);
         });
       if (Object.keys(user).length > 0)
         setUser(user);
-      setLoading(false);
     }
 
     async function getValidTokenFromInfo() {
@@ -48,12 +58,12 @@ export function useFindUser() {
     if (params.get("access_token")) {
       getValidTokenFromInfo()
         .then((response) => {
-          // console.log(response.data.token);
           setAuthApi("Bearer " + response.data.token);
           const dataEcnrypt = Crypto.AES.encrypt(response.data.token, "encrypt-token-for-cookie").toString();
-          // console.log("en", dataEcnrypt);
           cookies.set('auth', dataEcnrypt, { path: '/' });
-          findUser();
+          findUser()
+            .then(() => getReference())
+            .catch(() => setLoading(false));
         })
         .catch(() => {
           setLoading(false);
@@ -61,9 +71,10 @@ export function useFindUser() {
     }
     // if cookies has set for auth
     else {
-      // console.log(getAuth());
       setAuthApi(getAuth());
-      findUser().catch(() => setLoading(false));
+      findUser()
+        .then(() => getReference())
+        .catch(() => setLoading(false));
     }
   }, []);
 
@@ -71,6 +82,8 @@ export function useFindUser() {
     user,
     setUser,
     isLoading,
-    setLoading
+    setLoading,
+    karyawan,
+    kegiatan
   };
 }

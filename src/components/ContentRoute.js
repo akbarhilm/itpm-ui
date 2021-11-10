@@ -11,13 +11,15 @@ import TambahProyek from "../pages/proyek/TambahProyek";
 import PrivateRoute from "./PrivateRoute";
 // import Charter from "../pages/charter/Charter";
 import { MuiPickersUtilsProvider } from "@material-ui/pickers";
-// import ResourceRouter from "../pages/resource/ResourceRouter";
+import ResourceRouter from "../pages/resource/ResourceRouter";
 import CharterRouter from "../pages/charter/CharterRouter";
-// import RisikoRouter from "../pages/risiko/RisikoRouter";
+import RisikoRouter from "../pages/risiko/RisikoRouter";
 import UserRequirementRouter from "../pages/ureq/UserRequirementRouter";
 import RencanaPelaksanaanRouter from "../pages/rencana/RencanaPelaksanaanRouter";
-// import RealisasiRouter from "../pages/realisasi/RealisasiRouter";
-// import UatRouter from "../pages/uat/UatRouter";
+import RealisasiRouter from "../pages/realisasi/RealisasiRouter";
+import UatRouter from "../pages/uat/UatRouter";
+import BastRouter from "../pages/bast/BastRouter";
+// import UatAdd from "../pages/uat/UatAdd";
 // import { MuiPickersUtilsProvider } from "@material-ui/pickers";
 // import moment from 'moment';
 
@@ -46,11 +48,7 @@ export default function Content(props) {
 
   return (
     <MuiPickersUtilsProvider utils={MomentUtils}>
-
-      {/* // <MuiPickersUtilsProvider utils={MomentUtils}> */}
-      {/* // <MUIContainer maxWidth="lg" className={classes.container}> */}
       <div className={classes.div}>
-        {/* <Paper className={classes.paper}> */}
         <Switch>
           <Route exact path='/401' >
             <Page401 />
@@ -79,7 +77,7 @@ export default function Content(props) {
           <PrivateRoute exact path='/:namauri/rencana' >
             <RencanaPelaksanaanRouter proyek={proyek} />
           </PrivateRoute>
-          {/* <PrivateRoute exact path='/:namauri/resource' >
+          <PrivateRoute exact path='/:namauri/resource' >
             <ResourceRouter proyek={proyek} />
           </PrivateRoute>
           <PrivateRoute exact path='/:namauri/risiko' >
@@ -90,12 +88,12 @@ export default function Content(props) {
           </PrivateRoute>
           <PrivateRoute exact path='/:namauri/uat' >
             <UatRouter proyek={proyek} />
-          </PrivateRoute> */}
+          </PrivateRoute>
+          <PrivateRoute exact path='/:namauri/bast' >
+            <BastRouter proyek={proyek} />
+          </PrivateRoute>
         </Switch>
-        {/* </Paper> */}
       </div>
-      {/* // </MUIContainer> */}
-      {/* // </MuiPickersUtilsProvider> */}
     </MuiPickersUtilsProvider>
   );
 }

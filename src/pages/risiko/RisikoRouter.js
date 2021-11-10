@@ -38,11 +38,11 @@ export default function RisikoRouter(props) {
 
   if (loading)
     return <CircularProgress />;
-  else if (otoritas === "PM" && risiko && status && status.NOPLAN)
+  else if (otoritas === "PM" && risiko && status && status.NOPLAN && !status.NOBA)
     return <Risiko risiko={risiko} proyek={proyek} />;
   else if (risiko && Object.keys(risiko).length === 0)
     return <ErrorPage code="" message={otoritas === "PM" ? "Rencana Pelaksanaan belum diinput" : "Kajian Risiko belum diinput"} />;
   else
-    return <RisikoDetail risiko={risiko} proyek={proyek} />;
+    return <RisikoDetail risiko={risiko} />;
 
 };
