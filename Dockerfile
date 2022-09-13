@@ -1,4 +1,4 @@
-FROM 10.1.94.254:8082/nginx:stable-alpine
+FROM repository.indonesian-aerospace.com:8082/nginx:stable-alpine
 #COPY ./nginx.conf /etc/nginx/conf.d/default.conf
 COPY /build /usr/share/nginx/html
 EXPOSE 80
