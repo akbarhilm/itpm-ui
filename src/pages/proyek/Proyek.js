@@ -38,7 +38,7 @@ export default function Proyek(props) {
 
   const getProyek = useCallback(() => {
     setLoading(true);
-    getListProyek()
+    getListProyek('ALL')
       .then((response) => {
         setAuthPMO(response.data.otoritas.PMO);
         setListProyek(response.data.list);

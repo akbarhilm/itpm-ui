@@ -19,6 +19,7 @@ import RencanaPelaksanaanRouter from "../pages/rencana/RencanaPelaksanaanRouter"
 import RealisasiRouter from "../pages/realisasi/RealisasiRouter";
 import UatRouter from "../pages/uat/UatRouter";
 import BastRouter from "../pages/bast/BastRouter";
+import Dashboard from '../pages/dashboard/Dashboard';
 // import UatAdd from "../pages/uat/UatAdd";
 // import { MuiPickersUtilsProvider } from "@material-ui/pickers";
 // import moment from 'moment';
@@ -55,6 +56,9 @@ export default function Content(props) {
           </Route>
           <PrivateRoute exact path='/' >
             <Proyek setProyek={setProyek} setMenuSideBar={setMenuSideBar} />
+          </PrivateRoute>
+          <PrivateRoute exact path='/dashboard' >
+            <Dashboard />
           </PrivateRoute>
           <PrivateRoute exact path='/proyek' >
             <Proyek setProyek={setProyek} setMenuSideBar={setMenuSideBar} />

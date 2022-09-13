@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Grid, Stepper, Step, StepLabel, makeStyles, Paper, Typography, TextField } from '@material-ui/core';
 import { getProyekById, getStepperProyekById } from '../../gateways/api/ProyekAPI';
-import { jenisLayanan, jenisAplikasi } from '../../utils/DataEnum';
+import { jenisLayanan, jenisAplikasi, labelStepper } from '../../utils/DataEnum';
 import AlertDialog from '../../components/AlertDialog';
 
 const useStyles = makeStyles((theme) => ({
@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const labelStepper = ["Charter", "User Requirement", "Rencana Pelaksanaan", "Kebutuhan Resource", "Kajian Risiko", "Realisasi", "UAT", "BAST"];
+// const labelStepper = ["Charter", "User Requirement", "Rencana Pelaksanaan", "Kebutuhan Resource", "Kajian Risiko", "Realisasi", "UAT", "BAST"];
 
 const defaultAlert = { openAlertDialog: false, messageAlertDialog: "", severity: "info" };
 

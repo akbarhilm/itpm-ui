@@ -65,3 +65,5 @@ export const dampak = [
     value: "6"
   },
 ];
+
+export const labelStepper = ["Charter", "User Requirement", "Rencana Pelaksanaan", "Kebutuhan Resource", "Kajian Risiko", "Realisasi", "UAT", "BAST"];
