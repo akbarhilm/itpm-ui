@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Grid, Typography, Divider, CircularProgress, TextField, InputAdornment, Card, CardActionArea, CardContent, Accordion, AccordionSummary, AccordionDetails, Stepper, Step, StepLabel } from "@material-ui/core";
+import { Grid, Typography, Divider, CircularProgress, TextField, InputAdornment, Card, CardActionArea, CardContent, Accordion, AccordionSummary, AccordionDetails, Stepper, Step, StepLabel, Chip } from "@material-ui/core";
 import { ExpandMore, Search } from '@material-ui/icons';
 import Pagination from "@material-ui/lab/Pagination";
 import { getListProyek, getSummaryProyek } from '../../gateways/api/ProyekAPI';
@@ -249,7 +249,7 @@ export default function Dashboard(props) {
       });
       return newArray;
     };
-    console.log(kegiatan);
+    // console.log(kegiatan);
     setLoading(true);
     getListProyek(stat, true)
       .then((response) => {
@@ -372,9 +372,12 @@ export default function Dashboard(props) {
                       id={"panel" + i + "-header"}
                     >
                       {/* <Avatar key={"avatar-" + i} alt={d.NAMAPROYEK ? d.NAMAPROYEK.toUpperCase() : "N"} src="#" /> */}
-                      <Typography key={"no-layanan-" + i}>
-                        {d.NOLAYANAN + " | " + d.NAMAPROYEK}
-                      </Typography>
+                      <Grid container alignItems="center" justify="space-between" >
+                        <Typography key={"no-layanan-" + i}>
+                          {d.NOLAYANAN + " | " + d.NAMAPROYEK}
+                        </Typography>
+                        <Chip label={d.STATUSPROYEK} />
+                      </Grid>
                     </AccordionSummary>
                     <AccordionDetails key={"accord-dtl-" + i}>
                       <Grid container direction="column" spacing={2}>

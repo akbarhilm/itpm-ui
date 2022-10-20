@@ -23,3 +23,7 @@ export const updateProyek = async (data) => {
 export const getStepperProyekById = async (id) => {
   return await api.get('/proyek/stepper/' + id);
 };
+
+export const ubahStatusProyek = async (data) => {
+  return await api.put('/proyek/ubahstatus', data);
+};
