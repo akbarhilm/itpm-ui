@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Grid, Typography, Divider, CircularProgress, TextField, InputAdornment, Card, CardActionArea, CardContent, Accordion, AccordionSummary, AccordionDetails, Stepper, Step, StepLabel, Chip } from "@material-ui/core";
+import { Grid, Typography, Divider, CircularProgress, TextField, InputAdornment, Card, CardActionArea, CardContent, Accordion, AccordionSummary, AccordionDetails, Stepper, Step, StepLabel, Chip, MenuItem } from "@material-ui/core";
 import { ExpandMore, Search } from '@material-ui/icons';
 import Pagination from "@material-ui/lab/Pagination";
 import { getListProyek, getSummaryProyek } from '../../gateways/api/ProyekAPI';
@@ -11,6 +11,7 @@ import { Chart as ChartJS, CategoryScale, TimeScale, LinearScale, BarElement, Ti
 import 'chartjs-adapter-date-fns';
 import { Bar } from 'react-chartjs-2';
 import { groupBy } from "../../utils/Common";
+import { Autocomplete, createFilterOptions } from "@material-ui/lab";
 // import moment from "moment";
 
 ChartJS.register(
@@ -39,10 +40,6 @@ const options = {
     legend: {
       position: 'right',
     },
-    // title: {
-    //   display: true,
-    //   text: 'Pelaksanaan',
-    // },
     tooltips: {
       callbacks: {
         afterBody: (context, data) => {
@@ -56,33 +53,13 @@ const options = {
     x: {
       type: 'time',
       time: {
-        // tooltipFormat: 'MM/DD/YYYY',
         unit: 'day',
-        // tooltipFormat: ['dd MMM yyyy', 'dd MMM yyyy'],
-        // tooltipFormat: 'dd MMM yyyy',
         displayFormats: {
           day: 'dd MMM yyyy',
         },
-        // parser: 'yyyy-MM-ddhh:mm:ss',
       },
       min: '2022-07-31T00:00:00',
     },
-    // y: {
-    //   ticks: {
-    //     stepSize: 0,
-    //     // fontSize: 14,
-    //     // fontStyle: "normal",
-    //     // backdropPadding: 100,
-    //     // padding: 50,
-    //     // display: false,
-    //   },
-    //   // afterFit: function (scale) {
-    //   //   scale.width = 200;  //<-- set value as you wish 
-    //   // }
-    //   // grid: {
-    //   //   tickWidth: ,
-    //   // },
-    // },
   },
 };
 
@@ -92,11 +69,6 @@ const datax = [
   { x: [new Date('2022-08-05T00:00:00'), new Date('2022-08-07T00:00:00')], y: 'kegiatan 3' },
   { x: [new Date('2022-08-06T00:00:00'), new Date('2022-08-10T00:00:00')], y: 'kegiatan 4' },
   { x: [new Date('2022-08-05T00:00:00'), new Date('2022-08-15T00:00:00')], y: 'kegiatan 5' },
-  // { x: [new Date('2022-08-05T00:00:00'), new Date('2022-08-15T00:00:00')], y: 'kegiatan 6' },
-  // { x: [new Date('2022-08-05T00:00:00'), new Date('2022-08-15T00:00:00')], y: 'kegiatan 7' },
-  // { x: [new Date('2022-08-05T00:00:00'), new Date('2022-08-15T00:00:00')], y: 'kegiatan 8' },
-  // { x: [new Date('2022-08-05T00:00:00'), new Date('2022-08-15T00:00:00')], y: 'kegiatan 9' },
-  // { x: [new Date('2022-08-05T00:00:00'), new Date('2022-08-15T00:00:00')], y: 'kegiatan 10' },
 ];
 
 const dataxx = [
@@ -158,11 +130,26 @@ const dataTotal = [
   { label: "PENDING", value: 0, status: 'PENDING' },
   { label: "BARU", value: 0, status: 'BARU' },
 ];
-// console.log(moment('2022-08-01', 'YYYYMMDD').day());
+
+const listKategori = [
+  {
+    label: "Cari",
+    value: "default"
+  },
+  {
+    label: "Cari Berdasarkan NIK",
+    value: "nik"
+  },
+];
 
 const itemsPerPage = 10;
 
 const defaultAlert = { openAlertDialog: false, messageAlertDialog: "", severity: "info" };
+
+const filterOptions = createFilterOptions({
+  matchFrom: 'any',
+  stringify: (option) => option.nik + " - " + option.nama
+});
 
 export default function Dashboard(props) {
   // const { setProyek, setMenuSideBar } = props;
@@ -181,6 +168,28 @@ export default function Dashboard(props) {
   const [alertDialog, setAlertDialog] = useState(defaultAlert);
   const [expanded, setExpanded] = useState(false);
   const [summary, setSummary] = useState(dataTotal);
+  const [kategori, setKategori] = useState("default");
+  const [nik, setNik] = useState(null);
+
+  const setStatusColor = (status, plan) => {
+    // console.log(plan.map(p => new Date(p.tanggalSelesai)));
+    // console.log(new Date(Math.max(...plan.map(p => new Date(p.tanggalSelesai)))));
+    // return 'lightGreen';
+    if (status === "BERJALAN" && plan.length > 0) {
+      const today = new Date();
+      const maxDate = new Date(Math.max(...plan.map(p => new Date(p.tanggalSelesai))));
+      const fiveDayBeforeMaxDate = new Date(maxDate.getTime() - (5 * 24 * 60 * 60 * 1000));
+      // const fiveDayBeforeMaxDate = maxDate.getDate();
+      if (today < fiveDayBeforeMaxDate) return '#009944';
+      else if (today < maxDate) return '#f0541e';
+      else return '#cf000f';
+      // console.log(today);
+      // console.log(maxDate);
+      // console.log(fiveDayBeforeMaxDate);
+    }
+
+    return null;
+  };
 
   const handleCloseAlertDialog = () => {
     setAlertDialog({ ...alertDialog, openAlertDialog: false });
@@ -212,7 +221,7 @@ export default function Dashboard(props) {
     );
   }, [listProyekAfterSearch]);
 
-  const getProyek = useCallback((stat) => {
+  const getProyek = useCallback((stat, nik) => {
     const formatNewData = (listdetail) => {
       const grouped = groupBy(listdetail, x => x.IDKEGIATAN);
       const newData = [];
@@ -251,7 +260,7 @@ export default function Dashboard(props) {
     };
     // console.log(kegiatan);
     setLoading(true);
-    getListProyek(stat, true)
+    getListProyek(stat, true, nik)
       .then((response) => {
         setListProyek(formatListProyek(response.data.list));
         setListProyekAfterSearch(formatListProyek(response.data.list));
@@ -268,15 +277,27 @@ export default function Dashboard(props) {
   }, [karyawan, kegiatan]);
 
   useEffect(() => {
-    getProyek(status);
-  }, [getProyek, status]);
+    getProyek(status, nik);
+  }, [getProyek, status, nik]);
 
   const handleChangePage = (event, value) => {
     setPage(value);
   };
 
+  const handleChangeNik = (value) => {
+    setNik(value ? value.nik : null);
+    // setListProyekAfterSearch(listProyek);
+    setStatus('ALL');
+  };
+
+  const handleChangeKategori = (event) => {
+    setKategori(event.target.value);
+    // setListProyekAfterSearch(listProyek);
+    setStatus('ALL');
+    setNik(null);
+  };
+
   const handleChangeStatus = (status) => () => {
-    // console.log(status);
     setStatus(status);
   };
 
@@ -305,8 +326,7 @@ export default function Dashboard(props) {
 
   return (
     <Grid container direction="column" spacing={3}>
-      <AlertDialog
-        open={alertDialog.openAlertDialog}
+      <AlertDialog open={alertDialog.openAlertDialog}
         id="alert-dialog"
         onClose={handleCloseAlertDialog}
         message={alertDialog.messageAlertDialog}
@@ -324,12 +344,24 @@ export default function Dashboard(props) {
           </Card>
         ))}
       </Grid>
-      {/* <Grid item xs container direction="row" justify="space-between" >
-        <Typography variant="h5" >List Proyek</Typography>
-      </Grid> */}
       <Grid item xs container direction="column" >
-        <Grid item xs container direction="row" justify="space-between" alignItems="center">
+        <Grid item xs container direction="row" alignItems="center">
           <TextField
+            variant="outlined"
+            select
+            size="small"
+            margin="dense"
+            value={kategori}
+            onChange={handleChangeKategori}
+            style={{ backgroundColor: 'lightblue' }}
+          >
+            {listKategori.map((d) => (
+              <MenuItem key={"menu-likely-faktor-" + d.value} value={d.value}>
+                {d.label}
+              </MenuItem>
+            ))}
+          </TextField>
+          {kategori === "default" && <TextField
             type="search"
             variant="outlined"
             margin="dense"
@@ -343,25 +375,33 @@ export default function Dashboard(props) {
                 </InputAdornment>
               )
             }}
-          />
+          />}
+          {kategori === "nik" && <Autocomplete
+            options={karyawan.filter(d => d.organisasi.search("IT") !== -1) || []}
+            getOptionLabel={option => option.nik + " - " + option.nama}
+            onChange={(e, v) => handleChangeNik(v)}
+            getOptionSelected={
+              (option, value) => option.nik === value.nik
+            }
+            style={{ width: '30%' }}
+            renderOption={(option) => (
+              option.nik + " - " + option.nama
+            )}
+            filterOptions={filterOptions}
+            renderInput={params => (
+              <TextField
+                {...params}
+                variant="outlined"
+                size="small"
+                margin="dense"
+                placeholder="Nik/Nama Karyawan"
+              />
+            )}
+          />}
         </Grid>
         <Grid item xs>
           {loading ? <Grid container justify="center"><CircularProgress /></Grid>
             : listProyek.length > 0 ?
-              // <List>
-              //   {(dataSearch ? listProyek.filter(d => d.NAMAPROYEK.toLowerCase().search(dataSearch) !== -1) : listProyek)
-              //     .slice((page - 1) * itemsPerPage, page * itemsPerPage)
-              //     .map((d, i) => (
-              //       <ListItem button key={"list-item-" + i} divider onClick={() => handleDetail(d)}>
-              //         <ListItemAvatar key={"list-item-avatar-" + i}>
-              //           <Avatar key={"avatar-" + i} alt={d.NAMAPROYEK ? d.NAMAPROYEK.toUpperCase() : "N"} src="#" />
-              //         </ListItemAvatar>
-              //         <ListItemText key={"list-item-text-" + i} primary={d.NAMAPROYEK} secondary={d.KETPROYEK} />
-              //       </ListItem>
-              //     ))
-              //   }
-              // </List>
-              // (dataSearch ? listProyek.filter(d => d.NAMAPROYEK.toLowerCase().search(dataSearch) !== -1) : listProyek)
               listProyekAfterSearch.slice((page - 1) * itemsPerPage, page * itemsPerPage)
                 .map((d, i) => (
                   <Accordion expanded={expanded === d.IDPROYEK} onChange={handleChangeExpand(d.IDPROYEK)} key={"accord-" + i}>
@@ -376,7 +416,7 @@ export default function Dashboard(props) {
                         <Typography key={"no-layanan-" + i}>
                           {d.NOLAYANAN + " | " + d.NAMAPROYEK}
                         </Typography>
-                        <Chip label={d.STATUSPROYEK} />
+                        <Chip label={d.STATUSPROYEK} style={{ backgroundColor: setStatusColor(d.STATUSPROYEK, d.plan) }} />
                       </Grid>
                     </AccordionSummary>
                     <AccordionDetails key={"accord-dtl-" + i}>

@@ -1,7 +1,7 @@
 import api from '../../utils/ApiConfig';
 
-export const getListProyek = async (status, dashboard) => {
-  return await api.get('/profil/pengguna/proyek/nik', { params: { status: status, d: dashboard || null } });
+export const getListProyek = async (status, dashboard, nik) => {
+  return await api.get('/profil/pengguna/proyek/nik', { params: { status: status, d: dashboard || null, nik: nik || null } });
 };
 
 export const getSummaryProyek = async () => {
