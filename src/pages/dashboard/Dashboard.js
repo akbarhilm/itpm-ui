@@ -245,13 +245,19 @@ export default function Dashboard(props) {
       list.forEach(d => {
         const plan = formatNewData(d.plan);
         const real = formatNewData(d.real);
-        // const dataOption = options;
         const dataOption = { ...options, scales: { ...options.scales, x: { ...options.scales.x, min: d.charter.length > 0 ? d.charter[0].TGLMULAI.split("/").reverse().join("-").concat("T00:00:00") : null } } };
-        // const dataGrafik = data;
         const dataGrafik = {
           datasets: [
-            { ...data.datasets[0], data: real.map(p => ({ x: [new Date(p.tanggalMulai), new Date(p.tanggalSelesai)], y: p.kegiatan })) },
-            { ...data.datasets[1], data: plan.map(r => ({ x: [new Date(r.tanggalMulai), new Date(r.tanggalSelesai)], y: r.kegiatan })) },
+            {
+              ...data.datasets[0],
+              data: plan.map(r => ({
+                x: real.find(d => d.kegiatan === r.kegiatan)
+                  ? [new Date(real.find(d => d.kegiatan === r.kegiatan).tanggalMulai), new Date(real.find(d => d.kegiatan === r.kegiatan).tanggalSelesai)]
+                  : null,
+                y: r.kegiatan
+              }))
+            },
+            { ...data.datasets[1], data: plan.map(p => ({ x: [new Date(p.tanggalMulai), new Date(p.tanggalSelesai)], y: p.kegiatan })) },
           ]
         };
         newArray.push({ ...d, plan: plan, real: real, opt: dataOption, dataGrafik: dataGrafik });
@@ -416,7 +422,7 @@ export default function Dashboard(props) {
                         <Typography key={"no-layanan-" + i}>
                           {d.NOLAYANAN + " | " + d.NAMAPROYEK}
                         </Typography>
-                        <Chip label={d.STATUSPROYEK} style={{ backgroundColor: setStatusColor(d.STATUSPROYEK, d.plan) }} />
+                        <Chip label={d.STATUSPROYEK} style={{ backgroundColor: setStatusColor(d.STATUSPROYEK, d.plan), color: d.STATUSPROYEK === 'BERJALAN' ? 'white' : null }} />
                       </Grid>
                     </AccordionSummary>
                     <AccordionDetails key={"accord-dtl-" + i}>
