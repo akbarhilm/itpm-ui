@@ -51,8 +51,8 @@ export default function Resource(props) {
   const [loadingButton, setLoadingButton] = useState(false);
   const [edit, setEdit] = useState(false);
   const [nomor, setNomor] = useState("");
-  const [data, setData] = useState();
-  const [error, setError] = useState();
+  const [data, setData] = useState([]);
+  const [error, setError] = useState([]);
   const [alertDialog, setAlertDialog] = useState(defaultAlert);
 
   const [dataTambahan, setDataTambahan] = useState(defaultDataTambahan);
@@ -67,8 +67,11 @@ export default function Resource(props) {
     };
     const index = dataTambahan.findIndex(d => d.code === code);
     datas[index] = newData;
-    if (validateLength100(value))
+    if ((code === 'USER' && !isNaN(value) && validateLength100(value)) || (code !== 'USER' && validateLength100(value)))
       setDataTambahan(datas);
+    // else 
+    // if (validateLength100(value))
+    //   setDataTambahan(datas);
   };
 
   const handleCloseAlertDialog = () => {
@@ -293,6 +296,7 @@ export default function Resource(props) {
                   value={dataTambahan.find(d => d.code === 'USER').deskripsi}
                   onChange={(e) => handleChangeDataTambahan(e.target.value, 'USER')}
                   style={{ marginLeft: '10px' }}
+                // inputProps={{ style: { textAlign: 'right' } }}
                 />
               </Grid>
               <Grid item container direction='row' alignItems='center'>
