@@ -84,7 +84,7 @@ const dataxx = [
   { x: [new Date('2022-08-05T00:00:00'), new Date('2022-08-15T00:00:00')], y: 'kegiatan 10' },
 ];
 
-export const data = {
+const data = {
   datasets: [
     {
       label: 'Realisasi',
@@ -422,7 +422,7 @@ export default function Dashboard(props) {
                         <Typography key={"no-layanan-" + i}>
                           {d.NOLAYANAN + " | " + d.NAMAPROYEK}
                         </Typography>
-                        <Chip label={d.STATUSPROYEK} style={{ backgroundColor: setStatusColor(d.STATUSPROYEK, d.plan), color: d.STATUSPROYEK === 'BERJALAN' ? 'white' : null }} />
+                        <Chip label={d.STATUSPROYEK} style={{ backgroundColor: setStatusColor(d.STATUSPROYEK, d.plan), color: d.STATUSPROYEK === 'BERJALAN' && d.plan.length > 0 ? 'white' : null }} />
                       </Grid>
                     </AccordionSummary>
                     <AccordionDetails key={"accord-dtl-" + i}>
