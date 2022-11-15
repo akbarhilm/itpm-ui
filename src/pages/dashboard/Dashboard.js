@@ -153,14 +153,16 @@ const filterOptions = createFilterOptions({
 
 export default function Dashboard(props) {
   // const { setProyek, setMenuSideBar } = props;
-  const { kegiatan, karyawan } = useContext(UserContext);
+  const { user, kegiatan, karyawan } = useContext(UserContext);
+  const isPermitted = ["BOD", "PMO", "QA"].some(x => user.OTORITAS.includes(x));
+  // console.log(isPermitted);
 
   // const [refresh, setRefresh] = useState(Boolean(user));
 
   const [status, setStatus] = useState('ALL');
   const [totalPages, setTotalPages] = useState(0);
   const [page, setPage] = useState(1);
-  // const [dataSearch, setDataSearch] = useState();
+  const [textSearch, setTextSearch] = useState("");
   const [listProyek, setListProyek] = useState([]);
   const [listProyekAfterSearch, setListProyekAfterSearch] = useState([]);
   // const [authPMO, setAuthPMO] = useState(false);
@@ -196,6 +198,7 @@ export default function Dashboard(props) {
   };
 
   useEffect(() => {
+    // console.log(user);
     getSummaryProyek()
       .then((response) => {
         const result = response.data[0];
@@ -303,11 +306,13 @@ export default function Dashboard(props) {
     setNik(null);
   };
 
-  const handleChangeStatus = (status) => () => {
-    setStatus(status);
+  const handleChangeStatus = (stat) => () => {
+    setStatus(stat);
+    if (status !== stat) setTextSearch("");
   };
 
   const handleChangeSearch = (event) => {
+    setTextSearch(event.target.value);
     setPage(1);
     // setDataSearch(event.target.value);
     setListProyekAfterSearch(listProyek.filter(d => d.NAMAPROYEK.toLowerCase().search(event.target.value.toLowerCase()) !== -1
@@ -352,7 +357,7 @@ export default function Dashboard(props) {
       </Grid>
       <Grid item xs container direction="column" >
         <Grid item xs container direction="row" alignItems="center">
-          <TextField
+          {isPermitted && <TextField
             variant="outlined"
             select
             size="small"
@@ -366,13 +371,14 @@ export default function Dashboard(props) {
                 {d.label}
               </MenuItem>
             ))}
-          </TextField>
+          </TextField>}
           {kategori === "default" && <TextField
             type="search"
             variant="outlined"
             margin="dense"
             size="small"
             placeholder="Cari"
+            value={textSearch ?? ""}
             onChange={handleChangeSearch}
             InputProps={{
               startAdornment: (
