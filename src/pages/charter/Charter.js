@@ -66,9 +66,9 @@ const useStyles = makeStyles((theme) => ({
 
 const err = { error: true, text: "Tidak boleh kosong." };
 const noErr = { error: false, text: "" };
-const defaultError = { tanggalMulai: noErr, tanggalSelesai: noErr, tujuan: noErr, scope: noErr, target: noErr };
+const defaultError = { tanggalMulai: noErr, tanggalSelesai: noErr, benefitFinansial: noErr, benefitNonFinansial: noErr, tujuan: noErr, scope: noErr, target: noErr };
 
-const defaultData = { nomor: "", tanggalMulai: null, tanggalSelesai: null, tujuan: [""], scope: [""], target: [""] };
+const defaultData = { nomor: "", tanggalMulai: null, tanggalSelesai: null, benefitFinansial: "", benefitNonFinansial: "", tujuan: [""], scope: [""], target: [""] };
 
 const defaultAlert = { openAlertDialog: false, messageAlertDialog: "", severity: "info" };
 
@@ -95,6 +95,8 @@ export default function Charter(props) {
       nomor: data.NOCHARTER,
       tanggalMulai: moment(data.TGLMULAI, "DD/MM/YYYY"),
       tanggalSelesai: moment(data.TGLSELESAI, "DD/MM/YYYY"),
+      benefitFinansial: data.BENEFITFINANSIAL ?? "",
+      benefitNonFinansial: data.BENEFITNONFINANSIAL ?? "",
       tujuan: data.TUJUAN,
       scope: data.SCOPE,
       target: data.TARGET
@@ -114,6 +116,7 @@ export default function Charter(props) {
     } else { // jika belum ada charter
       setData(defaultData);
     }
+    console.log(charter);
   }, [charter, formatDataCharter]);
 
   const handleChangeDate = (value, jenis) => {
@@ -122,6 +125,16 @@ export default function Charter(props) {
       setData(prev => ({ ...prev, [jenis]: value, tanggalSelesai: value < prev.tanggalSelesai ? prev.tanggalSelesai : null }));
     else
       setData(prev => ({ ...prev, [jenis]: value }));
+  };
+
+  const handleChangeText = (value, key) => {
+    if (validateLength500(value)) {
+      setData(prev => ({ ...prev, [key]: value }));
+      if (key === "benefitFinansial")
+        setError(prev => ({ ...prev, [key]: noErr }));
+      else
+        setError(prev => ({ ...prev, [key]: value ? noErr : err }));
+    } else setError(prev => ({ ...prev, [key]: { error: true, text: "Tidak boleh lebih dari 500 karakter." } }));
   };
 
   const validateLength500 = (value) => {
@@ -202,12 +215,14 @@ export default function Charter(props) {
     setError({
       tanggalMulai: data.tanggalMulai ? noErr : err,
       tanggalSelesai: data.tanggalSelesai ? noErr : err,
+      benefitNonFinansial: data.benefitNonFinansial ? noErr : err,
+      benefitFinansial: noErr,
       tujuan: tujuan.some(tu => tu) ? noErr : err,
       scope: scope.some(sc => sc) ? noErr : err,
       target: target.some(ta => ta) ? noErr : err
     });
 
-    if (data.tanggalMulai && data.tanggalSelesai && tujuan.some(tu => tu) && scope.some(sc => sc) && target.some(ta => ta))
+    if (data.tanggalMulai && data.tanggalSelesai && data.benefitNonFinansial && tujuan.some(tu => tu) && scope.some(sc => sc) && target.some(ta => ta))
       return true;
     else
       return false;
@@ -225,8 +240,14 @@ export default function Charter(props) {
         idproj: proyek.IDPROYEK,
         tglmulai: moment(data.tanggalMulai).format("DD/MM/YYYY"),
         tglselesai: moment(data.tanggalSelesai).format("DD/MM/YYYY"),
+        benffin: data.benefitFinansial,
+        benfnonfin: data.benefitNonFinansial,
         listdetail: listdetail
       };
+      // console.log(formatData);
+      // setTimeout(() => {
+      //   setLoadingButton(false);
+      // }, 500);
       if (edit) {
         // console.log("update", formatData);
         updateCharter(formatData)
@@ -360,6 +381,31 @@ export default function Charter(props) {
               className={classes.textField}
               views={['year', 'month', 'date']}
               disabled={!(data && data.tanggalMulai)}
+            />
+          </Grid>
+        </Grid>
+        <Grid item xs container direction="row" spacing={2} justify="space-between" >
+          <Grid item xs>
+            <TextField id="non-financial" label="Benefit (Non-Financial)" fullWidth
+              // value={proyek ? proyek.NIKREQ : ""}
+              value={data?.benefitNonFinansial ?? ""}
+              onChange={e => handleChangeText(e.target.value, "benefitNonFinansial")}
+              variant="outlined"
+              required
+              className={classes.textField}
+              error={error.benefitNonFinansial.error}
+              helperText={error.benefitNonFinansial.text}
+            />
+          </Grid>
+          <Grid item xs >
+            <TextField id="financial" label="Benefit (Financial)" fullWidth
+              // value={proyek ? proyek.NIKREQ : ""}
+              value={data?.benefitFinansial ?? ""}
+              onChange={e => handleChangeText(e.target.value, "benefitFinansial")}
+              variant="outlined"
+              className={classes.textField}
+              error={error.benefitFinansial.error}
+              helperText={error.benefitFinansial.text}
             />
           </Grid>
         </Grid>

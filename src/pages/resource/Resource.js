@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Grid, Typography, Button, TextField, IconButton, Paper, makeStyles, CircularProgress, Divider } from '@material-ui/core';
+import { Grid, Typography, Button, TextField, IconButton, Paper, makeStyles, CircularProgress, Divider, InputLabel, MenuItem, RadioGroup, FormControlLabel, Radio } from '@material-ui/core';
 import { RemoveCircleOutline, AddCircleOutline } from '@material-ui/icons';
 import AlertDialog from '../../components/AlertDialog';
 import { updateResource, createResource } from '../../gateways/api/ResourceAPI';
@@ -22,6 +22,23 @@ const useStyles = makeStyles((theme) => ({
 const defaultAlert = { openAlertDialog: false, messageAlertDialog: "", severity: "info" };
 
 const defaultData = { deskripsi: "", satuan: "", jumlah: "" };
+const defaultDataTambahan = [
+  { code: "STORAGE", deskripsi: "", satuan: "GB", jumlah: "0" },
+  { code: "USER", deskripsi: "", satuan: "usr", jumlah: "0" },
+  { code: "SERVER", deskripsi: "", satuan: "buah", jumlah: "0" },
+  { code: "NETWORK", deskripsi: "", satuan: "-", jumlah: "0" },
+  { code: "BACKUP", deskripsi: "", satuan: "-", jumlah: "0" },
+];
+
+// const defaultErrorDataTambahan = [
+//   { code: "STORAGE", error: false, text: "" },
+//   { code: "USER", error: false, text: "" },
+//   { code: "SERVER", error: false, text: "" },
+//   { code: "NETWORK", error: false, text: "" },
+//   { code: "BACKUP", error: false, text: "" },
+// ];
+
+const pilihServer = ["server yang sudah ada", "server dengan kebutuhan khusus"];
 
 const err = { error: true, text: "Tidak boleh kosong." };
 const noErr = { error: false, text: "" };
@@ -34,9 +51,28 @@ export default function Resource(props) {
   const [loadingButton, setLoadingButton] = useState(false);
   const [edit, setEdit] = useState(false);
   const [nomor, setNomor] = useState("");
-  const [data, setData] = useState();
-  const [error, setError] = useState();
+  const [data, setData] = useState([]);
+  const [error, setError] = useState([]);
   const [alertDialog, setAlertDialog] = useState(defaultAlert);
+
+  const [dataTambahan, setDataTambahan] = useState(defaultDataTambahan);
+  // const [errorDataTambahan, setErrorDataTambahan] = useState(defaultErrorDataTambahan);
+
+  const handleChangeDataTambahan = (value, code) => {
+    const datas = [...dataTambahan];
+    const findData = dataTambahan.find(d => d.code === code);
+    const newData = {
+      ...findData,
+      deskripsi: value ? value : "",
+    };
+    const index = dataTambahan.findIndex(d => d.code === code);
+    datas[index] = newData;
+    if ((code === 'USER' && !isNaN(value) && validateLength100(value)) || (code !== 'USER' && validateLength100(value)))
+      setDataTambahan(datas);
+    // else 
+    // if (validateLength100(value))
+    //   setDataTambahan(datas);
+  };
 
   const handleCloseAlertDialog = () => {
     setAlertDialog({ ...alertDialog, openAlertDialog: false });
@@ -46,6 +82,7 @@ export default function Resource(props) {
     const newData = [];
     listdetail.forEach(data => {
       newData.push({
+        // code: data.CODE || "",
         deskripsi: data.NAMARESOURCE,
         satuan: data.KODEUOM,
         jumlah: data.QUANTITY
@@ -59,17 +96,25 @@ export default function Resource(props) {
       setEdit(true);
       setNomor(resource.NORES);
       if (resource.LISTDETAIL.length > 0) {
-        const newData = formatNewData(resource.LISTDETAIL);
+        const newData = formatNewData(resource.LISTDETAIL.filter(d => !d.KODE));
         setData(newData);
         setError(newData.map(d => defaultError));
-      } else {
-        setData([defaultData]);
-        setError([defaultError]);
+        const newDataTambahan = defaultDataTambahan.map(dt => {
+          const dataFilter = resource.LISTDETAIL.filter(d => d.KODE === dt.code);
+          if (dataFilter.length > 0) return { code: dt.code, deskripsi: dataFilter[0].NAMARESOURCE, satuan: dt.satuan, jumlah: dt.jumlah };
+          return dt;
+        });
+        setDataTambahan(newDataTambahan);
       }
-    } else {
-      setData([defaultData]);
-      setError([defaultError]);
+      // else {
+      //   setData([defaultData]);
+      //   setError([defaultError]);
+      // }
     }
+    // else {
+    //   setData([defaultData]);
+    //   setError([defaultError]);
+    // }
   }, [resource, formatNewData]);
 
   const validateLength10 = (value) => {
@@ -128,66 +173,74 @@ export default function Resource(props) {
         return newObj;
       })
     );
-    if (data.every(dt => dt.deskripsi && dt.satuan && dt.jumlah)) return true;
+    if ((data.length > 0 && data.every(dt => dt.deskripsi && dt.satuan && dt.jumlah)) || dataTambahan.some(dt => dt.deskripsi && dt.satuan && dt.jumlah)) return true;
     else return false;
   };
 
   const simpan = () => {
     setLoadingButton(true);
-    if (data.length > 0) {
-      if (validateAll()) {
-        const listdetail = data.map(dt => ({
-          namaresource: dt.deskripsi,
-          kodeuom: dt.satuan,
-          quantity: dt.jumlah,
-        }));
-        const formatData = {
-          idproj: proyek.IDPROYEK,
-          listdetail: listdetail
-        };
-        if (edit) {
-          updateResource(formatData)
-            .then((response) => {
-              setData(formatNewData(response.data.LISTDETAIL));
-              setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil ubah", severity: "success" });
-              setLoadingButton(false);
-            })
-            .catch((error) => {
-              setLoadingButton(false);
-              if (error.response)
-                setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data.message, severity: "error" });
-              else
-                setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
-            });
-        } else {
-          createResource(formatData)
-            .then((response) => {
-              setData(formatNewData(response.data.LISTDETAIL));
-              setEdit(true);
-              setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil simpan", severity: "success" });
-              setLoadingButton(false);
-            })
-            .catch((error) => {
-              setLoadingButton(false);
-              if (error.response)
-                setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data.message, severity: "error" });
-              else
-                setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
-            });
-        }
-        // setTimeout(() => {
-        //   console.log("simpan");
-        //   console.log("format data", formatData);
-        //   setLoadingButton(false);
-        // }, 2000);
+    // if (data.length > 0) {
+    if (validateAll()) {
+      const listData = data.map(dt => ({
+        kode: "",
+        namaresource: dt.deskripsi,
+        kodeuom: dt.satuan,
+        quantity: dt.jumlah,
+      }));
+      const listDataTambahan = dataTambahan.filter(d => d.deskripsi).map(dt => ({
+        kode: dt.code,
+        namaresource: dt.deskripsi,
+        kodeuom: dt.satuan,
+        quantity: dt.jumlah,
+      }));
+      const formatData = {
+        idproj: proyek.IDPROYEK,
+        listdetail: listDataTambahan.concat(listData)
+      };
+      // console.log(formatData);
+      if (edit) {
+        updateResource(formatData)
+          .then((response) => {
+            setData(formatNewData(response.data.LISTDETAIL.filter(d => !d.KODE)));
+            setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil ubah", severity: "success" });
+            setLoadingButton(false);
+          })
+          .catch((error) => {
+            setLoadingButton(false);
+            if (error.response)
+              setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data.message, severity: "error" });
+            else
+              setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
+          });
       } else {
-        setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Silahkan periksa data yang anda masukkan.", severity: "warning" });
-        setLoadingButton(false);
+        createResource(formatData)
+          .then((response) => {
+            setData(formatNewData(response.data.LISTDETAIL.filter(d => !d.KODE)));
+            setEdit(true);
+            setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil simpan", severity: "success" });
+            setLoadingButton(false);
+          })
+          .catch((error) => {
+            setLoadingButton(false);
+            if (error.response)
+              setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data.message, severity: "error" });
+            else
+              setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
+          });
       }
+      // setTimeout(() => {
+      //   // console.log("simpan");
+      //   // console.log("format data", formatData);
+      //   setLoadingButton(false);
+      // }, 2000);
     } else {
-      setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Data kosong. Silahkan periksa data yang anda masukkan.", severity: "warning" });
+      setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Silahkan periksa data yang anda masukkan. Minimal ada satu data yang diisi.", severity: "warning" });
       setLoadingButton(false);
     }
+    // } else {
+    //   setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Data kosong. Silahkan periksa data yang anda masukkan.", severity: "warning" });
+    //   setLoadingButton(false);
+    // }
   };
 
   return (
@@ -221,6 +274,101 @@ export default function Resource(props) {
               <Grid item xs>
                 <Typography variant="h6">Sumber Daya Lain</Typography>
               </Grid>
+            </Grid>
+            <Grid item container spacing={1}>
+              <Grid item container direction='row' alignItems='center'>
+                <Grid item xs={4}>
+                  <InputLabel>Estimasi media penyimpanan pertahun</InputLabel>
+                </Grid>
+                <TextField variant='outlined'
+                  size='small'
+                  value={dataTambahan.find(d => d.code === 'STORAGE').deskripsi}
+                  onChange={(e) => handleChangeDataTambahan(e.target.value, 'STORAGE')}
+                  style={{ marginLeft: '10px' }}
+                />
+              </Grid>
+              <Grid item container direction='row' alignItems='center'>
+                <Grid item xs={4}>
+                  <InputLabel>Jumlah user</InputLabel>
+                </Grid>
+                <TextField variant='outlined'
+                  size='small'
+                  value={dataTambahan.find(d => d.code === 'USER').deskripsi}
+                  onChange={(e) => handleChangeDataTambahan(e.target.value, 'USER')}
+                  style={{ marginLeft: '10px' }}
+                // inputProps={{ style: { textAlign: 'right' } }}
+                />
+              </Grid>
+              <Grid item container direction='row' alignItems='center'>
+                <Grid item xs={4}>
+                  <InputLabel>Infrastruktur yang akan digunakan</InputLabel>
+                </Grid>
+                <Grid item xs>
+                  <TextField
+                    select
+                    variant="outlined"
+                    size='small'
+                    value={[pilihServer[0], ""].includes(dataTambahan.find(d => d.code === 'SERVER').deskripsi)
+                      ? dataTambahan.find(d => d.code === 'SERVER').deskripsi
+                      : pilihServer[pilihServer.length - 1]}
+                    onChange={(e) => handleChangeDataTambahan(e.target.value, 'SERVER')}
+                    style={{ marginLeft: '10px' }}
+                  >
+                    <MenuItem value={""}>
+                      <em>Pilih</em>
+                    </MenuItem>
+                    {pilihServer.map((d, i) => (<MenuItem key={"pilih-server-" + i} value={d}>{d}</MenuItem>))}
+                  </TextField>
+                  {![pilihServer[0], ""].includes(dataTambahan.find(d => d.code === 'SERVER').deskripsi)
+                    ? <TextField
+                      multiline
+                      variant="outlined"
+                      size='small'
+                      value={dataTambahan.find(d => d.code === 'SERVER').deskripsi !== pilihServer[pilihServer.length - 1]
+                        ? dataTambahan.find(d => d.code === 'SERVER').deskripsi
+                        : ""}
+                      onChange={(e) => handleChangeDataTambahan(e.target.value, 'SERVER')}
+                      style={{ marginLeft: '10px' }}
+                    />
+                    : null
+                  }
+                </Grid>
+              </Grid>
+              <Grid item container direction='row' alignItems='center'>
+                <Grid item xs={4}>
+                  <InputLabel>Kebutuhan jaringan</InputLabel>
+                </Grid>
+                <RadioGroup row
+                  value={dataTambahan.find(d => d.code === 'NETWORK').deskripsi ? dataTambahan.find(d => d.code === 'NETWORK').deskripsi : null}
+                  onChange={(e) => handleChangeDataTambahan(e.target.value, 'NETWORK')}
+                  style={{ marginLeft: '10px' }}
+                >
+                  <FormControlLabel value="internet" control={<Radio />} label="Internet" />
+                  <FormControlLabel value="intranet" control={<Radio />} label="Intranet" />
+                </RadioGroup>
+              </Grid>
+              <Grid item container direction='row' alignItems='center'>
+                <Grid item xs={4}>
+                  <InputLabel>Permintaan khusus dari user untuk backup data (jika ada)</InputLabel>
+                </Grid>
+                <TextField
+                  multiline
+                  variant="outlined"
+                  size='small'
+                  value={dataTambahan.find(d => d.code === 'BACKUP').deskripsi}
+                  onChange={(e) => handleChangeDataTambahan(e.target.value, 'BACKUP')}
+                  style={{ marginLeft: '10px' }}
+                />
+              </Grid>
+              {/* <Grid item container direction='row' alignItems='center'>
+                <Grid item xs={4}>
+                  <InputLabel>Kebutuhan lainnya</InputLabel>
+                </Grid>
+              </Grid> */}
+            </Grid>
+            <Divider variant='middle' style={{ marginTop: '20px', marginBottom: '20px' }} />
+            <Grid item>
+              <InputLabel>Kebutuhan lainnya</InputLabel>
             </Grid>
             <Grid item container direction="column" spacing={1}>
               <Grid item container direction="row" spacing={1} justify="space-between">
