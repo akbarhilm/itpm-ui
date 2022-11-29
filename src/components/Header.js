@@ -121,6 +121,12 @@ export default function Header(props) {
     history.push("/proyek");
   };
 
+  const handleLinkToDashboard = () => {
+    setProyek();
+    setMenuSideBar(false);
+    history.push("/dashboard");
+  };
+
   return (
     <>
       <AppBar position="fixed" className={classes.appBar}>
@@ -135,7 +141,14 @@ export default function Header(props) {
                 </Typography>
               </ButtonBase>
             </Grid>
-            <Grid item xs container direction="row" spacing={1} alignItems="center" justify="flex-start">
+            <Grid item xs container direction="row" spacing={3} alignItems="center" justify="flex-start">
+              <Grid item>
+                <ButtonBase onClick={handleLinkToDashboard}>
+                  <Typography>
+                    {"Dashboard"}
+                  </Typography>
+                </ButtonBase>
+              </Grid>
               <Grid item>
                 <ButtonBase onClick={handleLinkToProyek}>
                   <Typography>

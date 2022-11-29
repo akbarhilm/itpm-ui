@@ -15,7 +15,7 @@ export default function BastRouter(props) {
   const [status, setStatus] = useState(null);
   const [bast, setBast] = useState(null);
 
-  const otoritas = user.NIK === proyek.NIKREQ ? "BPO" : user.NIK === proyek.NIKPM ? "PM" : "PMO";
+  const otoritas = user.NIK === proyek.NIKREQ ? "BPO" : user.NIK === proyek.NIKPM ? "PM" : user.OTORITAS.find(d => d === 'PMO') ? "PMO" : "BOD";
   // const otoritas = "PMO";
   const message = otoritas === "PMO" ?
     "UAT (User Acceptance Test) belum diinput."

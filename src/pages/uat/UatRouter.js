@@ -14,8 +14,8 @@ export default function UatRouter(props) {
   const [listUat, setListUat] = useState(null);
   const [status, setStatus] = useState(null);
 
-  const otoritas = user.NIK === proyek.NIKREQ ? "BPO" : user.NIK === proyek.NIKPM ? "PM" : "PMO";
-  // const otoritas = "PM";
+  const otoritas = user.NIK === proyek.NIKREQ ? "BPO" : user.NIK === proyek.NIKPM ? "PM" : user.OTORITAS.find(d => d === 'QA') ? "QA" : "PMO";
+  // const otoritas = "QA";
 
   useEffect(() => {
     async function fetchData() {

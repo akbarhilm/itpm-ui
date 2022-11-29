@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Grid, Stepper, Step, StepLabel, makeStyles, Paper, Typography, TextField } from '@material-ui/core';
 import { getProyekById, getStepperProyekById } from '../../gateways/api/ProyekAPI';
-import { jenisLayanan, jenisAplikasi } from '../../utils/DataEnum';
+import { jenisLayanan, jenisAplikasi, labelStepper } from '../../utils/DataEnum';
 import AlertDialog from '../../components/AlertDialog';
+import { UserContext } from '../../utils/UserContext';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -23,12 +24,13 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const labelStepper = ["Charter", "User Requirement", "Rencana Pelaksanaan", "Kebutuhan Resource", "Kajian Risiko", "Realisasi", "UAT", "BAST"];
+// const labelStepper = ["Charter", "User Requirement", "Rencana Pelaksanaan", "Kebutuhan Resource", "Kajian Risiko", "Realisasi", "UAT", "BAST"];
 
 const defaultAlert = { openAlertDialog: false, messageAlertDialog: "", severity: "info" };
 
 export default function DetailProyek(props) {
   const { proyek, setProyek } = props;
+  const { karyawan } = useContext(UserContext);
   const classes = useStyles();
 
   const [dataProyek, setDataProyek] = useState();
@@ -38,7 +40,8 @@ export default function DetailProyek(props) {
   const handleCloseAlertDialog = () => {
     setAlertDialog({ ...alertDialog, openAlertDialog: false });
   };
-
+  // console.log(karyawan);
+  // console.log(karyawan.find(d => d.nik === dataProyek?.NIKPM)?.nik);
   useEffect(() => {
     if (!dataProyek) {
       getProyekById(proyek.IDPROYEK)
@@ -122,7 +125,7 @@ export default function DetailProyek(props) {
                     className={classes.fieldDisabled}
                     fullWidth
                     disabled
-                    value={dataProyek ? dataProyek.NIKREQ : ""}
+                    value={dataProyek ? karyawan.find(d => d.nik === dataProyek?.NIKREQ)?.nik + ' - ' + karyawan.find(d => d.nik === dataProyek?.NIKREQ)?.nama : ""}
                   />
                 </Grid>
                 <Grid item xs>
@@ -132,7 +135,7 @@ export default function DetailProyek(props) {
                     className={classes.fieldDisabled}
                     fullWidth
                     disabled
-                    value={dataProyek ? dataProyek.NIKPM : ""}
+                    value={dataProyek ? karyawan.find(d => d.nik === dataProyek?.NIKPM)?.nik + ' - ' + karyawan.find(d => d.nik === dataProyek?.NIKPM)?.nama : ""}
                   />
                 </Grid>
               </Grid>

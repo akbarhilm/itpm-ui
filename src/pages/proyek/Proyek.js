@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Grid, Typography, IconButton, List, ListItem, ListItemAvatar, Avatar, ListItemText, ListItemSecondaryAction, Divider, CircularProgress, TextField, InputAdornment } from "@material-ui/core";
+import { Grid, Typography, IconButton, List, ListItem, ListItemAvatar, Avatar, ListItemText, ListItemSecondaryAction, Divider, CircularProgress, TextField, InputAdornment, Chip } from "@material-ui/core";
 import { AddBoxOutlined, EditOutlined, Search } from '@material-ui/icons';
 import Pagination from "@material-ui/lab/Pagination";
 import { getListProyek } from '../../gateways/api/ProyekAPI';
@@ -38,7 +38,7 @@ export default function Proyek(props) {
 
   const getProyek = useCallback(() => {
     setLoading(true);
-    getListProyek()
+    getListProyek('ALL')
       .then((response) => {
         setAuthPMO(response.data.otoritas.PMO);
         setListProyek(response.data.list);
@@ -130,19 +130,20 @@ export default function Proyek(props) {
           {loading ? <Grid container justify="center"><CircularProgress /></Grid>
             : listProyek.length > 0 ?
               <List>
-                {(dataSearch ? listProyek.filter(d => d.NAMAPROYEK.toLowerCase().search(dataSearch) !== -1) : listProyek)
+                {(dataSearch ? listProyek.filter(d => d.NAMAPROYEK.toLowerCase().search(dataSearch.toLowerCase()) !== -1 || d.NOLAYANAN.toLowerCase().search(dataSearch.toLowerCase()) !== -1) : listProyek)
                   .slice((page - 1) * itemsPerPage, page * itemsPerPage)
                   .map((d, i) => (
                     <ListItem button key={"list-item-" + i} divider onClick={() => handleDetail(d)}>
                       <ListItemAvatar key={"list-item-avatar-" + i}>
                         <Avatar key={"avatar-" + i} alt={d.NAMAPROYEK ? d.NAMAPROYEK.toUpperCase() : "N"} src="#" />
                       </ListItemAvatar>
-                      <ListItemText key={"list-item-text-" + i} primary={d.NAMAPROYEK} secondary={d.KETPROYEK} />
-                      {authPMO && d.STATUSPROYEK === "BARU" && <ListItemSecondaryAction key={"list-item-secondary-action-" + i}>
-                        <IconButton key={"secondary-action" + i} edge="end" aria-label="edit" onClick={() => handleEdit(d)}>
+                      <ListItemText key={"list-item-text-" + i} primary={d.NAMAPROYEK} secondary={d.NOLAYANAN} />
+                      <ListItemSecondaryAction key={"list-item-secondary-action-" + i}>
+                        <Chip label={d.STATUSPROYEK} />
+                        {authPMO && d.STATUSPROYEK !== "SELESAI" && <IconButton key={"secondary-action" + i} edge="end" aria-label="edit" onClick={() => handleEdit(d)}>
                           <EditOutlined key={"secondary-action-icon-" + i} />
-                        </IconButton>
-                      </ListItemSecondaryAction>}
+                        </IconButton>}
+                      </ListItemSecondaryAction>
                     </ListItem>
                   ))
                 }

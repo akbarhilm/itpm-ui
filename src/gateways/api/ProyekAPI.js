@@ -1,7 +1,11 @@
 import api from '../../utils/ApiConfig';
 
-export const getListProyek = async () => {
-  return await api.get('/profil/pengguna/proyek/nik');
+export const getListProyek = async (status, dashboard, nik) => {
+  return await api.get('/profil/pengguna/proyek/nik', { params: { status: status, d: dashboard || null, nik: nik || null } });
+};
+
+export const getSummaryProyek = async () => {
+  return await api.get('/profil/pengguna/proyek/summary');
 };
 
 export const getProyekById = async (id) => {
@@ -18,4 +22,8 @@ export const updateProyek = async (data) => {
 
 export const getStepperProyekById = async (id) => {
   return await api.get('/proyek/stepper/' + id);
+};
+
+export const ubahStatusProyek = async (data) => {
+  return await api.put('/proyek/ubahstatus', data);
 };

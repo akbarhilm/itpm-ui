@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Grid, makeStyles, Typography, TextField, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Paper, Button, Divider, FormHelperText, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress } from '@material-ui/core';
+import { Grid, makeStyles, Typography, TextField, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Paper, Button, Divider, FormHelperText, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, MenuItem } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import { jenisLayanan, jenisAplikasi } from '../../utils/DataEnum';
+import { jenisLayanan, jenisAplikasi, statusProyek } from '../../utils/DataEnum';
 import { getAplikasi, createAplikasi } from '../../gateways/api/AplikasiAPI';
 import { getModulByAplikasiId, createModul } from '../../gateways/api/ModulAPI';
 import { useHistory } from "react-router-dom";
 import { getLayananUnused } from '../../gateways/api/LayananAPI';
-import { createProyek, getProyekById, updateProyek } from '../../gateways/api/ProyekAPI';
+import { createProyek, getProyekById, ubahStatusProyek, updateProyek } from '../../gateways/api/ProyekAPI';
 import { AddCircleOutline } from '@material-ui/icons';
 import AlertDialog from '../../components/AlertDialog';
 
@@ -61,11 +61,12 @@ const defaultError = {
 
 const defaultAlert = { openAlertDialog: false, messageAlertDialog: "", severity: "info" };
 
-export default function DetailProyek(props) {
+export default function TambahProyek(props) {
   const { proyek } = props;
   const classes = useStyles();
   const history = useHistory();
 
+  const isDisabled = proyek && proyek.STATUSPROYEK !== "BARU" ? true : false;
   const [listLayanan, setListLayanan] = useState([]);
   const [dataLayanan, setDataLayanan] = useState(null);
   const [loadingButton, setLoadingButton] = useState({ submit: false, submitDialog: false });
@@ -77,12 +78,15 @@ export default function DetailProyek(props) {
   const [error, setError] = useState(defaultError);
   const [openDialogAplikasi, setOpenDialogAplikasi] = useState(false);
   const [openDialogModul, setOpenDialogModul] = useState(false);
-  const open = openDialogAplikasi || openDialogModul;
   const [dataDialogAplikasi, setDataDialogAplikasi] = useState({ kodeapl: "", namaapl: "", ketapl: "" });
   const [errorDialogAplikasi, setErrorDialogAplikasi] = useState({ kodeapl: { error: false, message: "" }, namaapl: { error: false, message: "" }, ketapl: { error: false, message: "" } });
   const [dataDialogModul, setDataDialogModul] = useState({ idapl: null, namamodul: "", ketmodul: "" });
   const [errorDialogModul, setErrorDialogModul] = useState({ namamodul: { error: false, message: "" }, ketmodul: { error: false, message: "" } });
   const [alertDialog, setAlertDialog] = useState(defaultAlert);
+  const [openDialogStatus, setOpenDialogStatus] = useState(false);
+  const [dataDialogStatus, setDataDialogStatus] = useState({ status: null, keterangan: null });
+  const [errorDialogStatus, setErrorDialogStatus] = useState({ status: { error: false, message: "" }, keterangan: { error: false, message: "" } });
+  const open = openDialogAplikasi || openDialogModul || openDialogStatus;
 
   const handleCloseAlertDialog = () => {
     setAlertDialog({ ...alertDialog, openAlertDialog: false });
@@ -335,10 +339,13 @@ export default function DetailProyek(props) {
   const handleCloseDialog = () => {
     setOpenDialogAplikasi(false);
     setOpenDialogModul(false);
+    setOpenDialogStatus(false);
     setDataDialogAplikasi({ kodeapl: "", namaapl: "", ketapl: "" });
     setDataDialogModul(prev => ({ ...prev, namamodul: "", ketmodul: "" }));
+    setDataDialogStatus({ status: null, keterangan: null });
     setErrorDialogAplikasi({ kodeapl: { error: false, message: "" }, namaapl: { error: false, message: "" }, ketapl: { error: false, message: "" } });
     setErrorDialogModul({ namamodul: { error: false, message: "" }, ketmodul: { error: false, message: "" } });
+    setErrorDialogStatus({ status: { error: false, message: "" }, keterangan: { error: false, message: "" } });
   };
 
   const validateDataDialog = () => {
@@ -369,6 +376,19 @@ export default function DetailProyek(props) {
       if (
         !dataDialogModul.namamodul ||
         !dataDialogModul.ketmodul
+      )
+        valid = false;
+
+      return valid;
+    }
+    else if (openDialogStatus) {
+      setErrorDialogStatus({
+        status: dataDialogStatus.status ? def : err,
+        keterangan: dataDialogStatus.keterangan ? def : err
+      });
+      if (
+        !dataDialogStatus.status ||
+        !dataDialogStatus.keterangan
       )
         valid = false;
 
@@ -411,6 +431,33 @@ export default function DetailProyek(props) {
             else
               setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
           });
+      }
+      else if (openDialogStatus) {
+        // console.log(dataDialogStatus);
+
+        const newData = {
+          idproj: proyek.IDPROYEK,
+          status: dataDialogStatus.status,
+          ket: dataDialogStatus.keterangan
+        };
+
+        ubahStatusProyek(newData)
+          .then((response) => {
+            // setDataProyek(prev => ({ ...prev, aplikasi: { ...prev.aplikasi } }));
+            handleCloseDialog();
+            setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil ubah status proyek", severity: "success" });
+            setLoadingButton(prev => ({ ...prev, submitDialog: false }));
+          })
+          .catch((error) => {
+            setLoadingButton(prev => ({ ...prev, submitDialog: false }));
+            if (error.response)
+              setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data.message, severity: "error" });
+            else
+              setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
+          });
+        // setLoadingButton(prev => ({ ...prev, submitDialog: false }));
+        // handleCloseDialog();
+        // createModul(dataDialogModul)
       }
     } else {
       setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Data tidak valid. Silahkan cek data yang anda input", severity: "warning" });
@@ -470,6 +517,7 @@ export default function DetailProyek(props) {
                       helperText={error.layanan.message}
                     />
                   )}
+                  disabled={isDisabled}
                 />
                 <Grid item container direction="row" spacing={2} justify="space-between">
                   <Grid item xs>
@@ -581,6 +629,7 @@ export default function DetailProyek(props) {
                 required
                 error={error.namaProyek.error}
                 helperText={error.namaProyek.message}
+                disabled={isDisabled}
               />
             </Grid>
             <Grid item xs>
@@ -596,6 +645,7 @@ export default function DetailProyek(props) {
                 required
                 error={error.namaUri.error}
                 helperText={error.namaUri.message}
+                disabled={isDisabled}
               />
             </Grid>
           </Grid>
@@ -611,8 +661,9 @@ export default function DetailProyek(props) {
             required
             error={error.deskripsi.error}
             helperText={error.deskripsi.message}
+            disabled={isDisabled}
           />
-          <FormControl component="fieldset" className={classes.radio} fullWidth error={error.jenisAplikasi.error}>
+          <FormControl disabled={isDisabled} component="fieldset" className={classes.radio} fullWidth error={error.jenisAplikasi.error}>
             <FormLabel component="legend">Jenis Aplikasi</FormLabel>
             <RadioGroup row aria-label="jenisAplikasi" name="jenisAplikasi" value={dataProyek && dataProyek.jenisAplikasi ? dataProyek.jenisAplikasi : ""} onChange={handleChangeRadio} >
               {jenisAplikasi.map(d => (<FormControlLabel key={d.value} value={d.value} control={<Radio />} label={d.label} />))}
@@ -621,7 +672,7 @@ export default function DetailProyek(props) {
           </FormControl>
         </Grid>
         <Grid item xs={6} >
-          <FormControl component="fieldset" className={classes.radio} fullWidth error={error.jenisLayanan.error} disabled={sap}>
+          <FormControl component="fieldset" className={classes.radio} fullWidth error={error.jenisLayanan.error} disabled={sap || isDisabled}>
             <FormLabel component="legend">Jenis Layanan</FormLabel>
             <RadioGroup row aria-label="jenisLayanan" name="jenisLayanan" value={dataProyek && dataProyek.jenisLayanan ? dataProyek.jenisLayanan : ""} onChange={handleChangeRadio}>
               {jenisLayanan.map(d => (<FormControlLabel key={d.value} value={d.value} control={<Radio />} label={d.label} />))}
@@ -656,10 +707,11 @@ export default function DetailProyek(props) {
                       helperText={error.aplikasi.message}
                     />
                   )}
+                  disabled={isDisabled}
                 />
               </Grid>
               <Grid item xs={1}>
-                <IconButton onClick={() => setOpenDialogAplikasi(true)}>
+                <IconButton onClick={() => setOpenDialogAplikasi(true)} disabled={isDisabled}>
                   <AddCircleOutline />
                 </IconButton>
               </Grid>
@@ -693,10 +745,11 @@ export default function DetailProyek(props) {
                       helperText={error.modul.message}
                     />
                   )}
+                  disabled={isDisabled}
                 />
               </Grid>
               <Grid item xs={1}>
-                {dataDialogModul.idapl && <IconButton onClick={() => setOpenDialogModul(true)} >
+                {dataDialogModul.idapl && <IconButton onClick={() => setOpenDialogModul(true)} disabled={isDisabled}>
                   <AddCircleOutline />
                 </IconButton>}
               </Grid>
@@ -705,9 +758,14 @@ export default function DetailProyek(props) {
         </Grid>
       </Grid>
       <Divider />
-      <Grid item container direction="row" justify="flex-end">
-        <Button variant="contained" color="primary" onClick={loadingButton.submit ? null : simpan} >{loadingButton.submit ? <CircularProgress color="inherit" size={20} /> : edit ? "Ubah" : "Simpan"}</Button>
-        <Button variant="contained" color="inherit" onClick={handleBackToProyek} style={{ marginLeft: 10 }} >{"Kembali"}</Button>
+      <Grid item xs container direction="row" justify='space-between'>
+        {proyek && <Grid item xs>
+          <Button variant="contained" onClick={() => setOpenDialogStatus(true)} color="secondary" >{"Ubah Status"}</Button>
+        </Grid>}
+        <Grid item xs container justify="flex-end">
+          <Button variant="contained" color="primary" onClick={loadingButton.submit ? null : simpan} disabled={isDisabled}>{loadingButton.submit ? <CircularProgress color="inherit" size={20} /> : edit ? "Ubah" : "Simpan"}</Button>
+          <Button variant="contained" color="inherit" onClick={handleBackToProyek} style={{ marginLeft: 10 }} >{"Kembali"}</Button>
+        </Grid>
       </Grid>
       <Dialog
         fullWidth
@@ -814,7 +872,73 @@ export default function DetailProyek(props) {
                     helperText={errorDialogModul.ketmodul.message}
                   />
                 </Grid>
-              </Grid> : null
+              </Grid>
+              : openDialogStatus ?
+                <Grid container direction="row" spacing={2} justify="space-between">
+                  <Grid item xs>
+                    {/* <TextField
+                      id="status"
+                      label="Status"
+                      variant="outlined"
+                      className={classes.field}
+                      fullWidth
+                      onChange={event => {
+                        setErrorDialogStatus(prev => ({ ...prev, [event.target.id]: event.target.value ? { error: false, message: "" } : { error: true, message: "Tidak Boleh Kosong" } }));
+                        if (event.target.value.length <= 255)
+                          setDataDialogStatus(prev => ({ ...prev, [event.target.id]: event.target.value }));
+                      }}
+                      value={dataDialogStatus.status || ""}
+                      required
+                      error={errorDialogStatus.status.error}
+                      helperText={errorDialogStatus.status.message}
+                    /> */}
+                    <TextField
+                      id="status"
+                      label="Status"
+                      variant="outlined"
+                      className={classes.field}
+                      select
+                      fullWidth
+                      value={dataDialogStatus.status || ""}
+                      onChange={event => {
+                        setErrorDialogStatus(prev => ({ ...prev, status: event.target.value ? { error: false, message: "" } : { error: true, message: "Tidak Boleh Kosong" } }));
+                        if (event.target.value.length <= 255)
+                          setDataDialogStatus(prev => ({ ...prev, status: event.target.value }));
+                      }}
+                      required
+                      error={errorDialogStatus.status.error}
+                      helperText={errorDialogStatus.status.message}
+                    >
+                      <MenuItem value="">
+                        <em>Pilih</em>
+                      </MenuItem>
+                      {statusProyek.filter(x => x !== "BARU" && x !== proyek.STATUSPROYEK).map((d) => (
+                        <MenuItem key={"menu-likely-faktor-" + d} value={d}>
+                          {d}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  </Grid>
+                  <Grid item xs>
+                    <TextField
+                      multiline
+                      id="ketstatus"
+                      label="Keterangan"
+                      variant="outlined"
+                      className={classes.field}
+                      fullWidth
+                      onChange={event => {
+                        setErrorDialogStatus(prev => ({ ...prev, keterangan: event.target.value ? { error: false, message: "" } : { error: true, message: "Tidak Boleh Kosong" } }));
+                        if (event.target.value.length <= 400)
+                          setDataDialogStatus(prev => ({ ...prev, keterangan: event.target.value }));
+                      }}
+                      value={dataDialogStatus.keterangan || ""}
+                      required
+                      error={errorDialogStatus.keterangan.error}
+                      helperText={errorDialogStatus.keterangan.message}
+                    />
+                  </Grid>
+                </Grid> : null
           }
         </DialogContent>
         <DialogActions>

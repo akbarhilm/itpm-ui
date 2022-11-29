@@ -197,7 +197,7 @@ export default function Uat(props) {
                       </IconButton>
                     </Tooltip>}
                     { // jika nanti sudah ada aplikasi qa, ini tidak dibutuhkan lagi
-                      !d.approveQA && otoritas === "PMO" && <Tooltip title="Setuju QC">
+                      !d.approveQA && otoritas === "QA" && <Tooltip title="Setuju QC">
                         <IconButton size="small" onClick={() => approveQC(d)}>
                           <AssignmentTurnedInOutlined />
                         </IconButton>
