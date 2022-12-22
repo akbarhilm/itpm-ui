@@ -104,6 +104,22 @@ export default function CharterDetail(props) {
             />
           </Grid>
         </Grid>
+        <Grid item xs container direction="row" spacing={2} justify="space-between" >
+          <Grid item xs>
+            <TextField id="non-financial" label="Benefit (Non-Financial)" fullWidth
+              value={charter.BENEFITNONFINANSIAL || "-"}
+              disabled
+              className={classes.textFieldDisabled}
+            />
+          </Grid>
+          <Grid item xs >
+            <TextField id="financial" label="Benefit (Financial)" fullWidth
+              value={charter.BENEFITFINANSIAL || "-"}
+              disabled
+              className={classes.textFieldDisabled}
+            />
+          </Grid>
+        </Grid>
         <Grid item xs container spacing={2}>
           <Grid item xs>
             <ListDetail label="Tujuan" classes={classes} data={charter.TUJUAN} />
