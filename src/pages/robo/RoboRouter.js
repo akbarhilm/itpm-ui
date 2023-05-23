@@ -4,6 +4,7 @@ import ErrorPage from '../../components/ErrorPage';
 import { UserContext } from '../../utils/UserContext';
 import { getRoboByIdProyek, getRef } from '../../gateways/api/RoboAPI';
 import Robo from './Robo';
+import RoboDetail from './RoboDetail'
 import { getStepperProyekById } from '../../gateways/api/ProyekAPI';
 import { getRisikoByIdProyek } from '../../gateways/api/RisikoAPI';
 
@@ -58,6 +59,7 @@ export default function RoboRouter(props) {
   else if (robo && robo.LISTDETAIL.new){
   console.log("masuk dua")
     return <ErrorPage code="" message={otoritas === "PM" ? "UAT (User Acceptence Test) belum diinput" : "Rollout Backout belum diinput"} />;
-  }
+  }else
+  return <RoboDetail robo={robo} proyek={proyek} karyawan={karyawan} refe={refe} risk={risk}/>;
 
 };
