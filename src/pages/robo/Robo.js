@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { FormControl,Grid, Select,Typography, Button, TextField, IconButton, Paper, makeStyles, CircularProgress, Divider, InputLabel, MenuItem, RadioGroup, FormControlLabel, Radio } from '@material-ui/core';
 import { RemoveCircleOutline, AddCircleOutline } from '@material-ui/icons';
 import AlertDialog from '../../components/AlertDialog';
-import { updateResource, createRobo } from '../../gateways/api/RoboAPI';
+import {  createRobo } from '../../gateways/api/RoboAPI';
 import { UserContext } from "../../utils/UserContext";
 import { Autocomplete } from '@material-ui/lab';
 import { KeyboardDatePicker } from '@material-ui/pickers';
@@ -29,13 +29,7 @@ const useStyles = makeStyles((theme) => ({
 const defaultAlert = { openAlertDialog: false, messageAlertDialog: "", severity: "info" };
 
 
-const defaultDataTambahan = [
-  { code: "JABATAN", deskripsi: "", satuan: "GB", jumlah: "0" },
-  { code: "USER", deskripsi: "", satuan: "usr", jumlah: "0" },
-  { code: "SERVER", deskripsi: "", satuan: "buah", jumlah: "0" },
-  { code: "NETWORK", deskripsi: "", satuan: "-", jumlah: "0" },
-  { code: "BACKUP", deskripsi: "", satuan: "-", jumlah: "0" },
-];
+
 
 // const defaultErrorDataTambahan = [
 //   { code: "STORAGE", error: false, text: "" },
@@ -47,12 +41,12 @@ const defaultDataTambahan = [
 
 
 
-const err = { error: true, text: "Tidak boleh kosong." };
+//const err = { error: true, text: "Tidak boleh kosong." };
 const noErr = { error: false, text: "" };
 const defaultError = { deskripsi: noErr, satuan: noErr, jumlah: noErr };
 
 export default function Robo(props) {
-  const { robo, proyek, karyawan, refe, risk, status } = props;
+  const { robo,  karyawan, refe, risk, status } = props;
   const { user } = useContext(UserContext);
 
   const classes = useStyles();
@@ -60,9 +54,7 @@ export default function Robo(props) {
   const [loadingButton, setLoadingButton] = useState(false);
   const [edit, setEdit] = useState(false);
   const [nomor, setNomor] = useState("");
-  const [jenisLayanan, setJenisLayanan] = useState("");
-  const [ketLayanan, setKetLayanan] = useState("");
-  const [ketModul, setKetModul] = useState("");
+ 
   const [dataDetail, setDataDetail] = useState([]);
   const [dataRespPr, setDataRespPr] = useState([]);
   const [dataRespAt, setDataRespAt] = useState([]);
@@ -73,13 +65,10 @@ export default function Robo(props) {
 
   const [error, setError] = useState([]);
   const [alertDialog, setAlertDialog] = useState(defaultAlert);
-  const [listDataPenanganan, setListDataPenanganan] = useState();
 
-  const [dataTambahan, setDataTambahan] = useState(defaultDataTambahan);
   const [dataRef, setDataRef] = useState(null);
   // const [errorDataTambahan, setErrorDataTambahan] = useState(defaultErrorDataTambahan);
 
-  const defaultDataPR = { kodeactor: "0", namaactor: "PM", nik: user.NIK, nama: user.NAMA, ketrole: "", idroleresp: "0" }
   const defaultDataAT = { kodeactor: "", namaactor: "", nik: "", nama: '', ketrole: "", idroleresp: "" }
   const defaultDataAct = { idroact: "0", namaact: "", ketact: "", namatj: "", namapt: "", tanggalMulai: null, tanggalSelesai: null }
   const defaultDataBo = { namatahap: "", ketplan: "",kodehasil:"",kethasil:""}
@@ -183,19 +172,7 @@ export default function Robo(props) {
     setAlertDialog({ ...alertDialog, openAlertDialog: false });
   };
 
-  const formatNewData = useCallback((listdetail) => {
-    const newData = [];
-    listdetail.forEach(data => {
-      newData.push({
-        // code: data.CODE || "",
-        idrorole: data.IDROROLE,
-        ketrole: data.KETROLE,
-        namaactor: data.NAMAACTOR
-
-      });
-    });
-    return newData;
-  }, []);
+  
 
 
 const formatdatamaster = useCallback((master)=>{
@@ -393,6 +370,7 @@ data.LISTDETAIL = LISTDETAIL
 
   const save = () => {
     setLoadingButton(true);
+    console.log(dataDetail)
     const datares = dataRespPr.concat(dataRespAt)
 
     datares.forEach(d => {
@@ -454,56 +432,56 @@ data.LISTDETAIL = LISTDETAIL
 
   }
 
-  const simpan = () => {
-    setLoadingButton(true);
-    // if (data.length > 0) {
-    if (validateAll()) {
+  // const simpan = () => {
+  //   setLoadingButton(true);
+  //   // if (data.length > 0) {
+  //   if (validateAll()) {
 
-      // console.log(formatData);
-      if (edit) {
-        updateResource(dataMaster)
-          .then((response) => {
-            setDataDetail(formatNewData(response.data.LISTDETAIL.filter(d => !d.KODE)));
-            setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil ubah", severity: "success" });
-            setLoadingButton(false);
-          })
-          .catch((error) => {
-            setLoadingButton(false);
-            if (error.response)
-              setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data.message, severity: "error" });
-            else
-              setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
-          });
-      } else {
-        createRobo(dataMaster)
-          .then((response) => {
-            setDataDetail(formatNewData(response.data.LISTDETAIL.filter(d => !d.KODE)));
-            setEdit(true);
-            setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil simpan", severity: "success" });
-            setLoadingButton(false);
-          })
-          .catch((error) => {
-            setLoadingButton(false);
-            if (error.response)
-              setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data.message, severity: "error" });
-            else
-              setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
-          });
-      }
-      // setTimeout(() => {
-      //   // console.log("simpan");
-      //   // console.log("format data", formatData);
-      //   setLoadingButton(false);
-      // }, 2000);
-    } else {
-      setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Silahkan periksa data yang anda masukkan. Minimal ada satu data yang diisi.", severity: "warning" });
-      setLoadingButton(false);
-    }
-    // } else {
-    //   setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Data kosong. Silahkan periksa data yang anda masukkan.", severity: "warning" });
-    //   setLoadingButton(false);
-    // }
-  };
+  //     // console.log(formatData);
+  //     if (edit) {
+  //       updateResource(dataMaster)
+  //         .then((response) => {
+  //           setDataDetail(formatNewData(response.data.LISTDETAIL.filter(d => !d.KODE)));
+  //           setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil ubah", severity: "success" });
+  //           setLoadingButton(false);
+  //         })
+  //         .catch((error) => {
+  //           setLoadingButton(false);
+  //           if (error.response)
+  //             setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data.message, severity: "error" });
+  //           else
+  //             setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
+  //         });
+  //     } else {
+  //       createRobo(dataMaster)
+  //         .then((response) => {
+  //           setDataDetail(formatNewData(response.data.LISTDETAIL.filter(d => !d.KODE)));
+  //           setEdit(true);
+  //           setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil simpan", severity: "success" });
+  //           setLoadingButton(false);
+  //         })
+  //         .catch((error) => {
+  //           setLoadingButton(false);
+  //           if (error.response)
+  //             setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data.message, severity: "error" });
+  //           else
+  //             setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
+  //         });
+  //     }
+  //     // setTimeout(() => {
+  //     //   // console.log("simpan");
+  //     //   // console.log("format data", formatData);
+  //     //   setLoadingButton(false);
+  //     // }, 2000);
+  //   } else {
+  //     setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Silahkan periksa data yang anda masukkan. Minimal ada satu data yang diisi.", severity: "warning" });
+  //     setLoadingButton(false);
+  //   }
+  //   // } else {
+  //   //   setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Data kosong. Silahkan periksa data yang anda masukkan.", severity: "warning" });
+  //   //   setLoadingButton(false);
+  //   // }
+  // };
 
 
 

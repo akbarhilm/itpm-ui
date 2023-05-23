@@ -195,7 +195,7 @@ const sumtotal = (item)=>{
                         </TableHead>
                         <TableBody>
                           {summaryByDev?summaryByDev.map((row) => (
-                            <TableRow key={row.NIKPM}>
+                            <TableRow key={row.NIK}>
                               <TableCell component="th" scope="row" align="center">
                                 {row.NIK+" - "+karyawan.find(k=>k.nik===row.NIK).nama}
                               </TableCell>
@@ -262,7 +262,7 @@ const sumtotal = (item)=>{
                         </TableHead>
                         <TableBody>
                           {summaryByCat?summaryByCat.map((row) => (
-                            <TableRow key={row.NIKPM}>
+                            <TableRow key={row.KATEGORI}>
                               <TableCell component="th" scope="row" align="center">
                                 {row.KATEGORI}
                               </TableCell>
@@ -329,7 +329,7 @@ const sumtotal = (item)=>{
                         </TableHead>
                         <TableBody>
                           {summaryByYear?summaryByYear.map((row) => (
-                            <TableRow key={row.NIKPM}>
+                            <TableRow key={row.TAHUN}>
                               <TableCell component="th" scope="row" align="center">
                                 {row.TAHUN}
                               </TableCell>

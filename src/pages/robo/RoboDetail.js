@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useCallback, useContext } from 'react';
-import { FormControl,Grid, Select,Typography, Button, TextField, IconButton, Paper, makeStyles, CircularProgress, Divider, InputLabel, MenuItem, RadioGroup, FormControlLabel, Radio } from '@material-ui/core';
-import { RemoveCircleOutline, AddCircleOutline } from '@material-ui/icons';
+import { FormControl,Grid, Select,Typography,  TextField,  Paper, makeStyles,  Divider, InputLabel, MenuItem, RadioGroup, FormControlLabel, Radio } from '@material-ui/core';
 import AlertDialog from '../../components/AlertDialog';
-import { updateResource, createRobo } from '../../gateways/api/RoboAPI';
 import { UserContext } from "../../utils/UserContext";
 import { Autocomplete } from '@material-ui/lab';
 import { KeyboardDatePicker } from '@material-ui/pickers';
@@ -29,13 +27,7 @@ const useStyles = makeStyles((theme) => ({
 const defaultAlert = { openAlertDialog: false, messageAlertDialog: "", severity: "info" };
 
 
-const defaultDataTambahan = [
-  { code: "JABATAN", deskripsi: "", satuan: "GB", jumlah: "0" },
-  { code: "USER", deskripsi: "", satuan: "usr", jumlah: "0" },
-  { code: "SERVER", deskripsi: "", satuan: "buah", jumlah: "0" },
-  { code: "NETWORK", deskripsi: "", satuan: "-", jumlah: "0" },
-  { code: "BACKUP", deskripsi: "", satuan: "-", jumlah: "0" },
-];
+
 
 // const defaultErrorDataTambahan = [
 //   { code: "STORAGE", error: false, text: "" },
@@ -47,22 +39,15 @@ const defaultDataTambahan = [
 
 
 
-const err = { error: true, text: "Tidak boleh kosong." };
-const noErr = { error: false, text: "" };
-const defaultError = { deskripsi: noErr, satuan: noErr, jumlah: noErr };
 
 export default function RoboDetail(props) {
-  const { robo, proyek, karyawan, refe, risk, status } = props;
+  const { robo,  karyawan, refe, risk, status } = props;
   const { user } = useContext(UserContext);
 
   const classes = useStyles();
 
-  const [loadingButton, setLoadingButton] = useState(false);
   const [edit, setEdit] = useState(false);
   const [nomor, setNomor] = useState("");
-  const [jenisLayanan, setJenisLayanan] = useState("");
-  const [ketLayanan, setKetLayanan] = useState("");
-  const [ketModul, setKetModul] = useState("");
   const [dataDetail, setDataDetail] = useState([]);
   const [dataRespPr, setDataRespPr] = useState([]);
   const [dataRespAt, setDataRespAt] = useState([]);
@@ -71,19 +56,11 @@ export default function RoboDetail(props) {
   const [dataBo, setDataBo] = useState([])
   const [dataMaster, setDataMaster] = useState([]);
 
-  const [error, setError] = useState([]);
   const [alertDialog, setAlertDialog] = useState(defaultAlert);
-  const [listDataPenanganan, setListDataPenanganan] = useState();
 
-  const [dataTambahan, setDataTambahan] = useState(defaultDataTambahan);
   const [dataRef, setDataRef] = useState(null);
-  // const [errorDataTambahan, setErrorDataTambahan] = useState(defaultErrorDataTambahan);
 
-  const defaultDataPR = { kodeactor: "0", namaactor: "PM", nik: user.NIK, nama: user.NAMA, ketrole: "", idroleresp: "0" }
-  const defaultDataAT = { kodeactor: "", namaactor: "", nik: "", nama: '', ketrole: "", idroleresp: "" }
-  const defaultDataAct = { idroact: "0", namaact: "", ketact: "", namatj: "", namapt: "", tanggalMulai: null, tanggalSelesai: null }
-  const defaultDataBo = { namatahap: "", ketplan: "",kodehasil:"",kethasil:""}
-
+  
   const validateLength500 = (value) => {
     if (value.length <= 500) return true;
     else return false;
@@ -92,8 +69,7 @@ export default function RoboDetail(props) {
   const handleChangeText = (value, key) => {
     if (validateLength500(value)) {
       setDataMaster(prev => ({ ...prev, [key]: value }));
-
-    } else setError(prev => ({ ...prev, [key]: { error: true, text: "Tidak boleh lebih dari 500 karakter." } }));
+    }
   };
 
   const formatdataresp = useCallback((ref) => {
@@ -183,19 +159,7 @@ export default function RoboDetail(props) {
     setAlertDialog({ ...alertDialog, openAlertDialog: false });
   };
 
-  const formatNewData = useCallback((listdetail) => {
-    const newData = [];
-    listdetail.forEach(data => {
-      newData.push({
-        // code: data.CODE || "",
-        idrorole: data.IDROROLE,
-        ketrole: data.KETROLE,
-        namaactor: data.NAMAACTOR
-
-      });
-    });
-    return newData;
-  }, []);
+  
 
 
 const formatdatamaster = useCallback((master)=>{
@@ -220,7 +184,6 @@ data.LISTDETAIL = LISTDETAIL
       setNomor(robo.NOROBO);
       setDataMaster(formatdatamaster(robo));
       setDataDetail(formatdatadetail(robo.LISTDETAIL));
-
       setDataRef(formatdataref(refe));
 
 
@@ -267,7 +230,7 @@ data.LISTDETAIL = LISTDETAIL
   };
 
   const handleChange = (value, index, key) => {
-
+console.log(dataDetail)
     if (key === "resppr") {
       let newArray = [...dataRespPr];
       //console.log(value.KETROLE)
@@ -325,66 +288,7 @@ data.LISTDETAIL = LISTDETAIL
 
   };
 
-  const addRow = (param) => {
-    let newArrayError = [...error];
-    newArrayError.push(defaultError);
-    setError(newArrayError);
-    if (param === "PR") {
-      let newArray = [...dataRespPr]
-      dataRef.refrole.forEach(d => {
-        if (d.kodeactor === '0')
-          newArray.push(d)
-      })
-
-      console.log(newArray)
-      setDataRespPr(newArray);
-    }
-    if (param === "AT") {
-      let newArray = [...dataRespAt]
-      newArray.push(defaultDataAT);
-      setDataRespAt(newArray);
-    }
-    if (param === "ACT") {
-      let newArray = [...dataAct]
-      newArray.push(defaultDataAct);
-      setDataAct(newArray);
-    }
-    if (param === "BO") {
-      let newArray = [...dataBo]
-      newArray.push(defaultDataBo);
-      setDataBo(newArray);
-    }
-
-  };
-
-  const deleteRow = (index, param) => {
-    console.log(param)
-    let newArrayError = [...error];
-    newArrayError.splice(index, 1);
-    setError(newArrayError);
-    if (param === "PR") {
-      let newArray = [...dataRespPr];
-      console.log(index)
-      newArray.splice(index, 1);
-      setDataRespPr(newArray);
-    }
-    if (param === "AT") {
-      let newArray = [...dataRespAt];
-      newArray.splice(index, 1);
-      setDataRespAt(newArray);
-    }
-    if (param === "ACT") {
-      let newArray = [...dataAct];
-      newArray.splice(index, 1);
-      setDataAct(newArray);
-    }
-    if (param === "BO") {
-      let newArray = [...dataBo];
-      newArray.splice(index, 1);
-      setDataBo(newArray);
-    }
-  };
-
+  
 
 
 
