@@ -9,7 +9,7 @@ import kebutuhanResourceIcon from '../assets/icons/icon-kebutuhan-resource.svg'
 import realisasiIcon from '../assets/icons/icon-realisasi.svg'
 import uatIcon from '../assets/icons/icon-uat.svg'
 import bastIcon from '../assets/icons/icon-bast.svg'
-
+import roboIcon from '../assets/icons/icon-rollout-backout.svg'
 // Redux
 // import { useSelector } from "react-redux";
 // import { selectMenuSidebar } from "../../features/auth/Slice";
@@ -134,6 +134,10 @@ const arrayIcons = [
     icon: uatIcon
   },
   {
+    nama: "rollout-backout",
+    icon: roboIcon
+  },
+  {
     nama: "bast",
     icon: bastIcon
   },
@@ -151,7 +155,7 @@ export default function MenuSidebar(props) {
       getMenuSideBar(proyek.IDPROYEK)
         .then((response) => {
           setMenuSideBar(response.data)
-          // console.log("menu", response.data)
+           console.log("menu", response.data)
         })
     }
   }, [proyek])

@@ -38,6 +38,7 @@ import { makeStyles, ButtonBase } from "@material-ui/core";
 import logoitpm from '../assets/image/logo_itpm.png';
 import { useHistory } from "react-router-dom";
 import { UserContext } from "../utils/UserContext";
+
 // import { getUser } from "../gateways/api/CommonAPI";
 
 const useStyles = makeStyles((theme) => ({
@@ -81,7 +82,7 @@ export default function Header(props) {
   const cookies = new Cookies();
   const classes = useStyles();
   // const [user, setUser] = useState();
-  const [anchor, setAnchor] = useState({ menu: null, pengguna: null });
+  const [anchor, setAnchor] = useState({ menu: null, pengguna: null});
   const popover = {
     menu: Boolean(anchor.menu),
     pengguna: Boolean(anchor.pengguna),
@@ -91,7 +92,13 @@ export default function Header(props) {
   //   if (!user)
   //     getUser().then((response) => setUser(response.data));
   // }, [user]);
+  // const [anchorEl, setAnchorEl] = React.useState(null);
+  // const open = Boolean(anchorEl);
 
+  // const handleClicksum = (event) => {
+  //   setAnchorEl(event.currentTarget);
+  // };
+  const isPermitted = ["BOD", "PMO", "QA"].some(x => user.OTORITAS.includes(x));
   const handleAnchor = (event) => {
     setAnchor((prevState) => ({
       ...prevState,
@@ -99,11 +106,16 @@ export default function Header(props) {
     }));
   };
 
+  // const handleClosesum = () => {
+  //   setAnchorEl(null);
+  // };
+
   const handleClose = () => {
     setAnchor((prevState) => ({
       ...prevState,
       menu: null,
       pengguna: null,
+      
     }));
   };
 
@@ -125,6 +137,11 @@ export default function Header(props) {
     setProyek();
     setMenuSideBar(false);
     history.push("/dashboard");
+  };
+  const handleLinkToSum= () => {
+    setProyek();
+    setMenuSideBar(false);
+    history.push("/summary");
   };
 
   return (
@@ -156,6 +173,16 @@ export default function Header(props) {
                   </Typography>
                 </ButtonBase>
               </Grid>
+              {isPermitted &&
+              <Grid item>
+                <ButtonBase onClick={handleLinkToSum}>
+                  <Typography>
+                    {"Summary"}
+                  </Typography>
+                </ButtonBase>
+                   
+              </Grid>
+              } 
             </Grid>
           </Grid>
           <Grid container justify="flex-end">
