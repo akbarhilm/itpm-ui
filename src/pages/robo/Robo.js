@@ -46,7 +46,7 @@ const noErr = { error: false, text: "" };
 const defaultError = { deskripsi: noErr, satuan: noErr, jumlah: noErr };
 
 export default function Robo(props) {
-  const { robo,  karyawan, refe, risk, status } = props;
+  const { robo,  karyawan, refe, risk } = props;
   const { user } = useContext(UserContext);
 
   const classes = useStyles();
@@ -109,13 +109,13 @@ export default function Robo(props) {
       }
       if (d.KODEACTOR !== '0') {
         newrespat.push(
-          { kodeactor: d.KODEACTOR, namaactor: d.NAMAACTOR, nik: d.NIK, nama: karyawan ? karyawan.find(kar => kar.nik === d.NIK).nama : '', ketrole: d.KETROLE.replace(/ *, */g, '\n'), idroleresp: d.IDROLERESP }
+          { kodeactor: d.KODEACTOR, namaactor: d.NAMAACTOR, nik: {nik:d.NIK, nama: karyawan ? karyawan.find(kar => kar.nik === d.NIK).nama : ''}, nama: karyawan ? karyawan.find(kar => kar.nik === d.NIK).nama : '', ketrole: d.KETROLE.replace(/ *, */g, '\n'), idroleresp: d.IDROLERESP }
         )
       }
     })
     detail.ACT.forEach(d => {
       newact.push(
-        { idroact: d.IDROACT, namaact: d.NAMAACT, ketact: d.KETACT, namatj: d.NAMATJ, namapt: d.NAMAPT, tanggalMulai: moment(d.TGLMULAI).format("DD/MM/YYYY"), tanggalSelesai: moment(d.TGLSELESAI).format("DD/MM/YYYY") }
+        { idroact: d.IDROACT, namaact: d.NAMAACT, ketact: d.KETACT, namatj: d.NAMATJ, namapt: d.NAMAPT, tanggalMulai: moment(d.TGLMULAI,'DD/MM/YYYY'), tanggalSelesai: moment(d.TGLSELESAI,'DD/MM/YYYY') }
       )
     })
     detail.BO.forEach(d => {
@@ -143,7 +143,7 @@ export default function Robo(props) {
     ref.refrole.forEach(d => {
       if (d.KODEACTOR !== '0') {
         newrole.push(
-          { kodeactor: d.KODEACTOR, namaactor: d.NAMAACTOR, nik: user.NIK, nama: user.NAMA, ketrole: d.KETROLE.replace(/ *, */g, '\n'), idroleresp: d.IDROLERESP }
+          { kodeactor: d.KODEACTOR, namaactor: d.NAMAACTOR, nik: '', nama: '', ketrole: d.KETROLE.replace(/ *, */g, '\n'), idroleresp: d.IDROLERESP }
         )
       }
     })
@@ -164,7 +164,7 @@ export default function Robo(props) {
     newData.refact = newact
     newData.refbo = newbo
     return newData
-  }, [user])
+  }, [])
 
 
 
@@ -209,12 +209,13 @@ data.LISTDETAIL = LISTDETAIL
       setDataRef(formatdataref(refe));
       setDataRespPr(formatdataresp(refe));
 
-
+      
     }
+    
     
 
     //}, [robo, formatNewData]);
-  }, [robo, formatdataref, risk, formatdataresp, formatdatamaster , refe, status, formatdatadetail]);
+  }, [robo, formatdataref, risk, formatdataresp, formatdatamaster , refe, formatdatadetail]);
 
 
   const handleChangeDate = (value, index, jenis) => {
@@ -243,24 +244,40 @@ data.LISTDETAIL = LISTDETAIL
 
   };
 
+  const handleChangerespat = (value, index) => {
+    let newArray = [...dataRespAt];
+  
+
+      newArray[index] = Object.assign(newArray[index],value)
+    
+    console.log(newArray);
+    setDataRespAt(newArray);
+  }
+
+  const handleChangerespatnik = (value, index,nik) => {
+    let newArray = [...dataRespAt];
+  
+    newArray[index] = {
+      ...newArray[index],...value,
+      [nik]:value
+    };
+    
+    console.log(newArray);
+    setDataRespAt(newArray);
+  }
+
+
   const handleChange = (value, index, key) => {
 
-    if (key === "resppr") {
-      let newArray = [...dataRespPr];
-      //console.log(value.KETROLE)
-      newArray[index] = { ...newArray[index], ketrole: value.ketrole, idroleresp: value.idroleresp };
-      setDataRespPr(newArray);
-    }
+
     if (key === "respat") {
       let newArray = [...dataRespAt];
       newArray[index] = {
         ...newArray[index],
-        kodeactor: value.kodeactor, ketrole: value.ketrole,
-        idroleresp: value.idroleresp,
-        namaactor: value.namaactor
+        [key]:value
       };
 
-
+      console.log(newArray)
       setDataRespAt(newArray);
       // console.log(newArray)
     }
@@ -269,9 +286,9 @@ data.LISTDETAIL = LISTDETAIL
       let newArray = [...dataRespAt];
       newArray[index] = {
         ...newArray[index],
-        nik: value.nik,
-        nama: value.nama
+        [key]:value
       };
+      console.log(newArray)
       setDataRespAt(newArray);
     }
 
@@ -319,6 +336,7 @@ data.LISTDETAIL = LISTDETAIL
     if (param === "AT") {
       let newArray = [...dataRespAt]
       newArray.push(defaultDataAT);
+      console.log(newArray)
       setDataRespAt(newArray);
     }
     if (param === "ACT") {
@@ -371,7 +389,16 @@ data.LISTDETAIL = LISTDETAIL
   const save = () => {
     setLoadingButton(true);
     console.log(dataDetail)
-    const datares = dataRespPr.concat(dataRespAt)
+    const frespat = []
+    dataRespAt.forEach(d=>{
+      frespat.push({idroleresp:d.idroleresp,
+        kodeactor:d.kodeactor,
+        ketrole:d.ketrole,
+        nama:d.nama,
+        namaactor:d.namaactor,
+        nik:d.nik.nik})
+    })
+    const datares = dataRespPr.concat(frespat)
 
     datares.forEach(d => {
       dataMaster.LISTDETAIL.RESP.push(d)
@@ -714,9 +741,9 @@ data.LISTDETAIL = LISTDETAIL
                 <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justify="space-between" alignItems="center">
                   <Grid key={"grid-jabatan-" + i} item xs={2}>
                     <Autocomplete key={"respat-" + i} id={"respat-" + i} name={"respat-" + i}
-                      options={dataRef.refrole.filter((d) => d.kodeactor !== '0')}
+                      options={dataRef.refrole.filter((z) => z.kodeactor !== '0' && !dataRespAt.map(x=>x.kodeactor).includes(z.kodeactor))}
                       getOptionLabel={option => option.namaactor || ""}
-                      onChange={(e, v) => handleChange(v, i, "respat")}
+                      onChange={(e, v) => handleChangerespat(v, i)}
                       //value={d.ketrole||""}
                       inputValue={d.namaactor}
 
@@ -748,10 +775,11 @@ data.LISTDETAIL = LISTDETAIL
                   <Grid key={"grid-nik-" + i} item xs={3}>
                     <Autocomplete key={"nik-" + i} id={"nik-" + i} name={"nik-" + i}
                       options={karyawan || []}
-                      getOptionLabel={option => option.nik + " / " + option.nama}
-                      onChange={(e, v) => handleChange(v, i, 'nik')}
-                      inputValue={d.nik + " / " + d.nama || ""}
-                      //value={d.nik}
+                      value={d.nik}
+                      getOptionLabel={option => option.nik ? option.nik +" / "+ option.nama : ""}
+                      onChange={(e, v) => handleChangerespatnik(v, i,"nik")}
+                      //inputValue={d.nik + " / " + d.nama || ""}
+                     
                       getOptionSelected={
                         (option, value) => option.nik === value.nik
                       }
@@ -835,7 +863,7 @@ data.LISTDETAIL = LISTDETAIL
                 <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justify="space-between" alignItems="center">
                   <Grid key={"grid-aktivitas-" + i} item xs={2}>
                     <Autocomplete key={"act-" + i} id={"act-" + i} name={"act-" + i}
-                      options={dataRef.refact}
+                      options={dataRef.refact.filter(x=>!dataAct.map(z=>z.idroact).includes(x.idroact))}
                       getOptionLabel={option => option.namaact}
                       onChange={(e, v) => handleChange(v, i, "act")}
                       //value={d.namaact}
@@ -1077,7 +1105,7 @@ data.LISTDETAIL = LISTDETAIL
                   <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justify="space-between" alignItems="center">
                     <Grid key={"grid-tahapan-" + i} item xs={2}>
                       <Autocomplete key={"tahapan-" + i} id={"tahapanv-" + i} name={"tahapan-" + i}
-                        options={dataRef.refbo}
+                        options={dataRef.refbo.filter(x=>!dataBo.map(z=>z.namatahap).includes(x.namatahap))}
                         getOptionLabel={option => option.namatahap}
                         onChange={(e, v) => handleChange(v, i, "bo")}
                         //value={d.namaact}
@@ -1142,7 +1170,7 @@ data.LISTDETAIL = LISTDETAIL
                         onChange={(value) => handleChangehasil(value, i, "kodehasil")}
                       >
                         
-                        <MenuItem value={"sukses"}>Suskes</MenuItem>
+                        <MenuItem value={"sukses"}>Sukes</MenuItem>
                         <MenuItem value={"gagal"}>Gagal</MenuItem>
                         
                       </Select>

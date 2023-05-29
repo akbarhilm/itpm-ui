@@ -66,6 +66,6 @@ export const dampak = [
   },
 ];
 
-export const labelStepper = ["Charter", "User Requirement", "Rencana Pelaksanaan", "Kebutuhan Resource", "Kajian Risiko", "Realisasi", "UAT", "BAST"];
+export const labelStepper = ["Charter", "User Requirement", "Rencana Pelaksanaan", "Kebutuhan Resource", "Kajian Risiko", "Realisasi", "UAT", "ROBO", "BAST"];
 
 export const statusProyek = ["BARU", "BERJALAN", "PENDING", "SELESAI"];
