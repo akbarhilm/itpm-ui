@@ -76,6 +76,7 @@ export default function DetailProyek(props) {
     else if (data === "Kajian Risiko") return stepper.NORISK;
     else if (data === "Realisasi") return stepper.NOREAL;
     else if (data === "UAT") return stepper.NOUAT;
+    else if (data === "ROBO") return stepper.NOROBO;
     else if (data === "BAST") return stepper.NOBA;
     else return false;
   };
