@@ -380,9 +380,9 @@ data.LISTDETAIL = LISTDETAIL
     }
   };
 
-  const validateAll = () => {
-
-    if ((dataMaster.LISTDETAIL.RESP.length > 0 && dataMaster.LISTDETAIL.ACT.length > 0 && dataMaster.LISTDETAIL.BO.length > 0)) return true;
+  const validateAll = (data) => {
+    //console.log(dataMaster)
+    if ((data.LISTDETAIL.RESP.length > 0 && data.LISTDETAIL.ACT.length > 0 && data.LISTDETAIL.BO.length > 0)) return true;
     else return false;
   };
 
@@ -399,25 +399,42 @@ data.LISTDETAIL = LISTDETAIL
         nik:d.nik.nik})
     })
     const datares = dataRespPr.concat(frespat)
-
+   // console.log(datares)
+    //const tempmaster = {...dataMaster}
+    const LISTDETAIL ={}
+    LISTDETAIL.RESP = []
+    LISTDETAIL.ACT = []
+    LISTDETAIL.BO = []
+    //data.LISTDETAIL = LISTDETAIL
     datares.forEach(d => {
-      dataMaster.LISTDETAIL.RESP.push(d)
+      LISTDETAIL.RESP.push(d)
     })
     //const fdataact = []
     dataAct.forEach(d => {
 
-      dataMaster.LISTDETAIL.ACT.push({
+      LISTDETAIL.ACT.push({
         ...d, tanggalMulai: moment(d.tanggalMulai).format("DD/MM/YYYY"),
         tanggalSelesai: moment(d.tanggalSelesai).format("DD/MM/YYYY")
       })
-    })
-    dataBo.forEach(d => {
-      dataMaster.LISTDETAIL.BO.push(d)
-    })
-    dataMaster.LISTDETAIL.EDIT = edit
-    console.log(dataMaster)
 
-    if (validateAll()) {
+     
+  
+    })
+
+    dataBo.forEach(d => {
+      LISTDETAIL.BO.push(d)
+    })
+    //console.log(dataBo)
+    //tempmaster.LISTDETAIL.EDIT = edit
+    LISTDETAIL.EDIT = edit
+    const data = {...dataMaster}
+    data.LISTDETAIL = LISTDETAIL
+      
+    
+    
+    
+
+    if (validateAll(data)) {
       // if (edit) {
       //   updateResource(dataMaster)
       //     .then((response) => {
@@ -434,7 +451,8 @@ data.LISTDETAIL = LISTDETAIL
       //         setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
       //     });
       // } else {
-        createRobo(dataMaster)
+       console.log(data)
+        createRobo(data)
           .then((response) => {
             // setDataDetail(formatNewData(response.data.LISTDETAIL.filter(d => !d.KODE)));
             setNomor(response.data[0].NOROBO)
@@ -1170,7 +1188,7 @@ data.LISTDETAIL = LISTDETAIL
                         onChange={(value) => handleChangehasil(value, i, "kodehasil")}
                       >
                         
-                        <MenuItem value={"sukses"}>Sukes</MenuItem>
+                        <MenuItem value={"sukses"}>Sukses</MenuItem>
                         <MenuItem value={"gagal"}>Gagal</MenuItem>
                         
                       </Select>
