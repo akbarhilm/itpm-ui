@@ -52,12 +52,12 @@ export default function RoboRouter(props) {
   if (loading)
     return <CircularProgress />;
   else if (otoritas === "PM" && status && status.NOUAT && !status.NOBA){
-  console.log("masuk pertama")
-  console.log(karyawan)
+  //console.log("masuk pertama")
+  //console.log(karyawan)
     return <Robo robo={robo} proyek={proyek} karyawan={karyawan} refe={refe} risk={risk}/>;
   }
   else if (robo && robo.LISTDETAIL.new){
-  console.log("masuk dua")
+ // console.log("masuk dua")
     return <ErrorPage code="" message={otoritas === "PM" ? "UAT (User Acceptence Test) belum diinput" : "Rollout Backout belum diinput"} />;
   }else
   return <RoboDetail robo={robo} proyek={proyek} karyawan={karyawan} refe={refe} risk={risk}/>;
