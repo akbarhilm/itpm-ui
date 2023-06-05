@@ -139,7 +139,7 @@ export default function Robo(props) {
     const newrole = []
     const newact = []
     const newbo = []
-    console.log(ref)
+    //console.log(ref)
     ref.refrole.forEach(d => {
       if (d.KODEACTOR !== '0') {
         newrole.push(
@@ -219,9 +219,9 @@ data.LISTDETAIL = LISTDETAIL
 
 
   const handleChangeDate = (value, index, jenis) => {
-    console.log(index)
+    
     let newArray = [...dataAct]
-
+    
     if (jenis === "tanggalMulai") {
       newArray[index] = { ...newArray[index], [jenis]: value, tanggalSelesai: value < newArray[index].tanggalSelesai ? newArray[index].tanggalSelesai : null };
     } else {
@@ -250,7 +250,7 @@ data.LISTDETAIL = LISTDETAIL
 
       newArray[index] = Object.assign(newArray[index],value)
     
-    console.log(newArray);
+  
     setDataRespAt(newArray);
   }
 
@@ -262,7 +262,7 @@ data.LISTDETAIL = LISTDETAIL
       [nik]:value
     };
     
-    console.log(newArray);
+    
     setDataRespAt(newArray);
   }
 
@@ -277,7 +277,7 @@ data.LISTDETAIL = LISTDETAIL
         [key]:value
       };
 
-      console.log(newArray)
+      //console.log(newArray)
       setDataRespAt(newArray);
       // console.log(newArray)
     }
@@ -288,7 +288,7 @@ data.LISTDETAIL = LISTDETAIL
         ...newArray[index],
         [key]:value
       };
-      console.log(newArray)
+      //console.log(newArray)
       setDataRespAt(newArray);
     }
 
@@ -330,13 +330,13 @@ data.LISTDETAIL = LISTDETAIL
           newArray.push(d)
       })
 
-      console.log(newArray)
+      //console.log(newArray)
       setDataRespPr(newArray);
     }
     if (param === "AT") {
       let newArray = [...dataRespAt]
       newArray.push(defaultDataAT);
-      console.log(newArray)
+      //console.log(newArray)
       setDataRespAt(newArray);
     }
     if (param === "ACT") {
@@ -353,13 +353,13 @@ data.LISTDETAIL = LISTDETAIL
   };
 
   const deleteRow = (index, param) => {
-    console.log(param)
+    //console.log(param)
     let newArrayError = [...error];
     newArrayError.splice(index, 1);
     setError(newArrayError);
     if (param === "PR") {
       let newArray = [...dataRespPr];
-      console.log(index)
+      //console.log(index)
       newArray.splice(index, 1);
       setDataRespPr(newArray);
     }
@@ -451,13 +451,13 @@ data.LISTDETAIL = LISTDETAIL
       //         setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
       //     });
       // } else {
-       console.log(data)
+       //console.log(data)
         createRobo(data)
           .then((response) => {
             // setDataDetail(formatNewData(response.data.LISTDETAIL.filter(d => !d.KODE)));
             setNomor(response.data[0].NOROBO)
             setEdit(true);
-            console.log(response)
+          //  console.log(response)
             setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil simpan", severity: "success" });
             setLoadingButton(false);
           })
@@ -980,6 +980,7 @@ data.LISTDETAIL = LISTDETAIL
                       fullWidth
                       multiline
                       clearable
+                      minDate={moment(d.tanggalMulai)}
                       id="tanggalSelesai"
                       format="DD/MM/YYYY"
                       label="Tanggal Selesai"
