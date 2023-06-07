@@ -109,18 +109,18 @@ export default function Robo(props) {
       }
       if (d.KODEACTOR !== '0') {
         newrespat.push(
-          { kodeactor: d.KODEACTOR, namaactor: d.NAMAACTOR, nik: {nik:d.NIK, nama: karyawan ? karyawan.find(kar => kar.nik === d.NIK).nama : ''}, nama: karyawan ? karyawan.find(kar => kar.nik === d.NIK).nama : '', ketrole: d.KETROLE.replace(/ *, */g, '\n'), idroleresp: d.IDROLERESP }
+          { kodeactor: d.KODEACTOR, namaactor: {namaactor:d.NAMAACTOR}, nik: {nik:d.NIK, nama: karyawan ? karyawan.find(kar => kar.nik === d.NIK).nama : ''}, nama: karyawan ? karyawan.find(kar => kar.nik === d.NIK).nama : '', ketrole: d.KETROLE.replace(/ *, */g, '\n'), idroleresp: d.IDROLERESP }
         )
       }
     })
     detail.ACT.forEach(d => {
       newact.push(
-        { idroact: d.IDROACT, namaact: d.NAMAACT, ketact: d.KETACT, namatj: d.NAMATJ, namapt: d.NAMAPT, tanggalMulai: moment(d.TGLMULAI,'DD/MM/YYYY'), tanggalSelesai: moment(d.TGLSELESAI,'DD/MM/YYYY') }
+        { idroact: d.IDROACT, namaact: {namaact:d.NAMAACT}, ketact: d.KETACT, namatj: d.NAMATJ, namapt: d.NAMAPT, tanggalMulai: moment(d.TGLMULAI,'DD/MM/YYYY'), tanggalSelesai: moment(d.TGLSELESAI,'DD/MM/YYYY') }
       )
     })
     detail.BO.forEach(d => {
       newbo.push(
-        { idboplan: d.IDBOPLAN, namatahap: d.NAMATAHAP, ketplan: d.KETPLAN.replace(/ *, */g, '\n'),kodehasil:d.KODEHASIL||'',kethasil:d.KETHASIL||'' }
+        { idboplan: d.IDBOPLAN, namatahap: {namatahap:d.NAMATAHAP}, ketplan: d.KETPLAN.replace(/ *, */g, '\n'),kodehasil:d.KODEHASIL||'',kethasil:d.KETHASIL||'' }
       )
     })
     setDataRespPr(newresppr)
@@ -244,13 +244,17 @@ data.LISTDETAIL = LISTDETAIL
 
   };
 
-  const handleChangerespat = (value, index) => {
+  const handleChangerespat = (value, index,key) => {
     let newArray = [...dataRespAt];
-  
-
-      newArray[index] = Object.assign(newArray[index],value)
+  if(value && value.namaactor){
+    console.log("masuk")
+      newArray[index] ={...newArray[index],...value,[key]:value}
+  }
+    else{
+      
+      newArray[index]={...defaultDataAT}
+    }
     
-  
     setDataRespAt(newArray);
   }
 
@@ -262,62 +266,39 @@ data.LISTDETAIL = LISTDETAIL
       [nik]:value
     };
     
-    
+    console.log(newArray)
     setDataRespAt(newArray);
   }
 
-
-  const handleChange = (value, index, key) => {
-
-
-    if (key === "respat") {
-      let newArray = [...dataRespAt];
-      newArray[index] = {
-        ...newArray[index],
-        [key]:value
-      };
-
-      //console.log(newArray)
-      setDataRespAt(newArray);
-      // console.log(newArray)
-    }
-
-    if (key === 'nik') {
-      let newArray = [...dataRespAt];
-      newArray[index] = {
-        ...newArray[index],
-        [key]:value
-      };
-      //console.log(newArray)
-      setDataRespAt(newArray);
-    }
-
-    if (key === 'act') {
-      let newArray = [...dataAct];
-      newArray[index] = {
-        ...newArray[index],
-        namaact: value.namaact,
-        idroact: value.idroact, ketact: value.ketact,
-        namatj: value.namatj, namapt: value.namapt,
-      };
-      setDataAct(newArray);
-    }
-    if (key === 'bo') {
-      let newArray = [...dataBo];
-      newArray[index] = {
-        ...newArray[index],
-        namatahap: value.namatahap,
-        ketplan: value.ketplan,
-        idboplan: value.idboplan
+  const handleChangeact = (value, index,key) => {
+    let newArray = [...dataAct];
+  if(value && value.namaact){
+    console.log("masuk")
+      newArray[index] ={...newArray[index],...value,[key]:value}
+  }
+    else{
       
-
-      };
-      
-      setDataBo(newArray);
-
+      newArray[index]={...defaultDataAct}
     }
+    console.log(newArray)
+    setDataAct(newArray);
+  }
 
-  };
+  const handleChangebo = (value, index,key) => {
+    let newArray = [...dataBo];
+  if(value && value.namatahap){
+    console.log("masuk")
+      newArray[index] ={...newArray[index],...value,[key]:value}
+  }
+    else{
+      
+      newArray[index]={...defaultDataBo}
+    }
+    console.log(newArray)
+    setDataBo(newArray);
+  }
+
+  
 
   const addRow = (param) => {
     let newArrayError = [...error];
@@ -395,7 +376,7 @@ data.LISTDETAIL = LISTDETAIL
         kodeactor:d.kodeactor,
         ketrole:d.ketrole,
         nama:d.nama,
-        namaactor:d.namaactor,
+        namaactor:d.namaactor.namaactor,
         nik:d.nik.nik})
     })
     const datares = dataRespPr.concat(frespat)
@@ -413,7 +394,7 @@ data.LISTDETAIL = LISTDETAIL
     dataAct.forEach(d => {
 
       LISTDETAIL.ACT.push({
-        ...d, tanggalMulai: moment(d.tanggalMulai).format("DD/MM/YYYY"),
+        ...d,namaact:d.namaact.namaact, tanggalMulai: moment(d.tanggalMulai).format("DD/MM/YYYY"),
         tanggalSelesai: moment(d.tanggalSelesai).format("DD/MM/YYYY")
       })
 
@@ -422,7 +403,7 @@ data.LISTDETAIL = LISTDETAIL
     })
 
     dataBo.forEach(d => {
-      LISTDETAIL.BO.push(d)
+      LISTDETAIL.BO.push({...d,namatahap:d.namatahap.namatahap})
     })
     //console.log(dataBo)
     //tempmaster.LISTDETAIL.EDIT = edit
@@ -451,7 +432,7 @@ data.LISTDETAIL = LISTDETAIL
       //         setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
       //     });
       // } else {
-       //console.log(data)
+       console.log(data)
         createRobo(data)
           .then((response) => {
             // setDataDetail(formatNewData(response.data.LISTDETAIL.filter(d => !d.KODE)));
@@ -759,11 +740,12 @@ data.LISTDETAIL = LISTDETAIL
                 <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justify="space-between" alignItems="center">
                   <Grid key={"grid-jabatan-" + i} item xs={2}>
                     <Autocomplete key={"respat-" + i} id={"respat-" + i} name={"respat-" + i}
-                      options={dataRef.refrole.filter((z) => z.kodeactor !== '0' && !dataRespAt.map(x=>x.kodeactor).includes(z.kodeactor))}
+                      options={dataRef.refrole.filter((z) => z.kodeactor !== '0')}
+                      getOptionDisabled={option=>!!dataRespAt.find(el=>el.namaactor.namaactor === option.namaactor)}
                       getOptionLabel={option => option.namaactor || ""}
-                      onChange={(e, v) => handleChangerespat(v, i)}
-                      //value={d.ketrole||""}
-                      inputValue={d.namaactor}
+                      onChange={(e, v) => handleChangerespat(v, i,'namaactor')}
+                      value={d.namaactor}
+                      //inputValue={d.namaactor}
 
                       //autoSelect={true}
                       getOptionSelected={
@@ -881,16 +863,17 @@ data.LISTDETAIL = LISTDETAIL
                 <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justify="space-between" alignItems="center">
                   <Grid key={"grid-aktivitas-" + i} item xs={2}>
                     <Autocomplete key={"act-" + i} id={"act-" + i} name={"act-" + i}
-                      options={dataRef.refact.filter(x=>!dataAct.map(z=>z.idroact).includes(x.idroact))}
-                      getOptionLabel={option => option.namaact}
-                      onChange={(e, v) => handleChange(v, i, "act")}
-                      //value={d.namaact}
-                      inputValue={d.namaact}
+                      options={dataRef.refact}
+                      getOptionDisabled={option=>!!dataAct.find(el=>el.namaact.namaact === option.namaact)}
+                      getOptionLabel={option => option.namaact||""}
+                      onChange={(e, v) => handleChangeact(v, i, "namaact")}
+                      value={d.namaact}
+                      //inputValue={d.namaact}
 
                       //autoSelect={true}
                       getOptionSelected={
 
-                        (option, value) => option.idroact === value.idroact
+                        (option, value) => option.namaact === value.namaact
                       }
                       renderOption={(option) => (
                         <React.Fragment>
@@ -1124,11 +1107,12 @@ data.LISTDETAIL = LISTDETAIL
                   <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justify="space-between" alignItems="center">
                     <Grid key={"grid-tahapan-" + i} item xs={2}>
                       <Autocomplete key={"tahapan-" + i} id={"tahapanv-" + i} name={"tahapan-" + i}
-                        options={dataRef.refbo.filter(x=>!dataBo.map(z=>z.namatahap).includes(x.namatahap))}
-                        getOptionLabel={option => option.namatahap}
-                        onChange={(e, v) => handleChange(v, i, "bo")}
-                        //value={d.namaact}
-                        inputValue={d.namatahap}
+                        options={dataRef.refbo}
+                        getOptionLabel={option => option.namatahap||""}
+                        getOptionDisabled={option=>!!dataBo.find(el=>el.namatahap.namatahap===option.namatahap)}
+                        onChange={(e, v) => handleChangebo(v, i, "namatahap")}
+                        value={d.namatahap}
+                        //inputValue={d.namatahap}
 
                         //autoSelect={true}
                         getOptionSelected={
