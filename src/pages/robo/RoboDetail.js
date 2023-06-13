@@ -102,7 +102,7 @@ export default function RoboDetail(props) {
     })
     detail.ACT.forEach(d => {
       newact.push(
-        { idroact: d.IDROACT, namaact: d.NAMAACT, ketact: d.KETACT, namatj: d.NAMATJ, namapt: d.NAMAPT, tanggalMulai: moment(d.TGLMULAI).format("DD/MM/YYYY"), tanggalSelesai: moment(d.TGLSELESAI).format("DD/MM/YYYY") }
+        { idroact: d.IDROACT, namaact: d.NAMAACT, ketact: d.KETACT, namatj: d.NAMATJ, namapt: d.NAMAPT, tanggalMulai: moment(d.TGLMULAI,'DD/MM/YYYY'), tanggalSelesai: moment(d.TGLSELESAI,'DD/MM/YYYY')  }
       )
     })
     detail.BO.forEach(d => {
