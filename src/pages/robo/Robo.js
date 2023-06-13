@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useContext } from 'react';
+import React, { useState, useEffect, useCallback, useContext, useRef } from 'react';
 import { FormControl,Grid, Select,Typography, Button, TextField, IconButton, Paper, makeStyles, CircularProgress, Divider, InputLabel, MenuItem, RadioGroup, FormControlLabel, Radio } from '@material-ui/core';
 import { RemoveCircleOutline, AddCircleOutline } from '@material-ui/icons';
 import AlertDialog from '../../components/AlertDialog';
@@ -48,7 +48,7 @@ const defaultError = { deskripsi: noErr, satuan: noErr, jumlah: noErr };
 export default function Robo(props) {
   const { robo,  karyawan, refe, risk } = props;
   const { user } = useContext(UserContext);
-
+  const formRef = useRef()
   const classes = useStyles();
 
   const [loadingButton, setLoadingButton] = useState(false);
@@ -362,12 +362,14 @@ data.LISTDETAIL = LISTDETAIL
   };
 
   const validateAll = (data) => {
-    //console.log(dataMaster)
-    if ((data.LISTDETAIL.RESP.length > 0 && data.LISTDETAIL.ACT.length > 0 && data.LISTDETAIL.BO.length > 0)) return true;
+
+    if (formRef.current.reportValidity() && (data.LISTDETAIL.RESP.length > 0 && data.LISTDETAIL.ACT.length > 0 && data.LISTDETAIL.BO.length > 0)) return true;
     else return false;
+   
   };
 
   const save = () => {
+
     setLoadingButton(true);
     console.log(dataDetail)
     const frespat = []
@@ -512,6 +514,7 @@ data.LISTDETAIL = LISTDETAIL
 
 
   return (
+    <form ref={formRef}>
     <Grid container direction="column" spacing={2}>
       <AlertDialog
         open={alertDialog.openAlertDialog}
@@ -637,7 +640,7 @@ data.LISTDETAIL = LISTDETAIL
                         disabled
 
                       // onChange={(event) => handleChange(event.target.value, i, "kebutuhan")}
-                      // required
+                       //required
                       // error={error[i].kebutuhan.error}
                       // helperText={error[i].kebutuhan.text}
                       />
@@ -653,7 +656,7 @@ data.LISTDETAIL = LISTDETAIL
                         className={classes.fieldDisabled}
                       // value={d.rincian}
                       // onChange={(event) => handleChange(event.target.value, i, "rincian")}
-                      // required
+                       //required
                       // error={error[i].rincian.error}
                       // helperText={error[i].rincian.text}
                       />
@@ -763,12 +766,13 @@ data.LISTDETAIL = LISTDETAIL
                           fullWidth
                           variant={d.disabled ? "standard" : "outlined"}
                           size="small"
+                          required
                         // error={error[i].resppr.error}
                         // helperText={error[i].resppr.text}
                         // className={d.disabled ? classes.fieldDisabled : null}
                         />
                       )}
-
+                        
                       disabled={d.disabled}
                     />
                   </Grid>
@@ -794,6 +798,7 @@ data.LISTDETAIL = LISTDETAIL
                           fullWidth
                           variant={"outlined"}
                           size="small"
+                          required
                         // error={error[i].error}
                         // helperText={error[i].text}
                         />
@@ -886,6 +891,7 @@ data.LISTDETAIL = LISTDETAIL
                           fullWidth
                           variant={d.disabled ? "standard" : "outlined"}
                           size="small"
+                          required
                         // error={error[i].resppr.error}
                         // helperText={error[i].resppr.text}
                         // className={d.disabled ? classes.fieldDisabled : null}
@@ -1130,6 +1136,7 @@ data.LISTDETAIL = LISTDETAIL
                             fullWidth
                             variant={d.disabled ? "standard" : "outlined"}
                             size="small"
+                            required
                           // error={error[i].resppr.error}
                           // helperText={error[i].resppr.text}
                           // className={d.disabled ? classes.fieldDisabled : null}
@@ -1212,10 +1219,11 @@ data.LISTDETAIL = LISTDETAIL
       </Grid>
       <Divider />
       <Grid item container direction="row" justify="flex-end">
-        <Button onClick={loadingButton ? null : save} variant="contained" color="primary">
+        <Button  onClick={ loadingButton ? null : save} variant="contained" color="primary">
           {loadingButton ? <CircularProgress size={20} color="inherit" /> : edit ? "Ubah" : "Simpan"}
         </Button>
       </Grid>
     </Grid>
+    </form>
   );
 };
