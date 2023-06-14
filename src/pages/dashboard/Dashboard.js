@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Grid, Typography, Divider, CircularProgress, TextField, InputAdornment, Card, CardActionArea, CardContent, Accordion, AccordionSummary, AccordionDetails, Stepper, Step, StepLabel, Chip, MenuItem } from "@material-ui/core";
+import { Checkbox, FormControlLabel, FormControl, FormGroup, Grid, Typography, Divider, CircularProgress, TextField, InputAdornment, Card, CardActionArea, CardContent, Accordion, AccordionSummary, AccordionDetails, Stepper, Step, StepLabel, Chip, MenuItem, Button } from "@material-ui/core";
 import { ExpandMore, Search } from '@material-ui/icons';
 import Pagination from "@material-ui/lab/Pagination";
 import { getListProyek, getSummaryProyek } from '../../gateways/api/ProyekAPI';
@@ -12,6 +12,8 @@ import 'chartjs-adapter-date-fns';
 import { Bar } from 'react-chartjs-2';
 import { groupBy } from "../../utils/Common";
 import { Autocomplete, createFilterOptions } from "@material-ui/lab";
+import * as FileSaver from 'file-saver'
+import XLSX from 'sheetjs-style'
 // import moment from "moment";
 
 ChartJS.register(
@@ -23,6 +25,8 @@ ChartJS.register(
   Tooltip,
   Legend
 );
+
+
 
 const options = {
   indexAxis: 'y',
@@ -162,6 +166,12 @@ export default function Dashboard(props) {
   const [status, setStatus] = useState('ALL');
   const [totalPages, setTotalPages] = useState(0);
   const [page, setPage] = useState(1);
+  const [state, setState] = React.useState({
+    SAP: true,
+    NON_SAP: true
+    
+  });
+  // const [filterproyek,setFilterproyek] = useState([])
   const [textSearch, setTextSearch] = useState("");
   const [listProyek, setListProyek] = useState([]);
   const [listProyekAfterSearch, setListProyekAfterSearch] = useState([]);
@@ -192,7 +202,7 @@ export default function Dashboard(props) {
 
     return null;
   };
-
+  const { SAP, NON_SAP } = state;
   const handleCloseAlertDialog = () => {
     setAlertDialog({ ...alertDialog, openAlertDialog: false });
   };
@@ -269,11 +279,11 @@ export default function Dashboard(props) {
     };
     // console.log(kegiatan);
     setLoading(true);
-    getListProyek(stat, true, nik)
+    getListProyek(stat, true, nik,state)
       .then((response) => {
         setListProyek(formatListProyek(response.data.list));
         setListProyekAfterSearch(formatListProyek(response.data.list));
-        // console.log(formatListProyek(response.data.list));
+        // setFilterproyek(formatListProyek(response.data.list))
         setLoading(false);
       })
       .catch((error) => {
@@ -283,11 +293,11 @@ export default function Dashboard(props) {
         else
           setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
       });
-  }, [karyawan, kegiatan]);
+  }, [karyawan, kegiatan,state]);
 
   useEffect(() => {
     getProyek(status, nik);
-  }, [getProyek, status, nik]);
+  }, [getProyek, status, nik,state]);
 
   const handleChangePage = (event, value) => {
     setPage(value);
@@ -315,8 +325,35 @@ export default function Dashboard(props) {
     setTextSearch(event.target.value);
     setPage(1);
     // setDataSearch(event.target.value);
+    
     setListProyekAfterSearch(listProyek.filter(d => d.NAMAPROYEK.toLowerCase().search(event.target.value.toLowerCase()) !== -1
       || d.NOLAYANAN.search(event.target.value.toLowerCase()) !== -1));
+   
+     
+  };
+
+  const handleChangeSAP = (event) => {
+   
+    setState({
+      ...state,
+      [event.target.name]: event.target.checked,
+    });
+    // if(event.target.checked){
+    //   jenis.push(event.target.name)
+     
+    // }else{
+    
+    //   var index = jenis.indexOf(event.target.name);
+    //   if (index > -1) {
+    //     jenis.splice(index, 1);
+    //  }
+    // }
+    
+    //  setPage(1);
+    
+    
+    //  setListProyekAfterSearch(listProyek.filter(d => jenis.indexOf(d.JENISPROJ)>-1))
+    // setFilterproyek(listProyek.filter(d => jenis.indexOf(d.JENISPROJ)>-1))
   };
 
   const handleChangeExpand = (panel) => (event, isExpanded) => {
@@ -331,9 +368,39 @@ export default function Dashboard(props) {
     else if (data === "Kajian Risiko") return stepper.NORISK;
     else if (data === "Realisasi") return stepper.NOREAL;
     else if (data === "UAT") return stepper.NOUAT;
+    else if (data === "ROBO") return stepper.NOROBO;
     else if (data === "BAST") return stepper.NOBA;
     else return false;
   };
+
+ 
+      
+      
+      const exportExcel = async()=>{
+        const filename = 'dashboard'
+        const dataproyek = listProyek.map(({dataGrafik,opt,stepper,charter,plan,real,...rest})=>rest)
+        
+        //const datacharter = listProyek.flatMap(d=>d.charter)
+       
+       // const dataplan = listProyek.flatMap(d=>d.plan)
+        //const datareal = listProyek.flatMap(d=>d.real)
+        const fileType = 'application/vnd.openxmlformats-officedocuments.spreadsheetml.sheet;charset=UTF-8';
+        const fileExt = '.xlsx'
+        const wsproyek = XLSX.utils.json_to_sheet(dataproyek);
+        // const wscharter = XLSX.utils.json_to_sheet(datacharter);
+        // const wsplan = XLSX.utils.json_to_sheet(dataplan);
+        // const wsreal = XLSX.utils.json_to_sheet(datareal);
+        const wb = XLSX.utils.book_new();
+                  XLSX.utils.book_append_sheet(wb,wsproyek,'Proyek')
+                  // XLSX.utils.book_append_sheet(wb,wscharter,'Charter')
+                  // XLSX.utils.book_append_sheet(wb,wsplan,'Plan')
+                  // XLSX.utils.book_append_sheet(wb,wsreal,'Real')
+        //const wb = {Sheets:{'data':wsproyek},SheetNames:['proyek']}
+        const excelbuffer = XLSX.write(wb,{bookType:'xlsx',type:'array'})
+        const data = new Blob([excelbuffer],{type:fileType})
+        FileSaver.saveAs(data,filename+fileExt);
+      }
+  
 
   return (
     <Grid container direction="column" spacing={3}>
@@ -410,69 +477,88 @@ export default function Dashboard(props) {
               />
             )}
           />}
-        </Grid>
-        <Grid item xs>
-          {loading ? <Grid container justify="center"><CircularProgress /></Grid>
-            : listProyek.length > 0 ?
-              listProyekAfterSearch.slice((page - 1) * itemsPerPage, page * itemsPerPage)
-                .map((d, i) => (
-                  <Accordion expanded={expanded === d.IDPROYEK} onChange={handleChangeExpand(d.IDPROYEK)} key={"accord-" + i}>
-                    <AccordionSummary
-                      key={"accord-sum-" + i}
-                      expandIcon={<ExpandMore />}
-                      aria-controls={"panel" + i + "-content"}
-                      id={"panel" + i + "-header"}
-                    >
-                      {/* <Avatar key={"avatar-" + i} alt={d.NAMAPROYEK ? d.NAMAPROYEK.toUpperCase() : "N"} src="#" /> */}
-                      <Grid container alignItems="center" justify="space-between" >
-                        <Typography key={"no-layanan-" + i}>
-                          {d.NOLAYANAN + " | " + d.NAMAPROYEK}
-                        </Typography>
-                        <Chip label={d.STATUSPROYEK} style={{ backgroundColor: setStatusColor(d.STATUSPROYEK, d.plan), color: d.STATUSPROYEK === 'BERJALAN' && d.plan.length > 0 ? 'white' : null }} />
-                      </Grid>
-                    </AccordionSummary>
-                    <AccordionDetails key={"accord-dtl-" + i}>
-                      <Grid container direction="column" spacing={2}>
-                        <Grid item xs container justify="center">
-                          <Card style={{ width: '75%' }}>
-                            <Stepper alternativeLabel activeStep={-1}>
-                              {labelStepper
-                                .map((dStepper, index) => (
-                                  <Step key={dStepper} completed={d.stepper ? completeStepper(dStepper, d.stepper) : false}>
-                                    <StepLabel>{dStepper}</StepLabel>
-                                  </Step>
-                                ))}
-                            </Stepper>
-                          </Card>
-                        </Grid>
-                        {
-                          d.charter.length > 0 && d.plan.length > 0 &&
-                          <Grid item xs container justify="center">
-                            <Card style={{ width: '75%' }}>
-                              <Bar options={d.opt} data={d.dataGrafik} />
-                            </Card>
+          <FormControl component="fieldset">
+            <FormGroup aria-label="position" row>
+              <FormControlLabel
+                value="start"
+                control={<Checkbox checked={SAP} onChange={handleChangeSAP} name="SAP" />}
+                label="SAP"
+                labelPlacement="start"
+              />
+              <FormControlLabel
+                value="start"
+                control={<Checkbox checked={NON_SAP} onChange={handleChangeSAP} name="NON_SAP"/>}
+                label="Non SAP"
+                labelPlacement="start"
+              />
+              </FormGroup>
+            </FormControl>
+            </Grid>
+            <Grid item xs>
+              {loading ? <Grid container justify="center"><CircularProgress /></Grid>
+                : listProyek.length > 0 ?
+                  listProyekAfterSearch.slice((page - 1) * itemsPerPage, page * itemsPerPage)
+                    .map((d, i) => (
+                      <Accordion expanded={expanded === d.IDPROYEK} onChange={handleChangeExpand(d.IDPROYEK)} key={"accord-" + i}>
+                        <AccordionSummary
+                          key={"accord-sum-" + i}
+                          expandIcon={<ExpandMore />}
+                          aria-controls={"panel" + i + "-content"}
+                          id={"panel" + i + "-header"}
+                        >
+                          {/* <Avatar key={"avatar-" + i} alt={d.NAMAPROYEK ? d.NAMAPROYEK.toUpperCase() : "N"} src="#" /> */}
+                          <Grid container alignItems="center" justify="space-between" >
+                            <Typography key={"no-layanan-" + i}>
+                              {d.NOLAYANAN + " | " + d.NAMAPROYEK}
+                            </Typography>
+                            <Chip label={d.STATUSPROYEK} style={{ backgroundColor: setStatusColor(d.STATUSPROYEK, d.plan), color: d.STATUSPROYEK === 'BERJALAN' && d.plan.length > 0 ? 'white' : null }} />
                           </Grid>
-                        }
-                      </Grid>
-                    </AccordionDetails>
-                  </Accordion>))
-              : <><Divider style={{ marginTop: 8, marginBottom: 18 }} />
-                <Grid container justify="center">
-                  <Typography>Tidak ada data.</Typography>
-                </Grid></>
-          }
+                        </AccordionSummary>
+                        <AccordionDetails key={"accord-dtl-" + i}>
+                          <Grid container direction="column" spacing={2}>
+                            <Grid item xs container justify="center">
+                              <Card style={{ width: '75%' }}>
+                                <Stepper alternativeLabel activeStep={-1}>
+                                  {labelStepper
+                                    .map((dStepper, index) => (
+                                      <Step key={dStepper} completed={d.stepper ? completeStepper(dStepper, d.stepper) : false}>
+                                        <StepLabel>{dStepper}</StepLabel>
+                                      </Step>
+                                    ))}
+                                </Stepper>
+                              </Card>
+                            </Grid>
+                            {
+                              d.charter.length > 0 && d.plan.length > 0 &&
+                              <Grid item xs container justify="center">
+                                <Card style={{ width: '75%' }}>
+                                  <Bar options={d.opt} data={d.dataGrafik} />
+                                </Card>
+                              </Grid>
+                            }
+                          </Grid>
+                        </AccordionDetails>
+                      </Accordion>))
+                  : <><Divider style={{ marginTop: 8, marginBottom: 18 }} />
+                    <Grid container justify="center">
+                      <Typography>Tidak ada data.</Typography>
+                    </Grid></>
+              }
+            </Grid>
+            {totalPages > 0 && <Grid item xs container justify="center" style={{ marginTop: 10 }}>
+              <Pagination
+                count={totalPages}
+                page={page}
+                onChange={handleChangePage}
+                defaultPage={1}
+                color="primary"
+                size="small"
+              />
+            </Grid>}
+            <Grid item xs container justify="flex-end">
+            <Button variant="contained" onClick={exportExcel} color="primary">Excel Export</Button>
+            </Grid>
         </Grid>
-        {totalPages > 0 && <Grid item xs container justify="center" style={{ marginTop: 10 }}>
-          <Pagination
-            count={totalPages}
-            page={page}
-            onChange={handleChangePage}
-            defaultPage={1}
-            color="primary"
-            size="small"
-          />
-        </Grid>}
       </Grid>
-    </Grid>
-  );
+      );
 }
