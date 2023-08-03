@@ -10,12 +10,13 @@ import { getRencanaPelaksanaanByIdProyek } from '../../gateways/api/PlanAPI';
 
 export default function RealisasiRouter(props) {
   const { proyek } = props;
-  const { user, karyawan: cKaryawan, kegiatan: cKegiatan } = useContext(UserContext);
+  const { user, karyawan: cKaryawan, kegiatan: cKegiatan,role } = useContext(UserContext);
 
   const [loading, setLoading] = useState(true);
   const [plan, setPlan] = useState(null);
   const [realisasi, setRealisasi] = useState(null);
   const [status, setStatus] = useState(null);
+  const [roles, setRoles] = useState(null);
   const [kegiatan, setKegiatan] = useState(null);
   const [karyawan, setKaryawan] = useState(null);
 
@@ -39,20 +40,30 @@ export default function RealisasiRouter(props) {
       setKegiatan(cKegiatan);
       setKaryawan(cKaryawan.filter(d => d.organisasi.includes("IT")));
       setLoading(false);
+
+      const maprole = role.filter(d=>(d.IDAUTH!== 1 && d.IDAUTH !== 3  && d.IDAUTH !== 5)).map(d=>({
+        id:d.IDAUTH.toString(),
+        kode:d.KODEAUTH,
+        nama:d.NAMAAUTH
+  
+      }))
+  
+      setRoles(maprole)
     }
+    
     if (!realisasi) {
       setLoading(true);
       fetchData();
     }
-  }, [realisasi, proyek, cKegiatan, cKaryawan]);
+  }, [realisasi, proyek, cKegiatan, cKaryawan,role]);
 
   if (loading)
     return <CircularProgress />;
   else if (otoritas === "PM" && realisasi && status && status.NOPLAN && !status.NOBA)
-    return <Realisasi realisasi={realisasi} proyek={proyek} karyawan={karyawan} kegiatan={kegiatan} plan={plan} />;
+    return <Realisasi realisasi={realisasi} proyek={proyek} karyawan={karyawan} kegiatan={kegiatan} plan={plan} roles={roles} />;
   else if (realisasi && Object.keys(realisasi).length === 0)
     return <ErrorPage code="" message={otoritas === "PM" ? "Rencana Pelaksanaan belum diinput" : "Realisasi belum diinput"} />;
   else
-    return <RealisasiDetail realisasi={realisasi} karyawan={karyawan} kegiatan={kegiatan} plan={plan} />;
+    return <RealisasiDetail roles={roles}realisasi={realisasi} karyawan={karyawan} kegiatan={kegiatan} plan={plan} />;
 
 };
