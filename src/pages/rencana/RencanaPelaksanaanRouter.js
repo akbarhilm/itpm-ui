@@ -10,13 +10,14 @@ import { getCharterByIdProyek } from '../../gateways/api/CharterAPI';
 
 export default function RencanaPelaksanaanRouter(props) {
   const { proyek } = props;
-  const { user, karyawan: cKaryawan, kegiatan: cKegiatan } = useContext(UserContext);
+  const { user, karyawan: cKaryawan, kegiatan: cKegiatan,role } = useContext(UserContext);
 
   const [loading, setLoading] = useState(true);
   const [plan, setPlan] = useState(null);
   const [tglAwalCharter, setTglAwalCharter] = useState(null);
   const [status, setStatus] = useState(null);
   const [kegiatan, setKegiatan] = useState(null);
+  const [roles, setRoles] = useState(null);
   const [karyawan, setKaryawan] = useState(null);
 
   const otoritas = user.NIK === proyek.NIKREQ ? "BPO" : user.NIK === proyek.NIKPM ? "PM" : "PMO";
@@ -40,9 +41,17 @@ export default function RencanaPelaksanaanRouter(props) {
       const orderListKegiatan = cKegiatan.sort((a, b) => a.IDKEGIATAN - b.IDKEGIATAN).map(d => ({
         id: d.IDKEGIATAN,
         kegiatan: d.NAMAKEGIATAN,
-        target: d.NAMATARGET
+        target: d.NAMATARGET,
+        bobot: d.NILAIBOBOT
       }));
+      const maprole = role.filter(d=>(d.IDAUTH!== 1 && d.IDAUTH !== 3  && d.IDAUTH !== 5)).map(d=>({
+        id:d.IDAUTH.toString(),
+        kode:d.KODEAUTH,
+        nama:d.NAMAAUTH
+
+      }))
       setKegiatan(orderListKegiatan);
+      setRoles(maprole)
       setKaryawan(cKaryawan.filter(d => d.organisasi.includes("IT")));
       setLoading(false);
     }
@@ -50,14 +59,14 @@ export default function RencanaPelaksanaanRouter(props) {
       setLoading(true);
       fetchData();
     }
-  }, [plan, proyek, cKaryawan, cKegiatan]);
+  }, [plan, proyek, cKaryawan, cKegiatan,role]);
 
   if (loading)
     return <CircularProgress />;
   else if (otoritas === "PM" && plan && status && status.NOUREQ && !status.NOBA)
-    return <RencanaPelaksanaan plan={plan} proyek={proyek} kegiatan={kegiatan} karyawan={karyawan} minDate={tglAwalCharter} />;
+    return <RencanaPelaksanaan plan={plan} proyek={proyek} kegiatan={kegiatan} roles={roles} karyawan={karyawan} minDate={tglAwalCharter} />;
   else if (plan && Object.keys(plan).length === 0)
     return <ErrorPage code="" message={"Rencana Pelaksanaan belum diinput"} />;
   else
-    return <RencanaPelaksanaanDetail plan={plan} kegiatan={kegiatan} karyawan={karyawan} />;
+    return <RencanaPelaksanaanDetail plan={plan} roles={roles} kegiatan={kegiatan} karyawan={karyawan} />;
 };

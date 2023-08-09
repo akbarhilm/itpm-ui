@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function RealisasiDetail(props) {
-  const { realisasi, karyawan, kegiatan, plan } = props;
+  const { realisasi, karyawan, kegiatan, plan,roles } = props;
   const classes = useStyles();
 
   const [data, setData] = useState();
@@ -35,6 +35,7 @@ export default function RealisasiDetail(props) {
       const groupedRencana = groupBy(plan.LISTDETAIL, x => x.IDKEGIATAN);
       const newlist = [];
       groupedRencana.forEach((value, key, map) => {
+        const role = roles? !!roles.find(e=>e.id === 0)?roles.find(el=>el.id === value[0].IDROLE):{id:value[0].IDROLE}:{id:value[0].IDROLE}
         newlist.push({
           idkegiatan: key,
           kegiatan: kegiatan.length > 0 ? kegiatan.filter(k => k.IDKEGIATAN === key)[0].NAMAKEGIATAN : "",
@@ -43,10 +44,12 @@ export default function RealisasiDetail(props) {
               .map(r => karyawan.filter(kar => kar.nik === r.NIKPELAKSANA).length > 0 ? karyawan.filter(kar => kar.nik === r.NIKPELAKSANA)[0].nik : r.NIKPELAKSANA)
               .toString()
             : "",
+            role:role,
           tanggalMulai: listdetail.filter(l => l.IDKEGIATAN === key).length > 0 ? listdetail.filter(l => l.IDKEGIATAN === key)[0].TGLMULAI : "",
           tanggalSelesai: listdetail.filter(l => l.IDKEGIATAN === key).length > 0 ? listdetail.filter(l => l.IDKEGIATAN === key)[0].TGLSELESAI : "",
           // disabled: listdetail.filter(l => l.IDKEGIATAN === key).length > 0 ? true : false,
           // checked: listdetail.filter(l => l.IDKEGIATAN === key).length > 0 ? true : false,
+          progress:listdetail.filter(l=>l.IDKEGIATAN===key).length>0?listdetail.find(l=>l.IDKEGIATAN===key).PROGRESS:""
         });
       });
       newlist.sort((a, b) => a.idkegiatan - b.idkegiatan); // sorting by idkegiatan asc
@@ -75,7 +78,7 @@ export default function RealisasiDetail(props) {
     //   setData([defaultData]);
     //   setError([defaultError]);
     // }
-  }, [realisasi, plan, kegiatan, karyawan]);
+  }, [realisasi, plan, kegiatan, karyawan,roles]);
 
   return (
     <Grid container direction="column" spacing={2}>
@@ -110,15 +113,18 @@ export default function RealisasiDetail(props) {
                 <Grid item xs>
                   <Typography align="center" variant="body2"><b>Pelaksana</b></Typography>
                 </Grid>
+                <Grid item xs>
+                  <Typography align="center" variant="body2"><b>Role</b></Typography>
+                </Grid>
                 <Grid item xs={2}>
                   <Typography align="center" variant="body2"><b>Tanggal Mulai</b></Typography>
                 </Grid>
                 <Grid item xs={2}>
                   <Typography align="center" variant="body2"><b>Tanggal Selesai</b></Typography>
                 </Grid>
-                {/* <Grid item xs={1}>
-                  <Typography align="center" variant="body2"><b>Pilih</b></Typography>
-                </Grid> */}
+                <Grid item xs={1}>
+                  <Typography align="center" variant="body2"><b>Progress</b></Typography>
+                </Grid>
               </Grid>
               {data && data.map((d, i) =>
                 <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justify="space-between" alignItems="flex-start">
@@ -174,6 +180,16 @@ export default function RealisasiDetail(props) {
                       className={classes.fieldTableDisabled}
                     />
                   </Grid>
+                  <Grid key={"grid-role-" + i} item xs>
+                    <TextField key={"role-" + i} id={"role-" + i} name={"role-" + i}
+                      multiline
+                      fullWidth
+                      size="small"
+                      value={d.role.id==="0"?"N/A":d.role.kode}
+                      disabled
+                      className={classes.fieldTableDisabled}
+                    />
+                  </Grid>
                   <Grid key={"grid-mulai-" + i} item xs={2}>
                     {/* <KeyboardDatePicker key={"mulai-" + i} id={"mulai-" + i} name={"mulai-" + i}
                       fullWidth
@@ -221,6 +237,17 @@ export default function RealisasiDetail(props) {
                       disabled
                       className={classes.fieldTableDisabled}
                     />
+                  </Grid>
+                  <Grid key={"grid-progres-" + i} item xs={1} container justify="center">
+                  <TextField key={"progres-" + i} id={"progres-" + i} name={"progres-" + i}
+                      fullWidth
+                      size="small"
+                      multiline
+                      value={d.progress==="0"?"N/A":d.progress}
+                      disabled
+                      className={classes.fieldTableDisabled}
+                    />
+                    {/* <Checkbox key={"check-" + i} disabled={d.disabled} checked={d.checked} onChange={(e) => onCheck(e.target.checked, i, d)} /> */}
                   </Grid>
                   {/* <Grid key={"grid-check-" + i} item xs={1} container justify="center">
                     <Checkbox key={"check-" + i} disabled={d.disabled} checked={d.checked} onChange={(e) => onCheck(e.target.checked, i, d)} />

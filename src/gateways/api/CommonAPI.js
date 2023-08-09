@@ -23,3 +23,7 @@ export const getAllKaryawan = async () => {
 export const getKaryawanIT = async () => {
   return await api.get('/profil/karyawanIT');
 };
+
+export const getAllRole = async () => {
+  return await api.get('/profil/otoritas');
+};
