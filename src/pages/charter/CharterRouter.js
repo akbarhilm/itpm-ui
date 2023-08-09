@@ -57,7 +57,7 @@ export default function CharterRouter(props) {
     return <Charter charter={charter} proyek={proyek} />;
   else if (charter && Object.keys(charter).length === 0)
     return <ErrorPage code="" message="Charter belum diinput" />;
-  else if ((otoritas === "BPO" || otoritas === "PMO") && charter && Object.keys(charter).length > 0 && status && !status.NOUREQ)
+  else if (otoritas === "BPO" && charter && Object.keys(charter).length > 0 && status && !status.NOUREQ)
     return <CharterApproval charter={charter} proyek={proyek} />;
   else
     return <CharterDetail charter={charter} proyek={proyek} />;
