@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function RealisasiDetail(props) {
-  const { realisasi, karyawan, kegiatan, plan,roles } = props;
+  const { realisasi, karyawan, kegiatan, plan } = props;
   const classes = useStyles();
 
   const [data, setData] = useState();
@@ -35,7 +35,7 @@ export default function RealisasiDetail(props) {
       const groupedRencana = groupBy(plan.LISTDETAIL, x => x.IDKEGIATAN);
       const newlist = [];
       groupedRencana.forEach((value, key, map) => {
-        const role = roles? !!roles.find(e=>e.id === 0)?roles.find(el=>el.id === value[0].IDROLE):{id:value[0].IDROLE}:{id:value[0].IDROLE}
+       // const role = roles? !!roles.find(e=>e.id === 0)?roles.find(el=>el.id === value[0].IDROLE):{id:value[0].IDROLE}:{id:value[0].IDROLE}
         newlist.push({
           idkegiatan: key,
           kegiatan: kegiatan.length > 0 ? kegiatan.filter(k => k.IDKEGIATAN === key)[0].NAMAKEGIATAN : "",
@@ -44,7 +44,7 @@ export default function RealisasiDetail(props) {
               .map(r => karyawan.filter(kar => kar.nik === r.NIKPELAKSANA).length > 0 ? karyawan.filter(kar => kar.nik === r.NIKPELAKSANA)[0].nik : r.NIKPELAKSANA)
               .toString()
             : "",
-            role:role,
+           // role:role,
           tanggalMulai: listdetail.filter(l => l.IDKEGIATAN === key).length > 0 ? listdetail.filter(l => l.IDKEGIATAN === key)[0].TGLMULAI : "",
           tanggalSelesai: listdetail.filter(l => l.IDKEGIATAN === key).length > 0 ? listdetail.filter(l => l.IDKEGIATAN === key)[0].TGLSELESAI : "",
           // disabled: listdetail.filter(l => l.IDKEGIATAN === key).length > 0 ? true : false,
@@ -78,7 +78,7 @@ export default function RealisasiDetail(props) {
     //   setData([defaultData]);
     //   setError([defaultError]);
     // }
-  }, [realisasi, plan, kegiatan, karyawan,roles]);
+  }, [realisasi, plan, kegiatan, karyawan]);
 
   return (
     <Grid container direction="column" spacing={2}>
@@ -113,9 +113,9 @@ export default function RealisasiDetail(props) {
                 <Grid item xs>
                   <Typography align="center" variant="body2"><b>Pelaksana</b></Typography>
                 </Grid>
-                <Grid item xs>
+                {/* <Grid item xs>
                   <Typography align="center" variant="body2"><b>Role</b></Typography>
-                </Grid>
+                </Grid> */}
                 <Grid item xs={2}>
                   <Typography align="center" variant="body2"><b>Tanggal Mulai</b></Typography>
                 </Grid>
@@ -180,7 +180,7 @@ export default function RealisasiDetail(props) {
                       className={classes.fieldTableDisabled}
                     />
                   </Grid>
-                  <Grid key={"grid-role-" + i} item xs>
+                  {/* <Grid key={"grid-role-" + i} item xs>
                     <TextField key={"role-" + i} id={"role-" + i} name={"role-" + i}
                       multiline
                       fullWidth
@@ -189,7 +189,7 @@ export default function RealisasiDetail(props) {
                       disabled
                       className={classes.fieldTableDisabled}
                     />
-                  </Grid>
+                  </Grid> */}
                   <Grid key={"grid-mulai-" + i} item xs={2}>
                     {/* <KeyboardDatePicker key={"mulai-" + i} id={"mulai-" + i} name={"mulai-" + i}
                       fullWidth

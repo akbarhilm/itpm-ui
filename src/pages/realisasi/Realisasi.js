@@ -30,15 +30,15 @@ const useStyles = makeStyles((theme) => ({
 
 const defaultAlert = { openAlertDialog: false, messageAlertDialog: "", severity: "info" };
 
-const defaultData = { kegiatan: null, pelaksana: [],role:null, tanggalMulai: null, tanggalSelesai: null, target: "",progress:"" };
+const defaultData = { kegiatan: null, pelaksana: [], tanggalMulai: null, tanggalSelesai: null, target: "",progress:"" };
 
 const err = { error: true, text: "Tidak boleh kosong." };
 const errPro = { error: true, text: "Tidak boleh lebih dari bobot." };
 const noErr = { error: false, text: "" };
-const defaultError = { role:noErr,kegiatan: noErr,progress:noErr, pelaksana: noErr, tanggalMulai: noErr, tanggalSelesai: noErr };
+const defaultError = { kegiatan: noErr,progress:noErr, pelaksana: noErr, tanggalMulai: noErr, tanggalSelesai: noErr };
 
 export default function Realisasi(props) {
-  const { realisasi, proyek, karyawan, kegiatan, plan,roles } = props;
+  const { realisasi, proyek, karyawan, kegiatan, plan } = props;
   const classes = useStyles();
 
   const [loadingButton, setLoadingButton] = useState(false);
@@ -48,7 +48,7 @@ export default function Realisasi(props) {
   const [error, setError] = useState();
   // const [dataSave, setDataSave] = useState([]);
   const [minimumDate, setMinimumDate] = useState([]);
-  const [listrole,setListrole] = useState();
+  //const [listrole,setListrole] = useState();
   const [listKaryawan, setListKaryawan] = useState();
   const [alertDialog, setAlertDialog] = useState(defaultAlert);
 
@@ -65,7 +65,7 @@ export default function Realisasi(props) {
       
       groupedRencana.forEach((value, key, map) => {
         const keg = kegiatan.length > 0 ? kegiatan.find(k => k.IDKEGIATAN === key): ""
-        const role = listrole? !!listrole.find(e=>e.id === value[0].IDROLE)?listrole.find(el=>el.id === value[0].IDROLE):{id:value[0].IDROLE}:{id:value[0].IDROLE}
+        //const role = listrole? !!listrole.find(e=>e.id === value[0].IDROLE)?listrole.find(el=>el.id === value[0].IDROLE):{id:value[0].IDROLE}:{id:value[0].IDROLE}
         newlist.push({
           idkegiatan: key,
           bobot:keg.NILAIBOBOT,
@@ -74,10 +74,10 @@ export default function Realisasi(props) {
             listdetail.filter(l => l.IDKEGIATAN === key)
               .map(r => karyawan.filter(kar => kar.nik === r.NIKPELAKSANA)[0] || ({ nik: r.NIKPELAKSANA }))
             : value.map(v => karyawan.filter(kar => kar.nik === v.NIKPELAKSANA)[0] || ({ nik: v.NIKPELAKSANA })),
-          role:role,
+          //role:role,
           tanggalMulai: listdetail.filter(l => l.IDKEGIATAN === key).length > 0 ? moment(listdetail.filter(l => l.IDKEGIATAN === key)[0].TGLMULAI, "DD/MM/YYYY") : moment(value[0].TGLMULAI, "DD/MM/YYYY"),
           tanggalSelesai: listdetail.filter(l => l.IDKEGIATAN === key).length > 0 ? moment(listdetail.filter(l => l.IDKEGIATAN === key)[0].TGLSELESAI, "DD/MM/YYYY") : moment(value[0].TGLSELESAI, "DD/MM/YYYY"),
-          disabled: listdetail.filter(l=>l.IDKEGIATAN===key).length > 0 ? listdetail.find(l=>l.IDKEGIATAN===key).PROGRESS!=="0"?true:false : false,
+          disabled: listdetail.filter(l=>l.IDKEGIATAN===key).length > 0 ? listdetail.find(l=>l.IDKEGIATAN===key).PROGRESS===keg.NILAIBOBOT?true:false : false,
           // checked: listdetail.filter(l => l.IDKEGIATAN === key).length > 0 ? true : false,
           progress:listdetail.filter(l=>l.IDKEGIATAN===key).length>0?listdetail.find(l=>l.IDKEGIATAN===key).PROGRESS:value[0].PROGRESS
         });
@@ -88,7 +88,7 @@ export default function Realisasi(props) {
     } else {
       return [];
     }
-  }, [plan, karyawan, kegiatan,listrole]);
+  }, [plan, karyawan, kegiatan]);
 
   useEffect(() => {
     if (Object.keys(plan).length > 0) {
@@ -113,11 +113,11 @@ export default function Realisasi(props) {
     }
   }, [realisasi, plan, formatNewData]);
 
-  useEffect(() => {
-    if (!listrole) {
-      setListrole(roles);
-    }
-  }, [listrole, roles]);
+  // useEffect(() => {
+  //   if (!listrole) {
+  //     setListrole(roles);
+  //   }
+  // }, [listrole, roles]);
 
   useEffect(() => {
     if (!listKaryawan) {
@@ -180,7 +180,7 @@ export default function Realisasi(props) {
           const newObj = {
             kegiatan: data[i].kegiatan ? noErr : err,
             pelaksana: data[i].pelaksana.length > 0 ? noErr : err,
-            role: data[i].role ? noErr : err,
+            //role: data[i].role ? noErr : err,
             tanggalMulai: data[i].tanggalMulai ? noErr : err,
             tanggalSelesai: data[i].tanggalSelesai ? noErr : err,
             progress:Number(data[i].progress)<=Number(data[i].bobot)?noErr:errPro
@@ -190,7 +190,7 @@ export default function Realisasi(props) {
       })
     );
     // validasi data yang akan disimpan saja (yang sudah di check pada kolom pilih), bukan seluruh data yang terlihat pada page
-    if (data.every(dt => dt.kegiatan &&  dt.role && dt.progress && dt.pelaksana.length > 0 && dt.tanggalMulai && dt.tanggalSelesai)&&!error.find(x=> Object.values(x).some(e=>e.error))) return true;
+    if (data.every(dt => dt.kegiatan  && dt.progress && dt.pelaksana.length > 0 && dt.tanggalMulai && dt.tanggalSelesai)&&!error.find(x=> Object.values(x).some(e=>e.error))) return true;
     else return false;
   };
 
@@ -202,7 +202,7 @@ export default function Realisasi(props) {
           idkegiatan: dt.idkegiatan,
           pelaksana: dt.pelaksana.map(pel => pel.nik),
           progress: dt.progress,
-          idrole : dt.role.id,
+         // idrole : dt.role.id,
           tglmulai: moment(dt.tanggalMulai).format("DD/MM/YYYY"),
           tglselesai: moment(dt.tanggalSelesai).format("DD/MM/YYYY")
         }));
@@ -289,12 +289,10 @@ export default function Realisasi(props) {
                 <Grid item xs>
                   <Typography align="center" variant="body2"><b>Kegiatan</b></Typography>
                 </Grid>
-                <Grid item xs={3}>
+                <Grid item xs>
                   <Typography align="center" variant="body2"><b>Pelaksana</b></Typography>
                 </Grid>
-                <Grid item xs>
-                  <Typography align="center" variant="body2"><b>Role</b></Typography>
-                </Grid>
+              
                 <Grid item xs={2}>
                   <Typography align="center" variant="body2"><b>Tanggal Mulai</b></Typography>
                 </Grid>
@@ -317,7 +315,7 @@ export default function Realisasi(props) {
                       className={classes.fieldTableDisabled}
                     />
                   </Grid>
-                  <Grid key={"grid-pelaksana-" + i} item xs={3}>
+                  <Grid key={"grid-pelaksana-" + i} item xs>
                     <Autocomplete key={"pelaksana-" + i} id={"pelaksana-" + i} name={"pelaksana-" + i}
                       multiple
                       disableCloseOnSelect
@@ -352,7 +350,7 @@ export default function Realisasi(props) {
                       disabled={d.disabled}
                     />
                   </Grid>
-                  <Grid key={"grid-role-" + i} item xs>
+                  {/* <Grid key={"grid-role-" + i} item xs>
                   <Autocomplete key={"role-" + i} id={"role-" + i} name={"role-" + i}
                    
                    options={listrole || []}
@@ -381,7 +379,7 @@ export default function Realisasi(props) {
                    )}
                    disabled={d.disabled||d.role.id==="0"?true:false}
                  />
-                  </Grid>
+                  </Grid> */}
                   <Grid key={"grid-mulai-" + i} item xs={2}>
                     <KeyboardDatePicker key={"mulai-" + i} id={"mulai-" + i} name={"mulai-" + i}
                       fullWidth
@@ -424,7 +422,7 @@ export default function Realisasi(props) {
                        value={d.progress}
                        error={error[i].progress.error}
                        helperText={error[i].progress.text}
-                       disabled={d.disabled||d.role.id==="0"?true:false}
+                       //disabled={d.disabled}
                     />
                     {/* <Checkbox key={"check-" + i} disabled={d.disabled} checked={d.checked} onChange={(e) => onCheck(e.target.checked, i, d)} /> */}
                   </Grid>
