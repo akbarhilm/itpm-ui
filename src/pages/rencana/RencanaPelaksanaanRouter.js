@@ -17,7 +17,7 @@ export default function RencanaPelaksanaanRouter(props) {
   const [tglAwalCharter, setTglAwalCharter] = useState(null);
   const [status, setStatus] = useState(null);
   const [kegiatan, setKegiatan] = useState(null);
-  const [roles, setRoles] = useState(null);
+  //const [roles, setRoles] = useState(null);
   const [karyawan, setKaryawan] = useState(null);
 
   const otoritas = user.NIK === proyek.NIKREQ ? "BPO" : user.NIK === proyek.NIKPM ? "PM" : "PMO";
@@ -44,14 +44,14 @@ export default function RencanaPelaksanaanRouter(props) {
         target: d.NAMATARGET,
         bobot: d.NILAIBOBOT
       }));
-      const maprole = role.filter(d=>(d.IDAUTH!== 1 && d.IDAUTH !== 3  && d.IDAUTH !== 5)).map(d=>({
-        id:d.IDAUTH.toString(),
-        kode:d.KODEAUTH,
-        nama:d.NAMAAUTH
+      // const maprole = role.filter(d=>(d.IDAUTH!== 1 && d.IDAUTH !== 3  && d.IDAUTH !== 5)).map(d=>({
+      //   id:d.IDAUTH.toString(),
+      //   kode:d.KODEAUTH,
+      //   nama:d.NAMAAUTH
 
-      }))
+      // }))
       setKegiatan(orderListKegiatan);
-      setRoles(maprole)
+      //setRoles(maprole)
       setKaryawan(cKaryawan.filter(d => d.organisasi.includes("IT")));
       setLoading(false);
     }
@@ -64,9 +64,9 @@ export default function RencanaPelaksanaanRouter(props) {
   if (loading)
     return <CircularProgress />;
   else if (otoritas === "PM" && plan && status && status.NOUREQ && !status.NOBA)
-    return <RencanaPelaksanaan plan={plan} proyek={proyek} kegiatan={kegiatan} roles={roles} karyawan={karyawan} minDate={tglAwalCharter} />;
+    return <RencanaPelaksanaan plan={plan} proyek={proyek} kegiatan={kegiatan}  karyawan={karyawan} minDate={tglAwalCharter} />;
   else if (plan && Object.keys(plan).length === 0)
     return <ErrorPage code="" message={"Rencana Pelaksanaan belum diinput"} />;
   else
-    return <RencanaPelaksanaanDetail plan={plan} roles={roles} kegiatan={kegiatan} karyawan={karyawan} />;
+    return <RencanaPelaksanaanDetail plan={plan}  kegiatan={kegiatan} karyawan={karyawan} />;
 };

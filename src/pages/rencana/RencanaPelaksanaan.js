@@ -30,14 +30,14 @@ const useStyles = makeStyles((theme) => ({
 
 const defaultAlert = { openAlertDialog: false, messageAlertDialog: "", severity: "info" };
 
-const defaultData = { kegiatan: null, pelaksana: [],role:null, tanggalMulai: null, tanggalSelesai: null, target: "", disabled: false };
+const defaultData = { kegiatan: null, pelaksana: [], tanggalMulai: null, tanggalSelesai: null, target: "", disabled: false };
 
 const err = { error: true, text: "Tidak boleh kosong." };
 const noErr = { error: false, text: "" };
-const defaultError = { kegiatan: noErr, pelaksana: noErr, tanggalMulai: noErr, tanggalSelesai: noErr,role:noErr };
+const defaultError = { kegiatan: noErr, pelaksana: noErr, tanggalMulai: noErr, tanggalSelesai: noErr};
 
 export default function RencanaPelaksanaan(props) {
-  const { plan, proyek, kegiatan, karyawan, minDate,roles } = props;
+  const { plan, proyek, kegiatan, karyawan, minDate } = props;
   const classes = useStyles();
 
   const [loadingButton, setLoadingButton] = useState(false);
@@ -46,7 +46,7 @@ export default function RencanaPelaksanaan(props) {
   const [data, setData] = useState();
   const [error, setError] = useState();
   const [listKegiatan, setListKegiatan] = useState();
-  const [listrole,setListrole] = useState();
+  //const [listrole,setListrole] = useState();
   const [listKaryawan, setListKaryawan] = useState();
   const [alertDialog, setAlertDialog] = useState(defaultAlert);
 
@@ -61,24 +61,24 @@ export default function RencanaPelaksanaan(props) {
     grouped.forEach((value, key, map) => {
       const pelaksana = listKaryawan ? value.map(v => listKaryawan.filter(kar => kar.nik === v.NIKPELAKSANA)[0] || ({ nik: v.NIKPELAKSANA })) : [];
       const kegiatan = listKegiatan ? listKegiatan.filter(keg => keg.id === key)[0] : null;
-      const role = listrole? !!listrole.find(e=>e.id === value[0].IDROLE)?listrole.find(el=>el.id === value[0].IDROLE):{id:value[0].IDROLE}:{id:value[0].IDROLE}
+     // const role = listrole? !!listrole.find(e=>e.id === value[0].IDROLE)?listrole.find(el=>el.id === value[0].IDROLE):{id:value[0].IDROLE}:{id:value[0].IDROLE}
       
       
       newData.push({
         kegiatan: kegiatan,
         pelaksana: pelaksana,
-        role : role,
+       // role : role,
         tanggalMulai: moment(value[0].TGLMULAI, "DD/MM/YYYY"),
         tanggalSelesai: moment(value[0].TGLSELESAI, "DD/MM/YYYY"),
         target: kegiatan ? kegiatan.target : "",
-        disabled: role.id==="0"?true:value[0].REALISASI
+        //disabled: role.id==="0"?true:value[0].REALISASI
       });
     });
     if (listKaryawan && listKegiatan)
       newData.sort((a, b) => a.kegiatan.id - b.kegiatan.id);
       console.log(newData)
     return newData;
-  }, [listKaryawan, listKegiatan,listrole]);
+  }, [listKaryawan, listKegiatan]);
 
   useEffect(() => {
     if (Object.keys(plan).length > 0) {
@@ -100,11 +100,11 @@ export default function RencanaPelaksanaan(props) {
     }
   }, [listKegiatan, kegiatan]);
 
-  useEffect(() => {
-    if (!listrole) {
-      setListrole(roles);
-    }
-  }, [listrole, roles]);
+  // useEffect(() => {
+  //   if (!listrole) {
+  //     setListrole(roles);
+  //   }
+  // }, [listrole, roles]);
 
   useEffect(() => {
     if (!listKaryawan) {
@@ -125,9 +125,7 @@ export default function RencanaPelaksanaan(props) {
       newArray[index] = { ...newArray[index], [key]: value, target: value ? value.target : "" };
     } else if (key === "tanggalMulai") {
       newArray[index] = { ...newArray[index], [key]: value, tanggalSelesai: value < newArray[index].tanggalSelesai ? newArray[index].tanggalSelesai : null };
-    } else if (key === "pelaksana") {
-      newArray[index] = { ...newArray[index],[key]: value,role:null};
-    } else {
+    }  else {
       newArray[index] = { ...newArray[index], [key]: value };
     }
     setData(newArray);
@@ -139,8 +137,8 @@ export default function RencanaPelaksanaan(props) {
     setError(newArrayError);
 
     let newArray = [...data];
-    newArray.map(el=>Object.values(el.role)[0]==="0"? true : false).some(x=>x===true)?defaultData.disablerole=true:defaultData.disablerole=false
-    console.log(defaultData)
+    // newArray.map(el=>Object.values(el.role)[0]==="0"? true : false).some(x=>x===true)?defaultData.disablerole=true:defaultData.disablerole=false
+    // console.log(defaultData)
     newArray.push(defaultData);
 
     setData(newArray);
@@ -162,14 +160,14 @@ export default function RencanaPelaksanaan(props) {
         const newObj = {
           kegiatan: data[i].kegiatan ? noErr : err,
           pelaksana: data[i].pelaksana.length > 0 ? noErr : err,
-          role: data[i].role ? noErr : err,
+          //role: data[i].role ? noErr : err,
           tanggalMulai: data[i].tanggalMulai ? noErr : err,
           tanggalSelesai: data[i].tanggalSelesai ? noErr : err
         };
         return newObj;
       })
     );
-    if (data.every(dt => dt.kegiatan && dt.role && dt.pelaksana.length > 0 && dt.tanggalMulai && dt.tanggalSelesai)) return true;
+    if (data.every(dt => dt.kegiatan && dt.pelaksana.length > 0 && dt.tanggalMulai && dt.tanggalSelesai)) return true;
     else return false;
   };
 
@@ -180,7 +178,7 @@ export default function RencanaPelaksanaan(props) {
         const listdetail = data.map(dt => ({
           idkegiatan: dt.kegiatan.id,
           progress:0,
-          idrole : dt.role.id,
+          //idrole : dt.role.id,
           pelaksana: dt.pelaksana.map(pel => pel.nik),
           tglmulai: moment(dt.tanggalMulai).format("DD/MM/YYYY"),
           tglselesai: moment(dt.tanggalSelesai).format("DD/MM/YYYY")
@@ -272,9 +270,9 @@ export default function RencanaPelaksanaan(props) {
                 <Grid item xs>
                   <Typography align="center" variant="body2"><b>Pelaksana</b></Typography>
                 </Grid>
-                <Grid item xs>
+                {/* <Grid item xs>
                   <Typography align="center" variant="body2"><b>Role</b></Typography>
-                </Grid>
+                </Grid> */}
                 <Grid item xs={2}>
                   <Typography align="center" variant="body2"><b>Tanggal Mulai</b></Typography>
                 </Grid>
@@ -363,7 +361,7 @@ export default function RencanaPelaksanaan(props) {
                         disabled={d.disabled}
                       />}
                   </Grid>
-                  <Grid key={"grid-role-" + i} item xs>
+                  {/* <Grid key={"grid-role-" + i} item xs>
                     <Autocomplete key={"role-" + i} id={"role-" + i} name={"role-" + i}
                    
                       options={listrole || []}
@@ -392,7 +390,7 @@ export default function RencanaPelaksanaan(props) {
                       )}
                       disabled={d.disabled||d.disablerole}
                     />
-                  </Grid>
+                  </Grid> */}
                   <Grid key={"grid-mulai-" + i} item xs={2}>
                     <KeyboardDatePicker key={"mulai-" + i} id={"mulai-" + i} name={"mulai-" + i}
                       fullWidth
