@@ -42,10 +42,10 @@ export default function UserRequirementRouter(props) {
 
   if (loading)
     return <CircularProgress />;
-  else if (otoritas === "PM" && ureq && status && status.APPROVECHARTER && !status.NOBA)
+  else if (otoritas === "PM" && ureq && status &&  !status.NOBA)
     return <UserRequirement ureq={ureq} proyek={proyek} />;
   else if (ureq && Object.keys(ureq).length === 0)
-    return <ErrorPage code="" message={status && !status.APPROVECHARTER && otoritas === "PM" ? "Charter belum disetujui" : "Kebutuhan Pengguna belum diinput"} />;
+    return <ErrorPage code="" message={"Kebutuhan Pengguna belum diinput"} />;
   else
     return <UserRequirementDetail ureq={ureq} />;
 
