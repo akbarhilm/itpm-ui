@@ -99,12 +99,13 @@ export default function Realisasi(props) {
       const newData = formatNewData(realisasi.LISTDETAIL || []);
 
       // set minimum date dari data plan, bukan dari data hasil gabungan plan dan realisasi
-      setMinimumDate(newData.map(x => moment(plan.LISTDETAIL.filter(p => x.idkegiatan === p.IDKEGIATAN)[0].TGLMULAI, "DD/MM/YYYY")));
+      setMinimumDate(newData.map(x => moment(plan.LISTDETAIL[0].TGLMULAI, "DD/MM/YYYY")));
 
       // set data realisasi yang sudah diinput sebagai data yang akan diubah
       // setDataSave(newData.filter(x => x.disabled));
 
       // set data awal, gabungan dari plan dan real
+      console.log(newData)
       setData(newData);
       setError(newData.map(x => defaultError));
     } else {
@@ -139,14 +140,17 @@ export default function Realisasi(props) {
       newArray[index] = { ...newArray[index], [key]: value, target: value ? value.target : "" };
     } else if (key === "tanggalMulai") {
       newArray[index] = { ...newArray[index], [key]: value, tanggalSelesai: value < newArray[index].tanggalSelesai ? newArray[index].tanggalSelesai : null };
+      
     } else if(key === "progress"){
       newArray[index] = { ...newArray[index], [key]: value.target.value };
       newArrayError[index] = { ...newArrayError[index], [key]: Number(value.target.value) <= Number(newArray[index].bobot) ? noErr : errPro };
     } else {
       newArray[index] = { ...newArray[index], [key]: value };
     }
-
+   
+    //console.log(newArrayError)
     setError(newArrayError);
+ console.log(newArray)
     setData(newArray);
 
     // if (newArray[index].checked) {
@@ -185,6 +189,7 @@ export default function Realisasi(props) {
             tanggalSelesai: data[i].tanggalSelesai ? noErr : err,
             progress:Number(data[i].progress)<=Number(data[i].bobot)?noErr:errPro
           };
+          //console.log(data)
           return newObj;
       
       })
@@ -197,6 +202,7 @@ export default function Realisasi(props) {
   const simpan = () => {
     setLoadingButton(true);
     if (data.length > 0) {
+      console.log(data)
       if (validateAll()) {
         const listdetail = data.map(dt => ({
           idkegiatan: dt.idkegiatan,
@@ -211,6 +217,7 @@ export default function Realisasi(props) {
           listdetail: listdetail
         };
         if (edit) {
+          
           updateRealisasi(formatData)
             .then((response) => {
               setData(formatNewData(response.data.LISTDETAIL));
