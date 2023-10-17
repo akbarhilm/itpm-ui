@@ -9,7 +9,7 @@ import { getLayananUnused } from '../../gateways/api/LayananAPI';
 import { createProyek, getProyekById, ubahStatusProyek, updateProyek } from '../../gateways/api/ProyekAPI';
 import { AddCircleOutline } from '@material-ui/icons';
 import AlertDialog from '../../components/AlertDialog';
-import { tr } from 'date-fns/locale';
+
 
 const useStyles = makeStyles((theme) => ({
   paper: {
