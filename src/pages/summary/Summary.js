@@ -95,7 +95,7 @@ const sumtotal = (item)=>{
 
       <Grid item xs container direction="column" >
         <Grid item xs>
-          {loading ? <Grid container justify="center"><CircularProgress /></Grid>
+          {loading ? <Grid container justifyContent="center"><CircularProgress /></Grid>
             :
             <Grid item xs>
             <Accordion expanded={expanded === 'panel1'} onChange={handleChangeExpand('panel1')}>
@@ -105,7 +105,7 @@ const sumtotal = (item)=>{
                 id={"panel1-header"}
               >
                 {/* <Avatar key={"avatar-" + i} alt={d.NAMAPROYEK ? d.NAMAPROYEK.toUpperCase() : "N"} src="#" /> */}
-                <Grid container alignItems="center" justify="space-between" >
+                <Grid container alignItems="center" justifyContent="space-between" >
                   <Typography style={{fontWeight:"bolder"}}>
                     Summary By PM
                   </Typography>
@@ -113,7 +113,7 @@ const sumtotal = (item)=>{
               </AccordionSummary>
               <AccordionDetails key={"accord-dtl-1"}>
                 <Grid container direction="column" spacing={2}>
-                  <Grid item xs container justify="center">
+                  <Grid item xs container justifyContent="center">
                     {/* <Card style={{ width: '75%' }}> */}
 
                     <TableContainer component={Paper}>
@@ -170,7 +170,7 @@ const sumtotal = (item)=>{
                 id={"panel2-header"}
               >
                 {/* <Avatar key={"avatar-" + i} alt={d.NAMAPROYEK ? d.NAMAPROYEK.toUpperCase() : "N"} src="#" /> */}
-                <Grid container alignItems="center" justify="space-between" >
+                <Grid container alignItems="center" justifyContent="space-between" >
                   <Typography style={{fontWeight:"bolder"}}>
                     Summary By Dev
                   </Typography>
@@ -178,7 +178,7 @@ const sumtotal = (item)=>{
               </AccordionSummary>
               <AccordionDetails key={"accord-dtl-2"}>
                 <Grid container direction="column" spacing={2}>
-                  <Grid item xs container justify="center">
+                  <Grid item xs container justifyContent="center">
                     {/* <Card style={{ width: '75%' }}> */}
 
                     <TableContainer component={Paper}>
@@ -237,7 +237,7 @@ const sumtotal = (item)=>{
                 id={"panel3-header"}
               >
                 {/* <Avatar key={"avatar-" + i} alt={d.NAMAPROYEK ? d.NAMAPROYEK.toUpperCase() : "N"} src="#" /> */}
-                <Grid container alignItems="center" justify="space-between" >
+                <Grid container alignItems="center" justifyContent="space-between" >
                   <Typography style={{fontWeight:"bolder"}}>
                     Summary By Kategori
                   </Typography>
@@ -245,7 +245,7 @@ const sumtotal = (item)=>{
               </AccordionSummary>
               <AccordionDetails key={"accord-dtl-3"}>
                 <Grid container direction="column" spacing={2}>
-                  <Grid item xs container justify="center">
+                  <Grid item xs container justifyContent="center">
                     {/* <Card style={{ width: '75%' }}> */}
 
                     <TableContainer component={Paper}>
@@ -304,7 +304,7 @@ const sumtotal = (item)=>{
                 id={"panel4-header"}
               >
                 {/* <Avatar key={"avatar-" + i} alt={d.NAMAPROYEK ? d.NAMAPROYEK.toUpperCase() : "N"} src="#" /> */}
-                <Grid container alignItems="center" justify="space-between" >
+                <Grid container alignItems="center" justifyContent="space-between" >
                   <Typography style={{fontWeight:"bolder"}}>
                     Summary By Tahun
                   </Typography>
@@ -312,7 +312,7 @@ const sumtotal = (item)=>{
               </AccordionSummary>
               <AccordionDetails key={"accord-dtl-4"}>
                 <Grid container direction="column" spacing={2}>
-                  <Grid item xs container justify="center">
+                  <Grid item xs container justifyContent="center">
                     {/* <Card style={{ width: '75%' }}> */}
 
                     <TableContainer component={Paper}>

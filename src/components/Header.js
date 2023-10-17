@@ -148,7 +148,7 @@ export default function Header(props) {
     <>
       <AppBar position="fixed" className={classes.appBar}>
         <Toolbar variant="dense">
-          <Grid container direction="row" justify="flex-start" alignItems="center" spacing={3}>
+          <Grid container direction="row" justifyContent="flex-start" alignItems="center" spacing={3}>
             <Grid item>
               <ButtonBase onClick={handleLinkToProyek}>
                 <span className={classes.formlogo}>
@@ -158,7 +158,7 @@ export default function Header(props) {
                 </Typography>
               </ButtonBase>
             </Grid>
-            <Grid item xs container direction="row" spacing={3} alignItems="center" justify="flex-start">
+            <Grid item xs container direction="row" spacing={3} alignItems="center" justifyContent="flex-start">
               <Grid item>
                 <ButtonBase onClick={handleLinkToDashboard}>
                   <Typography>
@@ -185,7 +185,7 @@ export default function Header(props) {
               } 
             </Grid>
           </Grid>
-          <Grid container justify="flex-end">
+          <Grid container justifyContent="flex-end">
             <Grid item>
               <Box display="inline" marginLeft={1}>
                 <Chip

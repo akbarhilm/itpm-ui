@@ -13,7 +13,7 @@ function AddTextFiels(props) {
   return (
     <FormControl required={required} component="fieldset" fullWidth error={error} style={{ marginBottom: 10 }}>
       <FormLabel component="legend">{label} <IconButton onClick={onAdd} size="small"><AddCircleOutline /></IconButton></FormLabel>
-      <Grid container direction="column" justify="flex-start" spacing={1} >
+      <Grid container direction="column" justifyContent="flex-start" spacing={1} >
         {data.map((d, i) =>
           <Grid item key={"grid-" + i}>
             <TextField key={"field-" + i} id={i.toString()} name={i.toString()} fullWidth
@@ -314,7 +314,7 @@ export default function Charter(props) {
       </Grid>
       <Divider />
       <Grid item container direction="column" spacing={2}>
-        <Grid item xs container direction="row" spacing={2} justify="space-between">
+        <Grid item xs container direction="row" spacing={2} justifyContent="space-between">
           <Grid item xs>
             <TextField id="nomor" label="Nomor Charter" fullWidth
               value={data ? data.nomor : ""}
@@ -330,7 +330,7 @@ export default function Charter(props) {
             />
           </Grid>
         </Grid>
-        <Grid item xs container direction="row" spacing={2} justify="space-between" >
+        <Grid item xs container direction="row" spacing={2} justifyContent="space-between" >
           <Grid item xs>
             <TextField id="nikBPO" label="NIK BPO" fullWidth
               value={proyek ? proyek.NIKREQ : ""}
@@ -346,7 +346,7 @@ export default function Charter(props) {
             />
           </Grid>
         </Grid>
-        <Grid item xs container direction="row" spacing={2} justify="space-between" >
+        <Grid item xs container direction="row" spacing={2} justifyContent="space-between" >
           <Grid item xs>
             <KeyboardDatePicker
               fullWidth
@@ -384,7 +384,7 @@ export default function Charter(props) {
             />
           </Grid>
         </Grid>
-        <Grid item xs container direction="row" spacing={2} justify="space-between" >
+        <Grid item xs container direction="row" spacing={2} justifyContent="space-between" >
           <Grid item xs>
             <TextField id="non-financial" label="Benefit (Non-Financial)" fullWidth
               // value={proyek ? proyek.NIKREQ : ""}
@@ -421,7 +421,7 @@ export default function Charter(props) {
         </Grid>
       </Grid>
       <Divider />
-      <Grid item container justify="flex-end">
+      <Grid item container justifyContent="flex-end">
         <Button onClick={loadingButton ? null : simpan} color="primary" variant="contained" >
           {loadingButton ? <CircularProgress size={20} color="inherit" /> : edit ? "Ubah" : "Simpan"}
         </Button>

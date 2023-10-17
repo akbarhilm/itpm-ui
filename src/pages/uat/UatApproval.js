@@ -94,7 +94,7 @@ export default function UatApproval(props) {
         <UatDetail uat={uat} karyawan={karyawan} approval />
       </Grid>
       <Divider />
-      {statusApprove !== "1" && <Grid item xs container justify="flex-end">
+      {statusApprove !== "1" && <Grid item xs container justifyContent="flex-end">
         <Button onClick={loadingButton ? null : approve} color="primary" variant="contained" >
           {loadingButton ? <CircularProgress size={20} color="inherit" /> : "Setuju"}
         </Button>

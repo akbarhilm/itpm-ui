@@ -40,13 +40,13 @@ export default function UserRequirementDetail(props) {
       <Grid item >
         <Paper className={classes.paper}>
           <Grid container direction="column" spacing={2}>
-            <Grid item container direction="row" justify="space-between">
+            <Grid item container direction="row" justifyContent="space-between">
               <Grid item xs>
                 <Typography variant="h6">Data Requirement</Typography>
               </Grid>
             </Grid>
             <Grid item container direction="column" spacing={1}>
-              <Grid item container direction="row" spacing={3} justify="space-between">
+              <Grid item container direction="row" spacing={3} justifyContent="space-between">
                 <Grid item xs>
                   <Typography align="center" variant="body2"><b>Kebutuhan Sistem</b></Typography>
                 </Grid>
@@ -59,7 +59,7 @@ export default function UserRequirementDetail(props) {
               </Grid>
               {/* <Divider /> */}
               {ureq && ureq.LISTDETAIL.map((d, i) =>
-                <Grid item key={"grid-cont-" + i} container direction="row" spacing={3} justify="space-between" alignItems="center">
+                <Grid item key={"grid-cont-" + i} container direction="row" spacing={3} justifyContent="space-between" alignItems="center">
                   <Grid key={"grid-kebutuhan-" + i} item xs>
                     <TextField key={"kebutuhan-" + i} id={"kebutuhan-" + i} name={"kebutuhan-" + i}
                       fullWidth

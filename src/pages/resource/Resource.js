@@ -270,7 +270,7 @@ export default function Resource(props) {
       <Grid item >
         <Paper className={classes.paper}>
           <Grid container direction="column" spacing={2}>
-            <Grid item container direction="row" justify="space-between">
+            <Grid item container direction="row" justifyContent="space-between">
               <Grid item xs>
                 <Typography variant="h6">Sumber Daya Lain</Typography>
               </Grid>
@@ -371,7 +371,7 @@ export default function Resource(props) {
               <InputLabel>Kebutuhan lainnya</InputLabel>
             </Grid>
             <Grid item container direction="column" spacing={1}>
-              <Grid item container direction="row" spacing={1} justify="space-between">
+              <Grid item container direction="row" spacing={1} justifyContent="space-between">
                 <Grid item xs>
                   <Typography align="center" variant="body2"><b>Deskripsi Kebutuhan</b></Typography>
                 </Grid>
@@ -386,7 +386,7 @@ export default function Resource(props) {
                 </Grid>
               </Grid>
               {data && data.map((d, i) =>
-                <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justify="space-between" alignItems="center">
+                <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justifyContent="space-between" alignItems="center">
                   <Grid key={"grid-deskripsi-" + i} item xs>
                     <TextField key={"deskripsi-" + i} id={"deskripsi-" + i} name={"deskripsi-" + i}
                       variant="outlined"
@@ -426,14 +426,14 @@ export default function Resource(props) {
                       inputProps={{ style: { textAlign: 'right' } }}
                     />
                   </Grid>
-                  <Grid item xs={1} container justify="center">
+                  <Grid item xs={1} container justifyContent="center">
                     <IconButton size="small" onClick={() => deleteRow(i)}>
                       <RemoveCircleOutline />
                     </IconButton>
                   </Grid>
                 </Grid>
               )}
-              <Grid item xs container justify="center">
+              <Grid item xs container justifyContent="center">
                 <Button fullWidth aria-label="add row action plan" size="small" onClick={addRow} >
                   <AddCircleOutline />
                 </Button>
@@ -444,7 +444,7 @@ export default function Resource(props) {
 
       </Grid>
       <Divider />
-      <Grid item container direction="row" justify="flex-end">
+      <Grid item container direction="row" justifyContent="flex-end">
         <Button onClick={loadingButton ? null : simpan} variant="contained" color="primary">
           {loadingButton ? <CircularProgress size={20} color="inherit" /> : edit ? "Ubah" : "Simpan"}
         </Button>

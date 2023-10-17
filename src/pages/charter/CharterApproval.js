@@ -51,7 +51,7 @@ export default function CharterApproval(props) {
         <CharterDetail charter={charter} proyek={proyek} approval />
       </Grid>
       <Divider />
-      <Grid item xs container justify="flex-end">
+      <Grid item xs container justifyContent="flex-end">
         <Button onClick={loadingButton ? null : approve} color="primary" variant="contained" >
           {loadingButton ? <CircularProgress size={20} color="inherit" /> : approved ? "Batal Setuju" : "Setuju"}
         </Button>

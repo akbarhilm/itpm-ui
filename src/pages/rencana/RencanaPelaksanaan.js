@@ -57,7 +57,7 @@ export default function RencanaPelaksanaan(props) {
   const formatNewData = useCallback((listdetail) => {
     const grouped = groupBy(listdetail, x => x.IDKEGIATAN);
     const newData = [];
-    //console.log(grouped)
+    console.log(grouped)
     grouped.forEach((value, key, map) => {
       const pelaksana = listKaryawan ? value.map(v => listKaryawan.filter(kar => kar.nik === v.NIKPELAKSANA)[0] || ({ nik: v.NIKPELAKSANA })) : [];
       const kegiatan = listKegiatan ? listKegiatan.filter(keg => keg.id === key)[0] : null;
@@ -67,7 +67,7 @@ export default function RencanaPelaksanaan(props) {
       newData.push({
         kegiatan: kegiatan,
         pelaksana: pelaksana,
-        //role : role,
+        bobot : value[0].BOBOT,
         tanggalMulai: moment(value[0].TGLMULAI, "DD/MM/YYYY"),
         tanggalSelesai: moment(value[0].TGLSELESAI, "DD/MM/YYYY"),
         target: kegiatan ? kegiatan.target : "",
@@ -76,7 +76,7 @@ export default function RencanaPelaksanaan(props) {
     });
     if (listKaryawan && listKegiatan)
       newData.sort((a, b) => a.kegiatan.id - b.kegiatan.id);
-      console.log(newData)
+      //console.log(newData)
     return newData;
   }, [listKaryawan, listKegiatan]);
 
@@ -122,12 +122,13 @@ export default function RencanaPelaksanaan(props) {
 
     let newArray = [...data];
     if (key === "kegiatan") {
-      newArray[index] = { ...newArray[index], [key]: value, target: value ? value.target : "" };
+      newArray[index] = { ...newArray[index], [key]: value, target: value ? value.target : "",bobot:value.bobot };
     } else if (key === "tanggalMulai") {
       newArray[index] = { ...newArray[index], [key]: value, tanggalSelesai: value < newArray[index].tanggalSelesai ? newArray[index].tanggalSelesai : null };
     } else {
       newArray[index] = { ...newArray[index], [key]: value };
     }
+    console.log(newArray);
     setData(newArray);
   };
 
@@ -177,7 +178,7 @@ export default function RencanaPelaksanaan(props) {
       if (validateAll()) {
         const listdetail = data.map(dt => ({
           idkegiatan: dt.kegiatan.id,
-          progress:0,
+          bobot:dt.bobot,
          // idrole : dt.role.id,
           pelaksana: dt.pelaksana.map(pel => pel.nik),
           tglmulai: moment(dt.tanggalMulai).format("DD/MM/YYYY"),
@@ -257,15 +258,18 @@ export default function RencanaPelaksanaan(props) {
       <Grid item >
         <Paper className={classes.paper}>
           <Grid container direction="column" spacing={2}>
-            <Grid item container direction="row" justify="space-between">
+            <Grid item container direction="row" justifyContent="space-between">
               <Grid item xs>
                 <Typography variant="h6">Data Rencana</Typography>
               </Grid>
             </Grid>
             <Grid item container direction="column" spacing={1}>
-              <Grid item container direction="row" spacing={1} justify="space-between">
+              <Grid item container direction="row" spacing={1} justifyContent="space-between">
                 <Grid item xs>
                   <Typography align="center" variant="body2"><b>Kegiatan</b></Typography>
+                </Grid>
+                <Grid item xs={1}>
+                  <Typography align="center" variant="body2"><b>Bobot</b></Typography>
                 </Grid>
                 <Grid item xs>
                   <Typography align="center" variant="body2"><b>Pelaksana</b></Typography>
@@ -284,7 +288,7 @@ export default function RencanaPelaksanaan(props) {
                 </Grid>
               </Grid>
               {data && data.map((d, i) =>
-                <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justify="space-between" alignItems="flex-start">
+                <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justifyContent="space-between" alignItems="flex-start">
                   <Grid key={"grid-kegiatan-" + i} item xs>
                     <Autocomplete key={"kegiatan-" + i} id={"kegiatan-" + i} name={"kegiatan-" + i}
                       options={listKegiatan || []}
@@ -312,6 +316,16 @@ export default function RencanaPelaksanaan(props) {
                       )}
                       disabled={d.disabled}
                     />
+                  </Grid>
+                  <Grid key={"grid-bobot-"+i} item xs={1}>
+                  <TextField key={"bobot-" + i} id={"bobot-" + i} name={"bobot-" + i}
+                        //multiline
+                        fullWidth
+                        size="small"
+                        value={(d.bobot||"")+"%"}
+                        disabled
+                        className={classes.fieldTableDisabled}
+                      />
                   </Grid>
                   <Grid key={"grid-pelaksana-" + i} item xs>
                     {d.disabled ?
@@ -432,14 +446,14 @@ export default function RencanaPelaksanaan(props) {
                       className={classes.fieldTableDisabled}
                     />
                   </Grid>
-                  <Grid item xs={1} container justify="center">
+                  <Grid item xs={1} container justifyContent="center">
                     <IconButton size="small" onClick={() => deleteRow(i)} disabled={d.disabled}>
                       <RemoveCircleOutline />
                     </IconButton>
                   </Grid>
                 </Grid>
               )}
-              <Grid item xs container justify="center">
+              <Grid item xs container justifyContent="center">
                 <Button fullWidth aria-label="add row action plan" size="small" onClick={addRow} >
                   <AddCircleOutline />
                 </Button>
@@ -449,7 +463,7 @@ export default function RencanaPelaksanaan(props) {
         </Paper>
       </Grid>
       <Divider />
-      <Grid item container direction="row" justify="flex-end">
+      <Grid item container direction="row" justifyContent="flex-end">
         <Button onClick={loadingButton ? null : simpan} variant="contained" color="primary">
           {loadingButton ? <CircularProgress size={20} color="inherit" /> : edit ? "Ubah" : "Simpan"}
         </Button>

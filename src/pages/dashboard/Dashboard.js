@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useContext,useRef  } from "react";
-import { Checkbox, FormControlLabel, FormControl,FormLabel, FormGroup, Grid, Typography, Divider, CircularProgress, TextField, InputAdornment, Card, CardActionArea, CardContent, Accordion, AccordionSummary, AccordionDetails, Stepper, Step, StepLabel, Chip, MenuItem, Button } from "@material-ui/core";
+import { Checkbox, FormControlLabel, FormControl,FormLabel, FormGroup, Grid, Typography, Divider, CircularProgress, TextField, InputAdornment, Card, CardActionArea, CardContent, Accordion, AccordionSummary, AccordionDetails, Stepper, Step, StepLabel, Chip, MenuItem, Button, colors } from "@material-ui/core";
 import { ExpandMore, Search } from '@material-ui/icons';
 import Pagination from "@material-ui/lab/Pagination";
 import { getListProyek, getSummaryProyek } from '../../gateways/api/ProyekAPI';
 import { useCallback } from "react";
 import AlertDialog from '../../components/AlertDialog';
 import { UserContext } from "../../utils/UserContext";
-import { labelStepper } from "../../utils/DataEnum";
+import { labelStepper,statusProyek } from "../../utils/DataEnum";
 import { Chart as ChartJS, CategoryScale, TimeScale, LinearScale, BarElement, Title, Tooltip, Legend, } from 'chart.js';
 import 'chartjs-adapter-date-fns';
 import { Bar,getElementsAtEvent    } from 'react-chartjs-2';
@@ -213,6 +213,10 @@ const dataTotal = [
   { label: "BERJALAN", value: 0, status: 'BERJALAN' },
   { label: "PENDING", value: 0, status: 'PENDING' },
   { label: "BARU", value: 0, status: 'BARU' },
+  { label: "DELAY", value: 0, status: 'DELAY' },
+  { label: "CANCEL", value: 0, status: 'CANCEL' },
+  { label: "HOLD", value: 0, status: 'HOLD' },
+  { label: "BLOCKED", value: 0, status: 'BLOCKED' },
 ];
 
 const listKategori = [
@@ -223,6 +227,10 @@ const listKategori = [
   {
     label: "Cari Berdasarkan NIK",
     value: "nik"
+  },
+  {
+    label: "Cari Berdasarkan Status",
+    value: "status"
   },
 ];
 
@@ -276,17 +284,18 @@ export default function Dashboard(props) {
     if (status === "BERJALAN" && plan.length > 0) {
       const today = new Date();
       const maxDate = new Date(Math.max(...plan.map(p => new Date(p.tanggalSelesai))));
-      const fiveDayBeforeMaxDate = new Date(maxDate.getTime() - (5 * 24 * 60 * 60 * 1000));
+      //const fiveDayBeforeMaxDate = new Date(maxDate.getTime() - (5 * 24 * 60 * 60 * 1000));
       // const fiveDayBeforeMaxDate = maxDate.getDate();
-      if (today < fiveDayBeforeMaxDate) return '#009944';
-      else if (today < maxDate) return '#f0541e';
-      else return '#cf000f';
+      console.log(today,maxDate);
+      if (today > maxDate) 
+      status = "DELAYED";
+     
       // console.log(today);
       // console.log(maxDate);
       // console.log(fiveDayBeforeMaxDate);
     }
-
-    return null;
+    return status;
+    //return null;
   };
 
 const handeleChangeYear = (event) =>{
@@ -301,15 +310,20 @@ const handeleChangeYear = (event) =>{
 
   useEffect(() => {
     // console.log(user);
-    getSummaryProyek()
+    getSummaryProyek(year.toString())
       .then((response) => {
         const result = response.data[0];
         setSummary([
           { label: "TOTAL", value: result.TOTAL || 0, status: 'ALL' },
+          { label: "BARU", value: result.BARU || 0, status: 'BARU' },
           { label: "SELESAI", value: result.SELESAI || 0, status: 'SELESAI' },
           { label: "BERJALAN", value: result.BERJALAN || 0, status: 'BERJALAN' },
+          { label: "DELAY", value: result.DELAY || 0, status: 'DELAY' },
           { label: "PENDING", value: result.PENDING || 0, status: 'PENDING' },
-          { label: "BARU", value: result.BARU || 0, status: 'BARU' },
+          { label: "CANCEL", value: result.CANCEL || 0, status: 'CANCEL' },
+          { label: "HOLD", value: result.HOLD || 0, status: 'HOLD' },
+          { label: "BLOCKED", value: result.BLOCKED || 0, status: 'BLOCKED' },
+
         ]);
       })
       .catch((error) => {
@@ -318,7 +332,7 @@ const handeleChangeYear = (event) =>{
         else
           setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
       });
-  }, []);
+  }, [year]);
 
   useEffect(() => {
     setTotalPages(
@@ -349,7 +363,7 @@ const handeleChangeYear = (event) =>{
     };
     
     const formatListProyek = (list) => {
-      const fbyyear = list.filter(d=>d.charter.find(x=>x.TGLMULAI.split('/')[2] === year.toString()))
+      const fbyyear = list.filter(d=>d.TGLENTRY.split('/')[2] === year.toString())
       const newArray = [];
       fbyyear.forEach(d => {
         const plan = formatNewData(d.plan);
@@ -385,7 +399,7 @@ const handeleChangeYear = (event) =>{
       const labels = []
       const data = {}
       // console.log(year)
-      const fbyyear = list.filter(d=>d.charter.find(x=>x.TGLMULAI.split('/')[2] === year.toString()))
+      const fbyyear = list.filter(d=>d.TGLENTRY.split('/')[2] === year.toString())
       // console.log(fbyyear)
 
       fbyyear.forEach(d =>{
@@ -462,8 +476,15 @@ const handeleChangeYear = (event) =>{
   };
 
   const handleChangeStatus = (stat) => () => {
+    
     setStatus(stat);
     if (status !== stat) setTextSearch("");
+  };
+
+  const handleChangeStatusfilter = (event) => {
+    console.log(event);
+    setStatus(event.target.value);
+    //if (status !== stat) setTextSearch("");
   };
 
   const handleChangeSearch = (event) => {
@@ -612,7 +633,7 @@ selecttahun.push({label:tahun,value:tahun})
         message={alertDialog.messageAlertDialog}
         severity={alertDialog.severity}
       />
-      <Grid item xs container direction="row" justify="space-around">
+      <Grid item xs container direction="row" justifyContent="space-around">
         {summary.map((dt, i) => (
           <Card key={"card-" + i}>
             <CardActionArea key={"card-action-" + i} onClick={handleChangeStatus(dt.status)}>
@@ -624,7 +645,7 @@ selecttahun.push({label:tahun,value:tahun})
           </Card>
         ))}
       </Grid>
-      <Grid item xs={2} container direction="column" justify="flex-start">
+      <Grid item xs={2} container direction="column" justifyContent="flex-start">
         <TextField
        
           id="select-tahuan"
@@ -644,7 +665,7 @@ selecttahun.push({label:tahun,value:tahun})
         }
         </TextField>
       </Grid>
-      <Grid item lg container direction="column" justify="flex-start">
+      <Grid item lg container direction="column" justifyContent="flex-start">
       <Accordion expanded={exp==='mile'} onChange={handleChangeExpandparent('mile')}>
       <AccordionSummary
           expandIcon={<ExpandMore />}
@@ -654,23 +675,23 @@ selecttahun.push({label:tahun,value:tahun})
           <Typography variant="h5" gutterBottom>Milestone</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          {loading ? <Grid container justify="center"><CircularProgress /></Grid>
+          {loading ? <Grid container justifyContent="center"><CircularProgress /></Grid>
                 : listProyek.length > 0 ?
-        <Grid item xs container justify="center" >
+        <Grid item xs container justifyContent="center" >
                                 <Card style={{ width: '100%'}}>
                                  
                                   <Bar options={dataMilestone.opt} data={dataMilestone.dataGrafik} ref={chartRef} onClick={onClick} />
                                 </Card>
                               </Grid>
                               :<><Divider style={{ marginTop: 8, marginBottom: 18 }} />
-                              <Grid container justify="center">
+                              <Grid container justifyContent="center">
                                 <Typography>Tidak ada data.</Typography>
                               </Grid></>
                               }
         </AccordionDetails>
         </Accordion>
         </Grid>
-        <Grid item lg container direction="column" justify="flex-start">
+        <Grid item lg container direction="column" justifyContent="flex-start">
       <Accordion expanded={exp==='list'} onChange={handleChangeExpandparent('list')}>
       <AccordionSummary
           expandIcon={<ExpandMore />}
@@ -735,6 +756,22 @@ selecttahun.push({label:tahun,value:tahun})
               />
             )}
           />}
+          {kategori === "status" && <TextField
+            type="search"
+            variant="outlined"
+            margin="dense"
+            size="small"
+            select
+            value={status}
+            onChange={handleChangeStatusfilter}
+            //style={{ backgroundColor: 'lightblue' }}
+          >
+            {statusProyek.map((d) => (
+              <MenuItem key={"status-" + d} value={d}>
+                {d}
+              </MenuItem>
+            ))}
+          </TextField>}
           <FormControl component="fieldset">
          
           <FormLabel  component="div" style={{display:'flex', justifyContent:'right'}}>Filter SAP dan NON SAP</FormLabel>
@@ -754,7 +791,7 @@ selecttahun.push({label:tahun,value:tahun})
                   </FormGroup>
             </FormControl>
            
-            <Grid item xs container direction="row" justify="flex-end">
+            <Grid item xs container direction="row" justifyContent="flex-end">
             <FormControl component="fieldset">
             <FormLabel component="div" style={{display:'flex', justifyContent:'center'}}>Filter Plan dan Real</FormLabel>
             <FormGroup aria-label="position" row>
@@ -783,7 +820,7 @@ selecttahun.push({label:tahun,value:tahun})
             </Grid>
             </Grid>
             <Grid item xs>
-              {loading ? <Grid container justify="center"><CircularProgress /></Grid>
+              {loading ? <Grid container justifyContent="center"><CircularProgress /></Grid>
                 : listProyek.length > 0 ?
                   listProyekAfterSearch.slice((page - 1) * itemsPerPage, page * itemsPerPage)
                     .map((d, i) => (
@@ -795,16 +832,31 @@ selecttahun.push({label:tahun,value:tahun})
                           id={"panel" + i + "-header"}
                         >
                           {/* <Avatar key={"avatar-" + i} alt={d.NAMAPROYEK ? d.NAMAPROYEK.toUpperCase() : "N"} src="#" /> */}
-                          <Grid container alignItems="center" justify="space-between" >
+                          <Grid container alignItems="center" justifyContent="space-between" >
                             <Typography key={"no-layanan-" + i}>
                               {d.NOLAYANAN + " | " + d.NAMAPROYEK}
+                              <Divider/>
+                              {d.nik_PM + " - " + d.nama_PM}
+                          
+                             
                             </Typography>
-                            <Chip label={d.STATUSPROYEK} style={{ backgroundColor: setStatusColor(d.STATUSPROYEK, d.plan), color: d.STATUSPROYEK === 'BERJALAN' && d.plan.length > 0 ? 'white' : null }} />
+                            <Grid justifyContent="flex-end">
+                            <Chip label={d.PRIORITAS}/>
+                            <Chip label={setStatusColor(d.STATUSPROYEK, d.plan)} style={{backgroundColor:setStatusColor(d.STATUSPROYEK, d.plan) === "DELAYED"?"red":null}} />
+                            </Grid>
                           </Grid>
                         </AccordionSummary>
                         <AccordionDetails key={"accord-dtl-" + i}>
                           <Grid container direction="column" spacing={2}>
-                            <Grid item xs container justify="center">
+                          {d.STATUSPROYEK === ("PENDING" || "CANCEL" || "HOLD" || "BLOCKED") ?
+                          <Grid item xs container justifyContent="center">
+                          <Card style={{ width: '75%' }}>
+                          <center><Typography><h4>{d.KETSTATUS || ""}</h4></Typography></center>
+                          </Card>
+                          </Grid>
+                          :null}
+                            <Grid item xs container justifyContent="center">
+                            
                               <Card style={{ width: '75%' }}>
                                 <Stepper alternativeLabel activeStep={-1}>
                                   {labelStepper
@@ -818,7 +870,7 @@ selecttahun.push({label:tahun,value:tahun})
                             </Grid>
                             {
                               d.charter.length > 0 && d.plan.length > 0 &&
-                              <Grid item xs container justify="center">
+                              <Grid item xs container justifyContent="center">
                                 <Card style={{ width: '75%' }}>
                                   <Bar options={d.opt} data={d.dataGrafik} />
                                 </Card>
@@ -828,12 +880,12 @@ selecttahun.push({label:tahun,value:tahun})
                         </AccordionDetails>
                       </Accordion>))
                   : <><Divider style={{ marginTop: 8, marginBottom: 18 }} />
-                    <Grid container justify="center">
+                    <Grid container justifyContent="center">
                       <Typography>Tidak ada data.</Typography>
                     </Grid></>
               }
             </Grid>
-            {totalPages > 0 && <Grid item xs container justify="center" style={{ marginTop: 10 }}>
+            {totalPages > 0 && <Grid item xs container justifyContent="center" style={{ marginTop: 10 }}>
               <Pagination
                 count={totalPages}
                 page={page}
@@ -843,7 +895,7 @@ selecttahun.push({label:tahun,value:tahun})
                 size="small"
               />
             </Grid>}
-            <Grid item xs container justify="flex-end">
+            <Grid item xs container justifyContent="flex-end">
             <Button variant="contained" onClick={exportExcel} color="primary">Excel Export</Button>
             </Grid>
         </Grid>
