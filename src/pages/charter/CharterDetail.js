@@ -8,7 +8,7 @@ function ListDetail(props) {
   return (
     <FormControl component="fieldset" fullWidth style={{ marginBottom: 10 }}>
       <FormLabel component="legend">{label}</FormLabel>
-      <Grid container direction="column" justifyContent="flex-start" >
+      <Grid container direction="column" justify="flex-start" >
         {data.map((d, i) =>
           <Grid item key={"grid-" + i}>
             <TextField key={"field-" + i} id={i.toString()} name={i.toString()} fullWidth
@@ -56,7 +56,7 @@ export default function CharterDetail(props) {
       </Grid>}
       {!approval && <Divider />}
       <Grid item xs container spacing={2} direction="column">
-        <Grid item xs container direction="row" spacing={2} justifyContent="space-between">
+        <Grid item xs container direction="row" spacing={2} justify="space-between">
           <Grid item xs={6}>
             <TextField id="nomor" label="Nomor Charter" fullWidth
               value={charter.NOCHARTER || "-"}
@@ -72,7 +72,7 @@ export default function CharterDetail(props) {
             />
           </Grid>
         </Grid>
-        <Grid item xs container direction="row" spacing={2} justifyContent="space-between">
+        <Grid item xs container direction="row" spacing={2} justify="space-between">
           <Grid item xs={6}>
             <TextField id="nikBPO" label="NIK BPO" fullWidth
               value={proyek.NIKREQ || "-"}
@@ -88,7 +88,7 @@ export default function CharterDetail(props) {
             />
           </Grid>
         </Grid>
-        <Grid item xs container direction="row" spacing={2} justifyContent="space-between">
+        <Grid item xs container direction="row" spacing={2} justify="space-between">
           <Grid item xs={6}>
             <TextField id="tglMulai" label="Tanggal Mulai" fullWidth
               value={charter.TGLMULAI || "-"}
@@ -104,7 +104,7 @@ export default function CharterDetail(props) {
             />
           </Grid>
         </Grid>
-        <Grid item xs container direction="row" spacing={2} justifyContent="space-between" >
+        <Grid item xs container direction="row" spacing={2} justify="space-between" >
           <Grid item xs>
             <TextField id="non-financial" label="Benefit (Non-Financial)" fullWidth
               value={charter.BENEFITNONFINANSIAL || "-"}

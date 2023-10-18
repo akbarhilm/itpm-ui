@@ -357,13 +357,13 @@ export default function Risiko(props) {
       <Grid item>
         <Paper className={classes.paper}>
           <Grid container direction="column" spacing={2}>
-            <Grid item container direction="row" justifyContent="space-between">
+            <Grid item container direction="row" justify="space-between">
               <Grid item xs>
                 <Typography variant="h6">List Faktor</Typography>
               </Grid>
             </Grid>
             <Grid item container direction="column" spacing={1}>
-              <Grid item container direction="row" spacing={1} justifyContent="space-between">
+              <Grid item container direction="row" spacing={1} justify="space-between">
                 <Grid item xs={5}>
                   <Typography align="center" variant="body2"><b>Deskripsi</b></Typography>
                 </Grid>
@@ -381,7 +381,7 @@ export default function Risiko(props) {
                 </Grid>
               </Grid>
               {listDataFaktor && listDataFaktor.map((d, i) =>
-                <Grid item key={"grid-cont-faktor-" + i} container direction="row" spacing={1} justifyContent="space-between" alignItems="center">
+                <Grid item key={"grid-cont-faktor-" + i} container direction="row" spacing={1} justify="space-between" alignItems="center">
                   <Grid key={"grid-deskripsi-faktor-" + i} item xs={5}>
                     <TextField key={"deskripsi-faktor-" + i} id={"deskripsi-faktor-" + i} name={"deskripsi-faktor-" + i}
                       variant="outlined"
@@ -448,14 +448,14 @@ export default function Risiko(props) {
                       className={classes.fieldDisabled}
                     />
                   </Grid>
-                  <Grid key={"grid-action-faktor-" + i} item xs={1} container justifyContent="center">
+                  <Grid key={"grid-action-faktor-" + i} item xs={1} container justify="center">
                     <IconButton key={"button-action-faktor-" + i} size="small" onClick={() => deleteRowFaktor(i)} disabled={disableIconDeleteFaktor(d)}>
                       <RemoveCircleOutline key={"icon-action-faktor-" + i} />
                     </IconButton>
                   </Grid>
                 </Grid>
               )}
-              <Grid item xs container justifyContent="center">
+              <Grid item xs container justify="center">
                 <Button fullWidth aria-label="add row faktor" size="small" onClick={addRowFaktor} >
                   <AddCircleOutline />
                 </Button>
@@ -467,13 +467,13 @@ export default function Risiko(props) {
       <Grid item>
         <Paper className={classes.paper}>
           <Grid container direction="column" spacing={2}>
-            <Grid item container direction="row" justifyContent="space-between">
+            <Grid item container direction="row" justify="space-between">
               <Grid item xs>
                 <Typography variant="h6">List Penanganan</Typography>
               </Grid>
             </Grid>
             <Grid item container direction="column" spacing={1}>
-              <Grid item container direction="row" spacing={1} justifyContent="space-between">
+              <Grid item container direction="row" spacing={1} justify="space-between">
                 <Grid item xs>
                   <Typography align="center" variant="body2"><b>Faktor</b></Typography>
                 </Grid>
@@ -494,7 +494,7 @@ export default function Risiko(props) {
                 </Grid>
               </Grid>
               {listDataPenanganan && listDataPenanganan.map((d, i) =>
-                <Grid item key={"grid-cont-penanganan-" + i} container direction="row" spacing={1} justifyContent="space-between" alignItems="center">
+                <Grid item key={"grid-cont-penanganan-" + i} container direction="row" spacing={1} justify="space-between" alignItems="center">
                   <Grid key={"grid-factor-penanganan-" + i} item xs>
                     {/* <TextField key={"factor-penanganan-" + i} id={"factor-penanganan-" + i} name={"factor-penanganan-" + i}
                       variant="outlined"
@@ -609,14 +609,14 @@ export default function Risiko(props) {
                       className={classes.fieldDisabled}
                     />
                   </Grid>
-                  <Grid key={"grid-action-penanganan-" + i} item xs={1} container justifyContent="center">
+                  <Grid key={"grid-action-penanganan-" + i} item xs={1} container justify="center">
                     <IconButton key={"button-action-penanganan-" + i} size="small" onClick={() => deleteRowPenanganan(i)}>
                       <RemoveCircleOutline key={"icon-action-penanganan-" + i} />
                     </IconButton>
                   </Grid>
                 </Grid>
               )}
-              <Grid item xs container justifyContent="center">
+              <Grid item xs container justify="center">
                 <Button fullWidth aria-label="add row penanganan" size="small" onClick={addRowPenanganan} >
                   <AddCircleOutline />
                 </Button>
@@ -626,7 +626,7 @@ export default function Risiko(props) {
         </Paper>
       </Grid>
       <Divider />
-      <Grid item container direction="row" justifyContent="flex-end">
+      <Grid item container direction="row" justify="flex-end">
         <Button onClick={loadingButton ? null : simpan} variant="contained" color="primary">
           {loadingButton ? <CircularProgress size={20} color="inherit" /> : edit ? "Ubah" : "Simpan"}
         </Button>

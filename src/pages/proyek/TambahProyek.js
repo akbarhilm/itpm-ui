@@ -530,7 +530,7 @@ export default function TambahProyek(props) {
             <Grid item>
               <Typography variant="h6" gutterBottom>{"Data Layanan"}</Typography>
             </Grid>
-            <Grid item container direction="row" spacing={2} justifyContent="space-between">
+            <Grid item container direction="row" spacing={2} justify="space-between">
               <Grid item xs={6} container direction="column" >
                 <Autocomplete id="layanan"
                   options={listLayanan}
@@ -565,7 +565,7 @@ export default function TambahProyek(props) {
                   )}
                   disabled={isDisabled}
                 />
-                <Grid item container direction="row" spacing={2} justifyContent="space-between">
+                <Grid item container direction="row" spacing={2} justify="space-between">
                   <Grid item xs>
                     <TextField
                       label="NIK BPO"
@@ -587,7 +587,7 @@ export default function TambahProyek(props) {
                     />
                   </Grid>
                 </Grid>
-                <Grid item container direction="row" spacing={2} justifyContent="space-between">
+                <Grid item container direction="row" spacing={2} justify="space-between">
                 <Grid item xs>
                   <FormControl component="fieldset" disabled className={classes.radio}>
                     <FormLabel component="legend">Jenis Layanan</FormLabel>
@@ -639,7 +639,7 @@ export default function TambahProyek(props) {
         </Paper>
       </Grid>}
 
-      <Grid item container direction="row" spacing={2} justifyContent="space-between">
+      <Grid item container direction="row" spacing={2} justify="space-between">
         <Grid item xs={6}>
           {!Boolean(dataLayanan) && <Autocomplete id="layanan"
             options={listLayanan}
@@ -673,7 +673,7 @@ export default function TambahProyek(props) {
               />
             )}
           />}
-          <Grid item container direction="row" spacing={2} justifyContent="space-between">
+          <Grid item container direction="row" spacing={2} justify="space-between">
             <Grid item xs>
               <TextField
                 id="namaProyek"
@@ -721,7 +721,7 @@ export default function TambahProyek(props) {
             helperText={error.deskripsi.message}
             disabled={isDisabled}
           />
-          <Grid item container direction="row" spacing={2} justifyContent="space-between">
+          <Grid item container direction="row" spacing={2} justify="space-between">
           
       <Grid item xs>
       <TextField
@@ -754,7 +754,7 @@ export default function TambahProyek(props) {
       />
       </Grid>
       </Grid>
-      <Grid item container direction="row" spacing={2} justifyContent="space-between">
+      <Grid item container direction="row" spacing={2} justify="space-between">
       <Grid item xs>
       <TextField
             id="deskripsiproker"
@@ -804,7 +804,7 @@ export default function TambahProyek(props) {
             <FormHelperText id="my-helper-text">{error.jenisLayanan.message}</FormHelperText>
           </FormControl>
           {dataProyek && dataProyek.jenisAplikasi && !sap &&
-            <Grid container direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
+            <Grid container direction="row" justify="space-between" alignItems="center" spacing={1}>
               <Grid item xs>
                 <Autocomplete id="aplikasi"
                   options={listAplikasi.filter(d => d.KODEAPLIKASI !== "SAP")}
@@ -882,11 +882,11 @@ export default function TambahProyek(props) {
         </Grid>
       </Grid>
       <Divider />
-      <Grid item xs container direction="row" justifyContent='space-between'>
+      <Grid item xs container direction="row" justify='space-between'>
         {proyek && <Grid item xs>
           <Button variant="contained" onClick={() => setOpenDialogStatus(true)} color="secondary" >{"Ubah Status"}</Button>
         </Grid>}
-        <Grid item xs container justifyContent="flex-end">
+        <Grid item xs container justify="flex-end">
           <Button variant="contained" color="primary" onClick={loadingButton.submit ? null : simpan} disabled={isDisabled}>{loadingButton.submit ? <CircularProgress color="inherit" size={20} /> : edit ? "Ubah" : "Simpan"}</Button>
           <Button variant="contained" color="inherit" onClick={handleBackToProyek} style={{ marginLeft: 10 }} >{"Kembali"}</Button>
         </Grid>
@@ -902,7 +902,7 @@ export default function TambahProyek(props) {
         <DialogContent dividers>
           {openDialogAplikasi ?
             <>
-              <Grid container direction="row" spacing={2} justifyContent="space-between">
+              <Grid container direction="row" spacing={2} justify="space-between">
                 <Grid item xs>
                   <TextField
                     id="kodeapl"
@@ -959,7 +959,7 @@ export default function TambahProyek(props) {
               />
             </>
             : openDialogModul ?
-              <Grid container direction="row" spacing={2} justifyContent="space-between">
+              <Grid container direction="row" spacing={2} justify="space-between">
                 <Grid item xs>
                   <TextField
                     id="namamodul"
@@ -998,7 +998,7 @@ export default function TambahProyek(props) {
                 </Grid>
               </Grid>
               : openDialogStatus ?
-                <Grid container direction="row" spacing={2} justifyContent="space-between">
+                <Grid container direction="row" spacing={2} justify="space-between">
                   <Grid item xs>
                     {/* <TextField
                       id="status"

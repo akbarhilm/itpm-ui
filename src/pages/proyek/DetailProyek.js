@@ -108,7 +108,7 @@ export default function DetailProyek(props) {
             <Typography variant="h4" align="center">{dataProyek ? dataProyek.NAMAPROYEK : ""}</Typography>
             <Typography variant="body1" align="center">{dataProyek ? dataProyek.KETPROYEK : ""}</Typography>
           </Grid>
-          <Grid item container direction="row" spacing={2} justifyContent="space-between">
+          <Grid item container direction="row" spacing={2} justify="space-between">
             <Grid item xs={6} container direction="column" >
               <TextField
                 label="Nomor Layanan"
@@ -118,7 +118,7 @@ export default function DetailProyek(props) {
                 disabled
                 value={dataProyek && dataProyek.LAYANAN ? dataProyek.LAYANAN.NOLAYANAN+" / "+dataProyek.LAYANAN.NOTIKET : ""}
               />
-              <Grid item container direction="row" spacing={2} justifyContent="space-between">
+              <Grid item container direction="row" spacing={2} justify="space-between">
                 <Grid item xs>
                   <TextField
                     label="NIK BPO"
@@ -140,7 +140,7 @@ export default function DetailProyek(props) {
                   />
                 </Grid>
               </Grid>
-              <Grid item container direction="row" spacing={2} justifyContent="space-between">
+              <Grid item container direction="row" spacing={2} justify="space-between">
                 <Grid item xs>
                   <TextField
                     label="Jenis Layanan"

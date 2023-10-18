@@ -138,7 +138,7 @@ export default function Uat(props) {
       <Grid item >
         <Paper className={classes.paper}>
           <Grid container direction="column" spacing={2}>
-            {otoritas === "PM" && data.every(d => d.approveUser) && !status.APPROVEBA && <Grid item container justifyContent="flex-end" >
+            {otoritas === "PM" && data.every(d => d.approveUser) && !status.APPROVEBA && <Grid item container justify="flex-end" >
               <Tooltip title="Tambah Data">
                 <IconButton onClick={add} >
                   <AddCircleOutline />
@@ -146,7 +146,7 @@ export default function Uat(props) {
               </Tooltip>
             </Grid>}
             <Grid item container direction="column" spacing={1}>
-              <Grid item container direction="row" spacing={2} justifyContent="space-between">
+              <Grid item container direction="row" spacing={2} justify="space-between">
                 <Grid item xs>
                   <Typography align="center" variant="body2"><b>Nomor UAT</b></Typography>
                 </Grid>
@@ -161,7 +161,7 @@ export default function Uat(props) {
                 </Grid>
               </Grid>
               {data && data.map((d, i) =>
-                <Grid item key={"grid-cont-" + i} container direction="row" spacing={2} justifyContent="space-between" alignItems="center">
+                <Grid item key={"grid-cont-" + i} container direction="row" spacing={2} justify="space-between" alignItems="center">
                   <Grid key={"grid-nomor-" + i} item xs>
                     <TextField key={"nomor-" + i} id={"nomor-" + i} name={"nomor-" + i}
                       fullWidth
@@ -172,19 +172,19 @@ export default function Uat(props) {
                       className={classes.fieldDisabled}
                     />
                   </Grid>
-                  <Grid key={"grid-qc-" + i} item xs={2} container justifyContent="center" >
+                  <Grid key={"grid-qc-" + i} item xs={2} container justify="center" >
                     <Checkbox key={"qc-" + i} id={"qc-" + i} name={"qc-" + i}
                       disabled
                       checked={d.approveQA}
                     />
                   </Grid>
-                  <Grid key={"grid-user-" + i} item xs={2} container justifyContent="center" >
+                  <Grid key={"grid-user-" + i} item xs={2} container justify="center" >
                     <Checkbox key={"user-" + i} id={"user-" + i} name={"user-" + i}
                       disabled
                       checked={d.approveUser}
                     />
                   </Grid>
-                  <Grid item xs={1} container justifyContent="center">
+                  <Grid item xs={1} container justify="center">
                     {d.approveUser || (d.approveQA && otoritas !== "BPO") || (!d.approveQA && otoritas !== "PM") ?
                       <Tooltip title="Detail">
                         <IconButton size="small" onClick={() => detail(d)}>
@@ -216,7 +216,7 @@ export default function Uat(props) {
       </Grid >
       < Dialog open={openDialogAdd} onClose={handleCloseDialogAdd} maxWidth="lg" fullWidth >
         <DialogTitle disableTypography >
-          <Grid container justifyContent="flex-end">
+          <Grid container justify="flex-end">
             <IconButton
               size="small"
               onClick={handleCloseDialogAdd}
@@ -231,7 +231,7 @@ export default function Uat(props) {
       </Dialog >
       <Dialog open={openDialogEdit} onClose={() => setOpenDialogEdit(false)} maxWidth="lg" fullWidth >
         <DialogTitle disableTypography >
-          <Grid container justifyContent="flex-end">
+          <Grid container justify="flex-end">
             <IconButton
               size="small"
               onClick={() => setOpenDialogEdit(false)}
@@ -246,7 +246,7 @@ export default function Uat(props) {
       </Dialog>
       <Dialog open={openDialogDetail} onClose={() => setOpenDialogDetail(false)} maxWidth="lg" fullWidth >
         <DialogTitle disableTypography >
-          <Grid container justifyContent="flex-end">
+          <Grid container justify="flex-end">
             <IconButton
               size="small"
               onClick={() => setOpenDialogDetail(false)}
@@ -261,7 +261,7 @@ export default function Uat(props) {
       </Dialog>
       <Dialog open={openDialogApproval} onClose={() => setOpenDialogApproval(false)} maxWidth="lg" fullWidth >
         <DialogTitle disableTypography >
-          <Grid container justifyContent="flex-end">
+          <Grid container justify="flex-end">
             <IconButton
               size="small"
               onClick={() => setOpenDialogApproval(false)}

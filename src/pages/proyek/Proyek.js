@@ -101,11 +101,11 @@ export default function Proyek(props) {
         message={alertDialog.messageAlertDialog}
         severity={alertDialog.severity}
       />
-      <Grid item xs container direction="row" justifyContent="space-between" >
+      <Grid item xs container direction="row" justify="space-between" >
         <Typography variant="h5" >List Proyek</Typography>
       </Grid>
       <Grid item xs container direction="column" >
-        <Grid item xs container direction="row" justifyContent="space-between" alignItems="center">
+        <Grid item xs container direction="row" justify="space-between" alignItems="center">
           <TextField
             type="search"
             variant="outlined"
@@ -127,7 +127,7 @@ export default function Proyek(props) {
           </IconButton>}
         </Grid>
         <Grid item xs>
-          {loading ? <Grid container justifyContent="center"><CircularProgress /></Grid>
+          {loading ? <Grid container justify="center"><CircularProgress /></Grid>
             : listProyek.length > 0 ?
               <List>
                 {(dataSearch ? listProyek.filter(d => d.NAMAPROYEK.toLowerCase().search(dataSearch.toLowerCase()) !== -1 || d.NOLAYANAN.toLowerCase().search(dataSearch.toLowerCase()) !== -1) : listProyek)
@@ -149,12 +149,12 @@ export default function Proyek(props) {
                 }
               </List>
               : <><Divider style={{ marginTop: 8, marginBottom: 18 }} />
-                <Grid container justifyContent="center">
+                <Grid container justify="center">
                   <Typography>Tidak ada data.</Typography>
                 </Grid></>
           }
         </Grid>
-        {totalPages > 0 && <Grid item xs container justifyContent="center" style={{ marginTop: 10 }}>
+        {totalPages > 0 && <Grid item xs container justify="center" style={{ marginTop: 10 }}>
           <Pagination
             count={totalPages}
             page={page}

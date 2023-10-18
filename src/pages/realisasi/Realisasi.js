@@ -449,7 +449,7 @@ export default function Realisasi(props) {
       <Grid item>
         <Paper className={classes.paper}>
           <Grid container direction="column" spacing={2}>
-            <Grid item container direction="row" justifyContent="space-between">
+            <Grid item container direction="row" justify="space-between">
               <Grid item xs>
                 <Typography variant="h6">Data Realisasi</Typography>
               </Grid>
@@ -460,7 +460,7 @@ export default function Realisasi(props) {
                 container
                 direction="row"
                 spacing={1}
-                justifyContent="space-between"
+                justify="space-between"
               >
                 <Grid item xs>
                   <Typography align="center" variant="body2">
@@ -502,7 +502,7 @@ export default function Realisasi(props) {
                     container
                     direction="row"
                     spacing={1}
-                    justifyContent="space-between"
+                    justify="space-between"
                     alignItems="flex-start"
                   >
                     <Grid key={"grid-kegiatan-" + i} item xs>
@@ -660,7 +660,7 @@ export default function Realisasi(props) {
                       item
                       xs={1}
                       container
-                      justifyContent="center"
+                      justify="center"
                     >
                       <TextField
                         key={"progres-" + i}
@@ -684,7 +684,7 @@ export default function Realisasi(props) {
         </Paper>
       </Grid>
       <Divider />
-      <Grid item container direction="row" justifyContent="flex-end">
+      <Grid item container direction="row" justify="flex-end">
         <Button
           onClick={loadingButton ? null : simpan}
           variant="contained"

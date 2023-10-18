@@ -100,13 +100,13 @@ export default function RealisasiDetail(props) {
       <Grid item >
         <Paper className={classes.paper}>
           <Grid container direction="column" spacing={2}>
-            <Grid item container direction="row" justifyContent="space-between">
+            <Grid item container direction="row" justify="space-between">
               <Grid item xs>
                 <Typography variant="h6">Data Realisasi</Typography>
               </Grid>
             </Grid>
             <Grid item container direction="column" spacing={1}>
-              <Grid item container direction="row" spacing={1} justifyContent="space-between">
+              <Grid item container direction="row" spacing={1} justify="space-between">
                 <Grid item xs>
                   <Typography align="center" variant="body2"><b>Kegiatan</b></Typography>
                 </Grid>
@@ -127,7 +127,7 @@ export default function RealisasiDetail(props) {
                 </Grid>
               </Grid>
               {data && data.map((d, i) =>
-                <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justifyContent="space-between" alignItems="flex-start">
+                <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justify="space-between" alignItems="flex-start">
                   <Grid key={"grid-kegiatan-" + i} item xs>
                     <TextField key={"kegiatan-" + i} id={"kegiatan-" + i} name={"kegiatan-" + i}
                       fullWidth
@@ -238,7 +238,7 @@ export default function RealisasiDetail(props) {
                       className={classes.fieldTableDisabled}
                     />
                   </Grid>
-                  <Grid key={"grid-progres-" + i} item xs={1} container justifyContent="center">
+                  <Grid key={"grid-progres-" + i} item xs={1} container justify="center">
                   <TextField key={"progres-" + i} id={"progres-" + i} name={"progres-" + i}
                       fullWidth
                       size="small"
@@ -249,7 +249,7 @@ export default function RealisasiDetail(props) {
                     />
                     {/* <Checkbox key={"check-" + i} disabled={d.disabled} checked={d.checked} onChange={(e) => onCheck(e.target.checked, i, d)} /> */}
                   </Grid>
-                  {/* <Grid key={"grid-check-" + i} item xs={1} container justifyContent="center">
+                  {/* <Grid key={"grid-check-" + i} item xs={1} container justify="center">
                     <Checkbox key={"check-" + i} disabled={d.disabled} checked={d.checked} onChange={(e) => onCheck(e.target.checked, i, d)} />
                   </Grid> */}
                 </Grid>
@@ -260,7 +260,7 @@ export default function RealisasiDetail(props) {
 
       </Grid>
       <Divider />
-      {/* <Grid item container direction="row" justifyContent="flex-end">
+      {/* <Grid item container direction="row" justify="flex-end">
         <Button onClick={loadingButton ? null : simpan} variant="contained" color="primary">
           {loadingButton ? <CircularProgress size={20} color="inherit" /> : edit ? "Ubah" : "Simpan"}
         </Button>

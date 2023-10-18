@@ -393,7 +393,7 @@ console.log(dataDetail)
                 </Grid>
               </Grid>
 
-              <Grid item container direction="row" justifyContent="space-between">
+              <Grid item container direction="row" justify="space-between">
                 <Grid item xs>
                   <Typography variant="h6">Peran dan Tanggung Jawab</Typography>
 
@@ -401,7 +401,7 @@ console.log(dataDetail)
                 </Grid>
               </Grid>
               <Grid item container direction="column" spacing={1}>
-                <Grid item container direction="row" spacing={1} justifyContent="space-between">
+                <Grid item container direction="row" spacing={1} justify="space-between">
                   <Grid item xs={1}>
                     <Typography align="center" variant="body2"><b>Jabatan</b></Typography>
                   </Grid>
@@ -414,7 +414,7 @@ console.log(dataDetail)
                 </Grid>
                 {dataRespPr && dataRespPr.map((d, i) =>
 
-                  <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justifyContent="space-between" alignItems="center">
+                  <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justify="space-between" alignItems="center">
 
                     <Grid key={"grid-jabatan-" + i} item xs={2}>
                       <TextField id={"jabatan-" + i} name={"jabatan-" + i}
@@ -513,7 +513,7 @@ console.log(dataDetail)
               <InputLabel>Anggota Tim</InputLabel>
             </Grid>
             <Grid item container direction="column" spacing={1}>
-              <Grid item container direction="row" spacing={1} justifyContent="space-between">
+              <Grid item container direction="row" spacing={1} justify="space-between">
                 <Grid item xs={1}>
                   <Typography align="center" variant="body2"><b>Jabatan</b></Typography>
                 </Grid>
@@ -526,7 +526,7 @@ console.log(dataDetail)
                 
               </Grid>
               {dataRespAt && dataRespAt.map((d, i) =>
-                <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justifyContent="space-between" alignItems="center">
+                <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justify="space-between" alignItems="center">
                   <Grid key={"grid-jabatan-" + i} item xs={2}>
                     <Autocomplete key={"respat-" + i} id={"respat-" + i} name={"respat-" + i}
                       options={dataRef.refrole.filter((d) => d.kodeactor !== '0')}
@@ -610,13 +610,13 @@ console.log(dataDetail)
 
             <Divider variant='middle' style={{ marginTop: '20px', marginBottom: '20px' }} />
 
-            <Grid item container direction="row" justifyContent="space-between">
+            <Grid item container direction="row" justify="space-between">
               <Grid item xs>
                 <Typography variant="h6">Jadwal & Aktivitas</Typography>
               </Grid>
             </Grid>
             <Grid item container direction="column" spacing={1}>
-              <Grid item container direction="row" spacing={1} justifyContent="space-between">
+              <Grid item container direction="row" spacing={1} justify="space-between">
                 <Grid item xs={2}>
                   <Typography align="center" variant="body2"><b>Aktivitas</b></Typography>
                 </Grid>
@@ -638,7 +638,7 @@ console.log(dataDetail)
                 
               </Grid>
               {dataAct && dataAct.map((d, i) =>
-                <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justifyContent="space-between" alignItems="center">
+                <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justify="space-between" alignItems="center">
                   <Grid key={"grid-aktivitas-" + i} item xs={2}>
                     <Autocomplete key={"act-" + i} id={"act-" + i} name={"act-" + i}
                       options={dataRef.refact}
@@ -767,13 +767,13 @@ console.log(dataDetail)
 
             <Divider variant='middle' style={{ marginTop: '20px', marginBottom: '20px' }} />
 
-            <Grid item container direction="row" justifyContent="space-between">
+            <Grid item container direction="row" justify="space-between">
               <Grid item xs>
                 <Typography variant="h6">Risiko & Mitigas</Typography>
               </Grid>
             </Grid>
             <Grid item container direction="column" spacing={1}>
-              <Grid item container direction="row" spacing={1} justifyContent="space-between">
+              <Grid item container direction="row" spacing={1} justify="space-between">
                 <Grid item xs={6}>
                   <Typography align="center" variant="body2"><b>Risiko</b></Typography>
                 </Grid>
@@ -788,7 +788,7 @@ console.log(dataDetail)
                 .sort((a, b) => a.IDPARENT < b.IDPARENT)
                 .map((d, i) =>
 
-                  <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justifyContent="space-between" alignItems="center">
+                  <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justify="space-between" alignItems="center">
                     <Grid item xs={6}>
                       <TextField id={"risiko-" + i} name={"risiko-" + i}
                         variant="outlined"
@@ -864,7 +864,7 @@ console.log(dataDetail)
             <Grid item container spacing={1}>
 
               <Grid item container direction="column" spacing={1}>
-                <Grid item container direction="row" spacing={1} justifyContent="space-between">
+                <Grid item container direction="row" spacing={1} justify="space-between">
                   <Grid item xs={2}>
                     <Typography align="center" variant="body2"><b>Tahapan</b></Typography>
                   </Grid>
@@ -880,7 +880,7 @@ console.log(dataDetail)
                  
                 </Grid>
                 {dataBo && dataBo.map((d, i) =>
-                  <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justifyContent="space-between" alignItems="center">
+                  <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justify="space-between" alignItems="center">
                     <Grid key={"grid-tahapan-" + i} item xs={2}>
                       <Autocomplete key={"tahapan-" + i} id={"tahapanv-" + i} name={"tahapan-" + i}
                         options={dataRef.refbo}

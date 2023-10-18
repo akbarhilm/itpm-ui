@@ -42,7 +42,7 @@ export default function ResourceDetail(props) {
       <Grid item >
         <Paper className={classes.paper}>
           <Grid container direction="column" spacing={2}>
-            <Grid item container direction="row" justifyContent="space-between">
+            <Grid item container direction="row" justify="space-between">
               <Grid item xs>
                 <Typography variant="h6">Sumber Daya Lain</Typography>
               </Grid>
@@ -153,7 +153,7 @@ export default function ResourceDetail(props) {
               <InputLabel>Kebutuhan lainnya</InputLabel>
             </Grid>
             <Grid item container direction="column" spacing={1}>
-              <Grid item container direction="row" spacing={1} justifyContent="space-between">
+              <Grid item container direction="row" spacing={1} justify="space-between">
                 <Grid item xs>
                   <Typography align="center" variant="body2"><b>Deskripsi Kebutuhan</b></Typography>
                 </Grid>
@@ -165,7 +165,7 @@ export default function ResourceDetail(props) {
                 </Grid>
               </Grid>
               {resource && resource.LISTDETAIL.filter(f => !f.KODE).map((d, i) =>
-                <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justifyContent="space-between" alignItems="center">
+                <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justify="space-between" alignItems="center">
                   <Grid key={"grid-deskripsi-" + i} item xs>
                     <TextField key={"deskripsi-" + i} id={"deskripsi-" + i} name={"deskripsi-" + i}
                       fullWidth

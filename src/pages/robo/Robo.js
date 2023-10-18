@@ -606,7 +606,7 @@ data.LISTDETAIL = LISTDETAIL
                 </Grid>
               </Grid>
 
-              <Grid item container direction="row" justifyContent="space-between">
+              <Grid item container direction="row" justify="space-between">
                 <Grid item xs>
                   <Typography variant="h6">Peran dan Tanggung Jawab</Typography>
 
@@ -614,7 +614,7 @@ data.LISTDETAIL = LISTDETAIL
                 </Grid>
               </Grid>
               <Grid item container direction="column" spacing={1}>
-                <Grid item container direction="row" spacing={1} justifyContent="space-between">
+                <Grid item container direction="row" spacing={1} justify="space-between">
                   <Grid item xs={1}>
                     <Typography align="center" variant="body2"><b>Jabatan</b></Typography>
                   </Grid>
@@ -627,7 +627,7 @@ data.LISTDETAIL = LISTDETAIL
                 </Grid>
                 {dataRespPr && dataRespPr.map((d, i) =>
 
-                  <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justifyContent="space-between" alignItems="center">
+                  <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justify="space-between" alignItems="center">
 
                     <Grid key={"grid-jabatan-" + i} item xs={2}>
                       <TextField id={"jabatan-" + i} name={"jabatan-" + i}
@@ -725,7 +725,7 @@ data.LISTDETAIL = LISTDETAIL
               <InputLabel>Anggota Tim</InputLabel>
             </Grid>
             <Grid item container direction="column" spacing={1}>
-              <Grid item container direction="row" spacing={1} justifyContent="space-between">
+              <Grid item container direction="row" spacing={1} justify="space-between">
                 <Grid item xs={1}>
                   <Typography align="center" variant="body2"><b>Jabatan</b></Typography>
                 </Grid>
@@ -740,7 +740,7 @@ data.LISTDETAIL = LISTDETAIL
                 </Grid>
               </Grid>
               {dataRespAt && dataRespAt.map((d, i) =>
-                <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justifyContent="space-between" alignItems="center">
+                <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justify="space-between" alignItems="center">
                   <Grid key={"grid-jabatan-" + i} item xs={2}>
                     <Autocomplete key={"respat-" + i} id={"respat-" + i} name={"respat-" + i}
                       options={dataRef.refrole.filter((z) => z.kodeactor !== '0')}
@@ -819,14 +819,14 @@ data.LISTDETAIL = LISTDETAIL
                     //defaultValue={"12345 / asd asd"}
                     />
                   </Grid>
-                  <Grid item xs={1} container justifyContent="center">
+                  <Grid item xs={1} container justify="center">
                     <IconButton size="small" onClick={() => deleteRow(i, "AT")}>
                       <RemoveCircleOutline />
                     </IconButton>
                   </Grid>
                 </Grid>
               )}
-              <Grid item xs container justifyContent="center">
+              <Grid item xs container justify="center">
                 <Button fullWidth aria-label="add row action plan" size="small" onClick={() => addRow("AT")} >
                   <AddCircleOutline />
                 </Button>
@@ -835,13 +835,13 @@ data.LISTDETAIL = LISTDETAIL
 
             <Divider variant='middle' style={{ marginTop: '20px', marginBottom: '20px' }} />
 
-            <Grid item container direction="row" justifyContent="space-between">
+            <Grid item container direction="row" justify="space-between">
               <Grid item xs>
                 <Typography variant="h6">Jadwal & Aktivitas</Typography>
               </Grid>
             </Grid>
             <Grid item container direction="column" spacing={1}>
-              <Grid item container direction="row" spacing={1} justifyContent="space-between">
+              <Grid item container direction="row" spacing={1} justify="space-between">
                 <Grid item xs={2}>
                   <Typography align="center" variant="body2"><b>Aktivitas</b></Typography>
                 </Grid>
@@ -865,7 +865,7 @@ data.LISTDETAIL = LISTDETAIL
                 </Grid>
               </Grid>
               {dataAct && dataAct.map((d, i) =>
-                <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justifyContent="space-between" alignItems="center">
+                <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justify="space-between" alignItems="center">
                   <Grid key={"grid-aktivitas-" + i} item xs={2}>
                     <Autocomplete key={"act-" + i} id={"act-" + i} name={"act-" + i}
                       options={dataRef.refact}
@@ -983,14 +983,14 @@ data.LISTDETAIL = LISTDETAIL
                       views={['year', 'month', 'date']}
                     />
                   </Grid>
-                  <Grid item xs={1} container justifyContent="center">
+                  <Grid item xs={1} container justify="center">
                     <IconButton size="small" onClick={() => deleteRow(i, "ACT")}>
                       <RemoveCircleOutline />
                     </IconButton>
                   </Grid>
                 </Grid>
               )}
-              <Grid item xs container justifyContent="center">
+              <Grid item xs container justify="center">
                 <Button fullWidth aria-label="add row action plan" size="small" onClick={() => addRow("ACT")} >
                   <AddCircleOutline />
                 </Button>
@@ -999,13 +999,13 @@ data.LISTDETAIL = LISTDETAIL
 
             <Divider variant='middle' style={{ marginTop: '20px', marginBottom: '20px' }} />
 
-            <Grid item container direction="row" justifyContent="space-between">
+            <Grid item container direction="row" justify="space-between">
               <Grid item xs>
                 <Typography variant="h6">Risiko & Mitigas</Typography>
               </Grid>
             </Grid>
             <Grid item container direction="column" spacing={1}>
-              <Grid item container direction="row" spacing={1} justifyContent="space-between">
+              <Grid item container direction="row" spacing={1} justify="space-between">
                 <Grid item xs={6}>
                   <Typography align="center" variant="body2"><b>Risiko</b></Typography>
                 </Grid>
@@ -1020,7 +1020,7 @@ data.LISTDETAIL = LISTDETAIL
                 .sort((a, b) => a.IDPARENT < b.IDPARENT)
                 .map((d, i) =>
 
-                  <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justifyContent="space-between" alignItems="center">
+                  <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justify="space-between" alignItems="center">
                     <Grid item xs={6}>
                       <TextField id={"risiko-" + i} name={"risiko-" + i}
                         variant="outlined"
@@ -1092,7 +1092,7 @@ data.LISTDETAIL = LISTDETAIL
             <Grid item container spacing={1}>
 
               <Grid item container direction="column" spacing={1}>
-                <Grid item container direction="row" spacing={1} justifyContent="space-between">
+                <Grid item container direction="row" spacing={1} justify="space-between">
                   <Grid item xs={2}>
                     <Typography align="center" variant="body2"><b>Tahapan</b></Typography>
                   </Grid>
@@ -1110,7 +1110,7 @@ data.LISTDETAIL = LISTDETAIL
                   </Grid>
                 </Grid>
                 {dataBo && dataBo.map((d, i) =>
-                  <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justifyContent="space-between" alignItems="center">
+                  <Grid item key={"grid-cont-" + i} container direction="row" spacing={1} justify="space-between" alignItems="center">
                     <Grid key={"grid-tahapan-" + i} item xs={2}>
                       <Autocomplete key={"tahapan-" + i} id={"tahapanv-" + i} name={"tahapan-" + i}
                         options={dataRef.refbo}
@@ -1199,14 +1199,14 @@ data.LISTDETAIL = LISTDETAIL
                       // inputProps={{ style: { textAlign: 'right' } }}
                       />
                     </Grid>
-                    <Grid item xs={1} container justifyContent="center">
+                    <Grid item xs={1} container justify="center">
                       <IconButton size="small" onClick={() => deleteRow(i, 'BO')}>
                         <RemoveCircleOutline />
                       </IconButton>
                     </Grid>
                   </Grid>
                 )}
-                <Grid item xs container justifyContent="center">
+                <Grid item xs container justify="center">
                   <Button fullWidth aria-label="add row action plan" size="small" onClick={() => addRow('BO')} >
                     <AddCircleOutline />
                   </Button>
@@ -1218,7 +1218,7 @@ data.LISTDETAIL = LISTDETAIL
 
       </Grid>
       <Divider />
-      <Grid item container direction="row" justifyContent="flex-end">
+      <Grid item container direction="row" justify="flex-end">
         <Button  onClick={ loadingButton ? null : save} variant="contained" color="primary">
           {loadingButton ? <CircularProgress size={20} color="inherit" /> : edit ? "Ubah" : "Simpan"}
         </Button>
