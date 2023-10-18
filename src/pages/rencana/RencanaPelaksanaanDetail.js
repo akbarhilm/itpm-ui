@@ -35,9 +35,11 @@ export default function RencanaPelaksanaanDetail(props) {
       grouped.forEach((value, key, map) => {
         const pelaksana = karyawan ? value.map(v => karyawan.filter(kar => kar.nik === v.NIKPELAKSANA).length > 0 ? karyawan.filter(kar => kar.nik === v.NIKPELAKSANA)[0].nik : v.NIKPELAKSANA) : [];
         const keg = kegiatan ? kegiatan.filter(keg => keg.id === key)[0] : null;
+        //const role = roles? !!roles.find(e=>e.id === 0)?roles.find(el=>el.id === value[0].IDROLE):{id:value[0].IDROLE}:{id:value[0].IDROLE}
         newData.push({
           kegiatan: keg ? keg.kegiatan : "",
           pelaksana: pelaksana.toString(),
+          //role:role,
           tanggalMulai: value[0].TGLMULAI, //moment(value[0].TGLMULAI, "DD/MM/YYYY"),
           tanggalSelesai: value[0].TGLSELESAI, //moment(value[0].TGLSELESAI, "DD/MM/YYYY"),
           target: keg ? keg.target : "",
@@ -82,6 +84,7 @@ export default function RencanaPelaksanaanDetail(props) {
                 <Grid item xs>
                   <Typography align="center" variant="body2"><b>Pelaksana</b></Typography>
                 </Grid>
+               
                 <Grid item xs={2}>
                   <Typography align="center" variant="body2"><b>Tanggal Mulai</b></Typography>
                 </Grid>
@@ -114,6 +117,7 @@ export default function RencanaPelaksanaanDetail(props) {
                       className={classes.fieldTableDisabled}
                     />
                   </Grid>
+                  
                   <Grid key={"grid-mulai-" + i} item xs={2}>
                     <TextField key={"mulai-" + i} id={"mulai-" + i} name={"mulai-" + i}
                       multiline
