@@ -11,6 +11,7 @@ import { AddCircleOutline } from '@material-ui/icons';
 import AlertDialog from '../../components/AlertDialog';
 
 
+
 const useStyles = makeStyles((theme) => ({
   paper: {
     padding: theme.spacing(2),
@@ -41,7 +42,7 @@ const useStyles = makeStyles((theme) => ({
 const defaultDataProyek = {
   idProyek: null,
   namaProyek: null,
-  namaUri: null,
+ // namaUri: null,
   deskripsi: null,
   jenisLayanan: null,
   jenisAplikasi: null,
@@ -54,7 +55,7 @@ const defaultDataProyek = {
 const defaultError = {
   layanan: { error: false, message: "" },
   namaProyek: { error: false, message: "" },
-  namaUri: { error: false, message: "" },
+ // namaUri: { error: false, message: "" },
   deskripsi: { error: false, message: "" },
   jenisLayanan: { error: false, message: "" },
   jenisAplikasi: { error: false, message: "" },
@@ -107,7 +108,7 @@ export default function TambahProyek(props) {
           setDataProyek({
             idProyek: response.data.IDPROYEK,
             namaProyek: response.data.NAMAPROYEK,
-            namaUri: response.data.NAMAURI,
+            //namaUri: response.data.NAMAURI,
             deskripsi: response.data.KETPROYEK,
             jenisLayanan: response.data.KODELAYANAN,
             jenisAplikasi: response.data.KODEAPLIKASI,
@@ -200,11 +201,11 @@ export default function TambahProyek(props) {
     else return false;
   };
 
-  const validateInputNamaUri = (value) => {
-    const regex = new RegExp(/^[\w-_]*$/);
-    if (regex.test(value) && !["proyek", "404", "401"].includes(value) && value.length <= 25) return true;
-    else return false;
-  };
+  // const validateInputNamaUri = (value) => {
+  //   const regex = new RegExp(/^[\w-_]*$/);
+  //   if (regex.test(value) && !["proyek", "404", "401"].includes(value) && value.length <= 25) return true;
+  //   else return false;
+  // };
 
   const validateInputDeskripsi = (value) => {
     if (value.length <= 255) return true;
@@ -228,8 +229,8 @@ export default function TambahProyek(props) {
     if (
       id === "namaProyek" ?
         validateInputNamaProyek(value)
-        : id === "namaUri" ?
-          validateInputNamaUri(value)
+        // : id === "namaUri" ?
+        //   validateInputNamaUri(value)
           : id === "deskripsi" ?
             validateInputDeskripsi(value)
             : id === "deskripsimpti" ?
@@ -294,7 +295,7 @@ export default function TambahProyek(props) {
     setError({
       layanan: !(dataLayanan && dataLayanan.idLayanan) ? err : def,
       namaProyek: !dataProyek.namaProyek ? err : def,
-      namaUri: !dataProyek.namaUri ? err : def,
+      //namaUri: !dataProyek.namaUri ? err : def,
       jenisLayanan: !dataProyek.jenisLayanan ? err : def,
       jenisAplikasi: !dataProyek.jenisAplikasi ? err : def,
       aplikasi: !dataProyek.aplikasi ? err : def,
@@ -306,7 +307,7 @@ export default function TambahProyek(props) {
     if (
       !(dataLayanan && dataLayanan.idLayanan) ||
       !dataProyek.namaProyek ||
-      !dataProyek.namaUri ||
+      //!dataProyek.namaUri ||
       !dataProyek.jenisLayanan ||
       !dataProyek.jenisAplikasi ||
       !dataProyek.aplikasi ||
@@ -330,10 +331,10 @@ export default function TambahProyek(props) {
       ketproj: dataProyek.deskripsi ? dataProyek.deskripsi : "",
       kodempti:mpti?"1":"0",
       ketmpti:dataProyek.deskripsimpti ? dataProyek.deskripsimpti : "",
-      kodeproker:mpti?"1":"0",
+      kodeproker:proker?"1":"0",
       ketproker:dataProyek.deskripsiproker ? dataProyek.deskripsiproker : "",
       
-      namauri: dataProyek.namaUri,
+      //namauri: dataProyek.namaUri,
       nikreq: dataLayanan.nikBPO,
       nikpm: dataLayanan.nikPM,
       idaplikasi: dataProyek.aplikasi ? dataProyek.aplikasi.IDAPLIKASI : null,
@@ -563,7 +564,7 @@ export default function TambahProyek(props) {
                       helperText={error.layanan.message}
                     />
                   )}
-                  disabled={isDisabled}
+                  disabled={edit}
                 />
                 <Grid item container direction="row" spacing={2} justify="space-between">
                   <Grid item xs>
@@ -690,7 +691,7 @@ export default function TambahProyek(props) {
                 disabled={isDisabled}
               />
             </Grid>
-            <Grid item xs>
+            {/* <Grid item xs>
               <TextField
                 id="namaUri"
                 label="Nama URI"
@@ -705,7 +706,7 @@ export default function TambahProyek(props) {
                 helperText={error.namaUri.message}
                 disabled={isDisabled}
               />
-            </Grid>
+            </Grid> */}
           </Grid>
           <TextField
             id="deskripsi"
@@ -736,7 +737,7 @@ export default function TambahProyek(props) {
             required
             error={error.deskripsimpti.error}
             helperText={error.deskripsimpti.message}
-            disabled={!mpti}
+            disabled={!mpti || isDisabled}
           />
           </Grid>
           <Grid item xs>
@@ -768,7 +769,7 @@ export default function TambahProyek(props) {
             required
             error={error.deskripsiproker.error}
             helperText={error.deskripsiproker.message}
-            disabled={!proker}
+            disabled={!proker || isDisabled}
           />
           </Grid>
           <Grid item xs>
