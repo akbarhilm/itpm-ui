@@ -315,9 +315,9 @@ const handeleChangeYear = (event) =>{
         const result = response.data[0];
         setSummary([
           { label: "TOTAL", value: result.TOTAL || 0, status: 'ALL' },
-          { label: "BARU", value: result.BARU || 0, status: 'BARU' },
-          { label: "SELESAI", value: result.SELESAI || 0, status: 'SELESAI' },
-          { label: "BERJALAN", value: result.BERJALAN || 0, status: 'BERJALAN' },
+          { label: "NEW", value: result.BARU || 0, status: 'BARU' },
+          { label: "CLOSED", value: result.SELESAI || 0, status: 'SELESAI' },
+          { label: "ONGOING", value: result.BERJALAN || 0, status: 'BERJALAN' },
           { label: "DELAY", value: result.DELAY || 0, status: 'DELAY' },
           { label: "PENDING", value: result.PENDING || 0, status: 'PENDING' },
           { label: "CANCEL", value: result.CANCEL || 0, status: 'CANCEL' },
