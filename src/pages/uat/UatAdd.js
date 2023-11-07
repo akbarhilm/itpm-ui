@@ -317,7 +317,7 @@ export default function UatAdd(props) {
       </Grid>
       <Grid item >
         <Tabel label="Quality Control"
-          listKaryawan={listKaryawan ? listKaryawan.filter(d => d.organisasi === "IT1300") : []}
+          listKaryawan={listKaryawan ? listKaryawan.filter(d => d.nik === "930324" || d.nik ==="920672" || d.nik === "140290" || d.nik === "950003") : []}
           data={dataQA}
           error={errorQA}
           addRow={addRowQA}

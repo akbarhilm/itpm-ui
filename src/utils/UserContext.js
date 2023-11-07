@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState } from 'react';
-import { getAllKaryawan, getAllKegiatan, getAuthFromAPI, getUser } from '../gateways/api/CommonAPI';
+import { getAllKaryawan, getAllKegiatan, getAuthFromAPI, getUser,getAllRole } from '../gateways/api/CommonAPI';
 import { setAuthApi } from './ApiConfig';
 import Cookies from "universal-cookie";
 import { getAuth } from './Auth';
@@ -13,6 +13,7 @@ export function useFindUser() {
   const [user, setUser] = useState(null);
   const [karyawan, setKaryawan] = useState(null);
   const [kegiatan, setKegiatan] = useState(null);
+  const [role, setRole] = useState(null);
   const [isLoading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -23,6 +24,11 @@ export function useFindUser() {
       await getAllKegiatan()
         .then((response) => {
           setKegiatan(response.data);
+        });
+
+        await getAllRole()
+        .then((response) => {
+          setRole(response.data);
         });
       await getAllKaryawan()
         .then((response) => {
@@ -84,6 +90,7 @@ export function useFindUser() {
     isLoading,
     setLoading,
     karyawan,
-    kegiatan
+    kegiatan,
+    role
   };
 }

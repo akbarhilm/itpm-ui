@@ -112,11 +112,11 @@ export default function DetailProyek(props) {
             <Grid item xs={6} container direction="column" >
               <TextField
                 label="Nomor Layanan"
-                // variant="outlined"
+                //variant="outlined"
                 className={classes.fieldDisabled}
                 fullWidth
                 disabled
-                value={dataProyek && dataProyek.LAYANAN ? dataProyek.LAYANAN.NOLAYANAN : ""}
+                value={dataProyek && dataProyek.LAYANAN ? dataProyek.LAYANAN.NOLAYANAN+" / "+dataProyek.LAYANAN.NOTIKET : ""}
               />
               <Grid item container direction="row" spacing={2} justify="space-between">
                 <Grid item xs>

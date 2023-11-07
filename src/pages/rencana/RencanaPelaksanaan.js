@@ -46,6 +46,7 @@ export default function RencanaPelaksanaan(props) {
   const [data, setData] = useState();
   const [error, setError] = useState();
   const [listKegiatan, setListKegiatan] = useState();
+  //const [listrole,setListrole] = useState();
   const [listKaryawan, setListKaryawan] = useState();
   const [alertDialog, setAlertDialog] = useState(defaultAlert);
 
@@ -56,20 +57,26 @@ export default function RencanaPelaksanaan(props) {
   const formatNewData = useCallback((listdetail) => {
     const grouped = groupBy(listdetail, x => x.IDKEGIATAN);
     const newData = [];
+    console.log(grouped)
     grouped.forEach((value, key, map) => {
       const pelaksana = listKaryawan ? value.map(v => listKaryawan.filter(kar => kar.nik === v.NIKPELAKSANA)[0] || ({ nik: v.NIKPELAKSANA })) : [];
       const kegiatan = listKegiatan ? listKegiatan.filter(keg => keg.id === key)[0] : null;
+      //const role = listrole? !!listrole.find(e=>e.id === value[0].IDROLE)?listrole.find(el=>el.id === value[0].IDROLE):{id:value[0].IDROLE}:{id:value[0].IDROLE}
+      
+      
       newData.push({
         kegiatan: kegiatan,
         pelaksana: pelaksana,
+        bobot : value[0].BOBOT,
         tanggalMulai: moment(value[0].TGLMULAI, "DD/MM/YYYY"),
         tanggalSelesai: moment(value[0].TGLSELESAI, "DD/MM/YYYY"),
         target: kegiatan ? kegiatan.target : "",
-        disabled: value[0].REALISASI
+       // disabled: role.id==="0"?true:value[0].REALISASI
       });
     });
     if (listKaryawan && listKegiatan)
       newData.sort((a, b) => a.kegiatan.id - b.kegiatan.id);
+      //console.log(newData)
     return newData;
   }, [listKaryawan, listKegiatan]);
 
@@ -84,6 +91,7 @@ export default function RencanaPelaksanaan(props) {
       setData([defaultData]);
       setError([defaultError]);
     }
+    
   }, [plan, formatNewData]);
 
   useEffect(() => {
@@ -91,6 +99,12 @@ export default function RencanaPelaksanaan(props) {
       setListKegiatan(kegiatan);
     }
   }, [listKegiatan, kegiatan]);
+
+  // useEffect(() => {
+  //   if (!listrole) {
+  //     setListrole(roles);
+  //   }
+  // }, [listrole, roles]);
 
   useEffect(() => {
     if (!listKaryawan) {
@@ -108,12 +122,13 @@ export default function RencanaPelaksanaan(props) {
 
     let newArray = [...data];
     if (key === "kegiatan") {
-      newArray[index] = { ...newArray[index], [key]: value, target: value ? value.target : "" };
+      newArray[index] = { ...newArray[index], [key]: value, target: value ? value.target : "",bobot:value.bobot };
     } else if (key === "tanggalMulai") {
       newArray[index] = { ...newArray[index], [key]: value, tanggalSelesai: value < newArray[index].tanggalSelesai ? newArray[index].tanggalSelesai : null };
     } else {
       newArray[index] = { ...newArray[index], [key]: value };
     }
+    console.log(newArray);
     setData(newArray);
   };
 
@@ -123,7 +138,10 @@ export default function RencanaPelaksanaan(props) {
     setError(newArrayError);
 
     let newArray = [...data];
+    // newArray.map(el=>Object.values(el.role)[0]==="0"? true : false).some(x=>x===true)?defaultData.disablerole=true:defaultData.disablerole=false
+    // console.log(defaultData)
     newArray.push(defaultData);
+
     setData(newArray);
   };
 
@@ -143,13 +161,14 @@ export default function RencanaPelaksanaan(props) {
         const newObj = {
           kegiatan: data[i].kegiatan ? noErr : err,
           pelaksana: data[i].pelaksana.length > 0 ? noErr : err,
+         // role: data[i].role ? noErr : err,
           tanggalMulai: data[i].tanggalMulai ? noErr : err,
           tanggalSelesai: data[i].tanggalSelesai ? noErr : err
         };
         return newObj;
       })
     );
-    if (data.every(dt => dt.kegiatan && dt.pelaksana.length > 0 && dt.tanggalMulai && dt.tanggalSelesai)) return true;
+    if (data.every(dt => dt.kegiatan  && dt.pelaksana.length > 0 && dt.tanggalMulai && dt.tanggalSelesai)) return true;
     else return false;
   };
 
@@ -159,6 +178,8 @@ export default function RencanaPelaksanaan(props) {
       if (validateAll()) {
         const listdetail = data.map(dt => ({
           idkegiatan: dt.kegiatan.id,
+          bobot:dt.bobot,
+         // idrole : dt.role.id,
           pelaksana: dt.pelaksana.map(pel => pel.nik),
           tglmulai: moment(dt.tanggalMulai).format("DD/MM/YYYY"),
           tglselesai: moment(dt.tanggalSelesai).format("DD/MM/YYYY")
@@ -167,7 +188,9 @@ export default function RencanaPelaksanaan(props) {
           idproj: proyek.IDPROYEK,
           listdetail: listdetail
         };
+       
         if (edit) {
+         
           updateRencanaPelaksanaan(formatData)
             .then((response) => {
               setData(formatNewData(response.data.LISTDETAIL));
@@ -245,6 +268,9 @@ export default function RencanaPelaksanaan(props) {
                 <Grid item xs>
                   <Typography align="center" variant="body2"><b>Kegiatan</b></Typography>
                 </Grid>
+                <Grid item xs={1}>
+                  <Typography align="center" variant="body2"><b>Bobot</b></Typography>
+                </Grid>
                 <Grid item xs>
                   <Typography align="center" variant="body2"><b>Pelaksana</b></Typography>
                 </Grid>
@@ -266,7 +292,7 @@ export default function RencanaPelaksanaan(props) {
                   <Grid key={"grid-kegiatan-" + i} item xs>
                     <Autocomplete key={"kegiatan-" + i} id={"kegiatan-" + i} name={"kegiatan-" + i}
                       options={listKegiatan || []}
-                      getOptionLabel={option => option.kegiatan}
+                      getOptionLabel={option => option.kegiatan+' / '+option.bobot+'%'}
                       onChange={(e, v) => handleChange(v, i, "kegiatan")}
                       value={d.kegiatan}
                       getOptionSelected={
@@ -274,7 +300,7 @@ export default function RencanaPelaksanaan(props) {
                       }
                       renderOption={(option) => (
                         <React.Fragment>
-                          {option.kegiatan}
+                          {option.kegiatan} / {option.bobot}%
                         </React.Fragment>
                       )}
                       renderInput={params => (
@@ -291,6 +317,16 @@ export default function RencanaPelaksanaan(props) {
                       disabled={d.disabled}
                     />
                   </Grid>
+                  <Grid key={"grid-bobot-"+i} item xs={1}>
+                  <TextField key={"bobot-" + i} id={"bobot-" + i} name={"bobot-" + i}
+                        //multiline
+                        fullWidth
+                        size="small"
+                        value={(d.bobot||"")+"%"}
+                        disabled
+                        className={classes.fieldTableDisabled}
+                      />
+                  </Grid>
                   <Grid key={"grid-pelaksana-" + i} item xs>
                     {d.disabled ?
                       <TextField key={"pelaksana-" + i} id={"pelaksana-" + i} name={"pelaksana-" + i}
@@ -302,6 +338,7 @@ export default function RencanaPelaksanaan(props) {
                         className={classes.fieldTableDisabled}
                       />
                       : <Autocomplete key={"pelaksana-" + i} id={"pelaksana-" + i} name={"pelaksana-" + i}
+                    
                         multiple
                         disableCloseOnSelect
                         options={listKaryawan || []}
@@ -335,6 +372,36 @@ export default function RencanaPelaksanaan(props) {
                         disabled={d.disabled}
                       />}
                   </Grid>
+                  {/* <Grid key={"grid-role-" + i} item xs>
+                    <Autocomplete key={"role-" + i} id={"role-" + i} name={"role-" + i}
+                   
+                      options={listrole || []}
+                      getOptionLabel={option =>option.kode?option.kode:option.id ==="0"?"N/A":option.id}
+                      getOptionDisabled={option=>data[i].pelaksana.find(el=>el.nik === proyek.NIKPM)?null:option.id==='2'}
+                      onChange={(e, v) => handleChange(v, i, "role")}
+                      value={d.role}
+                      getOptionSelected={
+                        (option, value) => option.id === value.id
+                      }
+                      renderOption={(option) => (
+                        <React.Fragment>
+                          {option.kode} 
+                        </React.Fragment>
+                      )}
+                      renderInput={params => (
+                        <TextField
+                          {...params}
+                          fullWidth
+                          variant={d.disabled ? "standard" : "outlined"}
+                          size="small"
+                          error={error[i].role.error}
+                          helperText={error[i].role.text}
+                          className={d.disabled ? classes.fieldDisabled : null}
+                        />
+                      )}
+                      disabled={d.disabled||d.disablerole}
+                    />
+                  </Grid> */}
                   <Grid key={"grid-mulai-" + i} item xs={2}>
                     <KeyboardDatePicker key={"mulai-" + i} id={"mulai-" + i} name={"mulai-" + i}
                       fullWidth

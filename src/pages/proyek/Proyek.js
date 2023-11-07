@@ -26,6 +26,8 @@ export default function Proyek(props) {
   const [loading, setLoading] = useState(false);
   const [alertDialog, setAlertDialog] = useState(defaultAlert);
 
+  const wsRegex = /^\s+|\s+$/g; 
+
   const handleCloseAlertDialog = () => {
     setAlertDialog({ ...alertDialog, openAlertDialog: false });
   };
@@ -130,7 +132,7 @@ export default function Proyek(props) {
           {loading ? <Grid container justify="center"><CircularProgress /></Grid>
             : listProyek.length > 0 ?
               <List>
-                {(dataSearch ? listProyek.filter(d => d.NAMAPROYEK.toLowerCase().search(dataSearch.toLowerCase()) !== -1 || d.NOLAYANAN.toLowerCase().search(dataSearch.toLowerCase()) !== -1) : listProyek)
+                {(dataSearch ? listProyek.filter(d => d.NAMAPROYEK.toLowerCase().search(dataSearch.replace(wsRegex,"").toLowerCase()) !== -1 || d.NOLAYANAN.toLowerCase().search(dataSearch.replace(wsRegex,"").toLowerCase()) !== -1) : listProyek)
                   .slice((page - 1) * itemsPerPage, page * itemsPerPage)
                   .map((d, i) => (
                     <ListItem button key={"list-item-" + i} divider onClick={() => handleDetail(d)}>

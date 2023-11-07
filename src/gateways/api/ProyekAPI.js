@@ -4,8 +4,8 @@ export const getListProyek = async (status, dashboard, nik,state) => {
   return await api.get('/profil/pengguna/proyek/nik', { params: { status: status, d: dashboard || null, nik: nik || null , sap : state?state.SAP : null, non:state?state.NON_SAP:null} });
 };
 
-export const getSummaryProyek = async () => {
-  return await api.get('/profil/pengguna/proyek/summary');
+export const getSummaryProyek = async (year) => {
+  return await api.get('/profil/pengguna/proyek/summary',{params:{tahun:year}});
 };
 
 export const getProyekById = async (id) => {

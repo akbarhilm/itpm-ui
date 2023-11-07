@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useContext } from "react";
-import { Checkbox, FormControlLabel, FormControl, FormGroup, Grid, Typography, Divider, CircularProgress, TextField, InputAdornment, Card, CardActionArea, CardContent, Accordion, AccordionSummary, AccordionDetails, Stepper, Step, StepLabel, Chip, MenuItem, Button } from "@material-ui/core";
+import React, { useState, useEffect, useContext,useRef  } from "react";
+import { Checkbox, FormControlLabel, FormControl,FormLabel, FormGroup, Grid, Typography, Divider, CircularProgress, TextField, InputAdornment, Card, CardActionArea, CardContent, Accordion, AccordionSummary, AccordionDetails, Stepper, Step, StepLabel, Chip, MenuItem, Button } from "@material-ui/core";
 import { ExpandMore, Search } from '@material-ui/icons';
 import Pagination from "@material-ui/lab/Pagination";
 import { getListProyek, getSummaryProyek } from '../../gateways/api/ProyekAPI';
 import { useCallback } from "react";
 import AlertDialog from '../../components/AlertDialog';
 import { UserContext } from "../../utils/UserContext";
-import { labelStepper } from "../../utils/DataEnum";
+import { labelStepper,statusProyek } from "../../utils/DataEnum";
 import { Chart as ChartJS, CategoryScale, TimeScale, LinearScale, BarElement, Title, Tooltip, Legend, } from 'chart.js';
 import 'chartjs-adapter-date-fns';
-import { Bar } from 'react-chartjs-2';
+import { Bar,getElementsAtEvent    } from 'react-chartjs-2';
 import { groupBy } from "../../utils/Common";
 import { Autocomplete, createFilterOptions } from "@material-ui/lab";
 import * as FileSaver from 'file-saver'
@@ -26,6 +26,44 @@ ChartJS.register(
   Legend
 );
 
+const options2 = {
+  indexAxis: 'y',
+  elements: {
+    bar: {
+      borderWidth: 1,
+    },
+  },
+  layout: {
+    autoPadding: false,
+    padding: 20,
+  },
+  responsive: true,
+  plugins: {
+    legend: {
+      position: 'right',
+    },
+    tooltips: {
+      callbacks: {
+        afterBody: (context, data) => {
+          console.log(context[0]);
+          return '';
+        }
+      }
+    }
+  },
+  scales: {
+    x: {
+      type: 'time',
+      time: {
+        unit: 'month',
+        displayFormats: {
+          month: 'MMM yyyy',
+        },
+      },
+      min: '2023-01-01T00:00:00',
+    },
+  },
+};
 
 
 const options = {
@@ -127,12 +165,58 @@ const data = {
   ],
 };
 
+const dummymilestone = {
+  datasets: [
+    {
+      label: 'Rencana',
+      data: datax.reverse(),
+      borderColor: 'rgb(255, 99, 132)',
+      backgroundColor: 'rgba(255, 99, 132, 0.5)',
+      barPercentage: 0.7,
+      categoryPercentage: 0.2,
+      tooltip: {
+        callbacks: {
+          label: (context) => {
+            const tanggalMulai = context.raw.x[0].toLocaleString('id-ID', { day: "2-digit", month: "short", year: "numeric" });
+            const tanggalSelesai = context.raw.x[1].toLocaleString('id-ID', { day: "2-digit", month: "short", year: "numeric" });
+            return context.dataset.label + ": " + tanggalMulai + " - " + tanggalSelesai;
+          }
+        }
+      },
+  
+     },
+    {
+      label: 'Realisasi',
+      data: dataxx.reverse(),
+      borderColor: 'rgb(53, 162, 235)',
+      backgroundColor: 'rgba(53, 162, 235, 0.5)',
+      barPercentage: 0.7,
+      categoryPercentage: 0.2,
+      tooltip: {
+        callbacks: {
+          label: (context) => {
+            const tanggalMulai = context.raw.x[0].toLocaleString('id-ID', { day: "2-digit", month: "short", year: "numeric" });
+            const tanggalSelesai = context.raw.x[1].toLocaleString('id-ID', { day: "2-digit", month: "short", year: "numeric" });
+            return context.dataset.label + ": " + tanggalMulai + " - " + tanggalSelesai;
+          }
+        }
+      },
+
+    },
+  ],
+};
+
+
 const dataTotal = [
   { label: "TOTAL", value: 0, status: 'ALL' },
   { label: "SELESAI", value: 0, status: 'SELESAI' },
   { label: "BERJALAN", value: 0, status: 'BERJALAN' },
   { label: "PENDING", value: 0, status: 'PENDING' },
   { label: "BARU", value: 0, status: 'BARU' },
+  { label: "DELAY", value: 0, status: 'DELAY' },
+  { label: "CANCEL", value: 0, status: 'CANCEL' },
+  { label: "HOLD", value: 0, status: 'HOLD' },
+  { label: "BLOCKED", value: 0, status: 'BLOCKED' },
 ];
 
 const listKategori = [
@@ -143,6 +227,10 @@ const listKategori = [
   {
     label: "Cari Berdasarkan NIK",
     value: "nik"
+  },
+  {
+    label: "Cari Berdasarkan Status",
+    value: "status"
   },
 ];
 
@@ -179,9 +267,15 @@ export default function Dashboard(props) {
   const [loading, setLoading] = useState(false);
   const [alertDialog, setAlertDialog] = useState(defaultAlert);
   const [expanded, setExpanded] = useState(false);
+  const [dataMilestone,setDataMilestone] = useState([]);
   const [summary, setSummary] = useState(dataTotal);
   const [kategori, setKategori] = useState("default");
   const [nik, setNik] = useState(null);
+  const [year,setYear] = useState(new Date().getFullYear())
+  const [exp,setExp] = useState(false)
+  const [plan,setPlan] = useState({PLAN:false,REAL:false,ALL:true})
+
+
 
   const setStatusColor = (status, plan) => {
     // console.log(plan.map(p => new Date(p.tanggalSelesai)));
@@ -190,34 +284,46 @@ export default function Dashboard(props) {
     if (status === "BERJALAN" && plan.length > 0) {
       const today = new Date();
       const maxDate = new Date(Math.max(...plan.map(p => new Date(p.tanggalSelesai))));
-      const fiveDayBeforeMaxDate = new Date(maxDate.getTime() - (5 * 24 * 60 * 60 * 1000));
+      //const fiveDayBeforeMaxDate = new Date(maxDate.getTime() - (5 * 24 * 60 * 60 * 1000));
       // const fiveDayBeforeMaxDate = maxDate.getDate();
-      if (today < fiveDayBeforeMaxDate) return '#009944';
-      else if (today < maxDate) return '#f0541e';
-      else return '#cf000f';
+      //console.log(today,maxDate);
+      if (today > maxDate) 
+      status = "DELAYED";
+     
       // console.log(today);
       // console.log(maxDate);
       // console.log(fiveDayBeforeMaxDate);
     }
-
-    return null;
+    return status;
+    //return null;
   };
+
+const handeleChangeYear = (event) =>{
+  setYear(event.target.value)
+}
+
   const { SAP, NON_SAP } = state;
+  const {PLAN,REAL,ALL} = plan;
   const handleCloseAlertDialog = () => {
     setAlertDialog({ ...alertDialog, openAlertDialog: false });
   };
 
   useEffect(() => {
     // console.log(user);
-    getSummaryProyek()
+    getSummaryProyek(year.toString())
       .then((response) => {
         const result = response.data[0];
         setSummary([
           { label: "TOTAL", value: result.TOTAL || 0, status: 'ALL' },
-          { label: "SELESAI", value: result.SELESAI || 0, status: 'SELESAI' },
-          { label: "BERJALAN", value: result.BERJALAN || 0, status: 'BERJALAN' },
+          { label: "NEW", value: result.BARU || 0, status: 'BARU' },
+          { label: "CLOSED", value: result.SELESAI || 0, status: 'SELESAI' },
+          { label: "ONGOING", value: result.BERJALAN || 0, status: 'BERJALAN' },
+          { label: "DELAY", value: result.DELAY || 0, status: 'DELAY' },
           { label: "PENDING", value: result.PENDING || 0, status: 'PENDING' },
-          { label: "BARU", value: result.BARU || 0, status: 'BARU' },
+          { label: "CANCEL", value: result.CANCEL || 0, status: 'CANCEL' },
+          { label: "HOLD", value: result.HOLD || 0, status: 'HOLD' },
+          { label: "BLOCKED", value: result.BLOCKED || 0, status: 'BLOCKED' },
+
         ]);
       })
       .catch((error) => {
@@ -226,7 +332,7 @@ export default function Dashboard(props) {
         else
           setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
       });
-  }, []);
+  }, [year]);
 
   useEffect(() => {
     setTotalPages(
@@ -234,7 +340,10 @@ export default function Dashboard(props) {
     );
   }, [listProyekAfterSearch]);
 
+
+
   const getProyek = useCallback((stat, nik) => {
+
     const formatNewData = (listdetail) => {
       const grouped = groupBy(listdetail, x => x.IDKEGIATAN);
       const newData = [];
@@ -252,10 +361,11 @@ export default function Dashboard(props) {
       });
       return newData.sort((a, b) => b.sort - a.sort);
     };
-
+    
     const formatListProyek = (list) => {
+      const fbyyear = list.filter(d=>d.TGLENTRY.split('/')[2] === year.toString())
       const newArray = [];
-      list.forEach(d => {
+      fbyyear.forEach(d => {
         const plan = formatNewData(d.plan);
         const real = formatNewData(d.real);
         const dataOption = { ...options, scales: { ...options.scales, x: { ...options.scales.x, min: d.charter.length > 0 ? d.charter[0].TGLMULAI.split("/").reverse().join("-").concat("T00:00:00") : null } } };
@@ -275,14 +385,63 @@ export default function Dashboard(props) {
         };
         newArray.push({ ...d, plan: plan, real: real, opt: dataOption, dataGrafik: dataGrafik });
       });
-      return newArray;
+      const newArray2 = plan.ALL ?  newArray : newArray.filter(d=>plan.PLAN?d.plan.length>0:d.plan.length===0).filter(x=>plan.REAL?x.real.length>0:x.real.length===0) 
+      console.log(newArray2)
+      return newArray2;
     };
+
+  
+    const formatMilestone = (list) =>{
+     
+     
+      const newdata1 = []
+      const newdata2 = []
+      const labels = []
+      const data = {}
+      // console.log(year)
+      const fbyyear = list.filter(d=>d.TGLENTRY.split('/')[2] === year.toString())
+      // console.log(fbyyear)
+
+      fbyyear.forEach(d =>{
+        const plan = [new Date(Math.min(...d.plan.map(x=>new Date(x.TGLMULAI.replace( /(\d{2})\/(\d{2})\/(\d{4})/, "$2/$1/$3"))))),new Date(Math.max(...d.plan.map(x=>new Date(x.TGLMULAI.replace( /(\d{2})\/(\d{2})\/(\d{4})/, "$2/$1/$3")))))]
+        const real = [new Date(Math.min(...d.real.map(x=>new Date(x.TGLMULAI.replace( /(\d{2})\/(\d{2})\/(\d{4})/, "$2/$1/$3"))))),new Date(Math.max(...d.real.map(x=>new Date(x.TGLMULAI.replace( /(\d{2})\/(\d{2})\/(\d{4})/, "$2/$1/$3")))))]
+        
+        
+        
+      newdata1.push({x:plan,y:d.NAMAPROYEK})
+      newdata2.push({x:real,y:d.NAMAPROYEK})
+      labels.push(d.NAMAPROYEK) 
+      });
+      const dataOption = { ...options2, scales: { ...options2.scales, x: { ...options2.scales.x, min: new Date(new Date(year.toString()).getFullYear(),0) } } };
+      const dataGrafik = {
+        datasets: [
+          {
+            ...dummymilestone.datasets[0],
+            data: newdata1
+          },
+          {
+            ...dummymilestone.datasets[1],
+            data: newdata2
+          },
+        ],
+        labels : labels
+      };
+      data.dataGrafik = dataGrafik
+      data.opt = dataOption
+     //console.log(data)
+      return data;
+      
+      }
+    
     // console.log(kegiatan);
     setLoading(true);
     getListProyek(stat, true, nik,state)
       .then((response) => {
         setListProyek(formatListProyek(response.data.list));
+       
         setListProyekAfterSearch(formatListProyek(response.data.list));
+        setDataMilestone(formatMilestone(response.data.list));
+       
         // setFilterproyek(formatListProyek(response.data.list))
         setLoading(false);
       })
@@ -293,11 +452,11 @@ export default function Dashboard(props) {
         else
           setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
       });
-  }, [karyawan, kegiatan,state]);
+  }, [karyawan, kegiatan,state,year,plan]);
 
   useEffect(() => {
     getProyek(status, nik);
-  }, [getProyek, status, nik,state]);
+  }, [getProyek, status, nik,state,year]);
 
   const handleChangePage = (event, value) => {
     setPage(value);
@@ -317,8 +476,15 @@ export default function Dashboard(props) {
   };
 
   const handleChangeStatus = (stat) => () => {
+    
     setStatus(stat);
     if (status !== stat) setTextSearch("");
+  };
+
+  const handleChangeStatusfilter = (event) => {
+    console.log(event);
+    setStatus(event.target.value);
+    //if (status !== stat) setTextSearch("");
   };
 
   const handleChangeSearch = (event) => {
@@ -338,6 +504,23 @@ export default function Dashboard(props) {
       ...state,
       [event.target.name]: event.target.checked,
     });
+  }
+    const handleChangePlan = (event) => {
+
+      
+      if(event.target.name === 'ALL' && event.target.checked){
+      setPlan({PLAN:false,REAL:false,ALL:true});
+    }
+      else if(event.target.name==='PLAN' && !event.target.checked){
+      setPlan({...plan,REAL:false,[event.target.name]: event.target.checked})
+    }
+      else{
+      setPlan({
+        ...plan,
+        [event.target.name]: event.target.checked,
+      });
+    }
+    }
     // if(event.target.checked){
     //   jenis.push(event.target.name)
      
@@ -354,11 +537,26 @@ export default function Dashboard(props) {
     
     //  setListProyekAfterSearch(listProyek.filter(d => jenis.indexOf(d.JENISPROJ)>-1))
     // setFilterproyek(listProyek.filter(d => jenis.indexOf(d.JENISPROJ)>-1))
-  };
+  
 
   const handleChangeExpand = (panel) => (event, isExpanded) => {
+   
     setExpanded(isExpanded ? panel : false);
   };
+
+  const handleChangeExpandparent = (panel) => (event, isExpanded) => {
+   
+      setExp(isExpanded?panel:false)
+  };
+
+  const testlog=(parent,child)=>{
+    
+    setExp(parent)
+    setExpanded(child);
+  }
+  // const handleChangeExpanlist = (panel) => (event, isExpanded) => {
+  //   setExpanded(isExpanded ? panel : false);
+  // };
 
   const completeStepper = (data, stepper) => {
     if (data === "Charter") return stepper.NOCHARTER;
@@ -373,13 +571,22 @@ export default function Dashboard(props) {
     else return false;
   };
 
- 
+  
+const selecttahun = []
+
+ const thisyear = new Date().getFullYear()
+ for (let i = 0; i < 3; i++) {
+  const tahun = thisyear -i
+selecttahun.push({label:tahun,value:tahun})
+ }
+
       
       
       const exportExcel = async()=>{
-        const filename = 'dashboard'
-        const dataproyek = listProyek.map(({dataGrafik,opt,stepper,charter,plan,real,...rest})=>rest)
-        
+        const filename = 'DATA_PROJECT-'+year
+        const dataproyek = listProyek.map(({dataGrafik,opt,stepper,charter,plan,real,planreport,realreport,...rest})=>rest)
+        const pln = listProyek.map(({realreport,planreport,plan,real,charter,opt,dataGrafik,stepper,...d})=>(Object.assign({...d},...planreport)))
+        const rl = listProyek.map(({realreport,planreport,plan,real,charter,opt,dataGrafik,stepper,...d})=>(Object.assign({...d},...realreport)))
         //const datacharter = listProyek.flatMap(d=>d.charter)
        
        // const dataplan = listProyek.flatMap(d=>d.plan)
@@ -387,11 +594,15 @@ export default function Dashboard(props) {
         const fileType = 'application/vnd.openxmlformats-officedocuments.spreadsheetml.sheet;charset=UTF-8';
         const fileExt = '.xlsx'
         const wsproyek = XLSX.utils.json_to_sheet(dataproyek);
+        const wspln = XLSX.utils.json_to_sheet(pln);
+        const wsrl = XLSX.utils.json_to_sheet(rl);
         // const wscharter = XLSX.utils.json_to_sheet(datacharter);
         // const wsplan = XLSX.utils.json_to_sheet(dataplan);
         // const wsreal = XLSX.utils.json_to_sheet(datareal);
         const wb = XLSX.utils.book_new();
                   XLSX.utils.book_append_sheet(wb,wsproyek,'Proyek')
+                  XLSX.utils.book_append_sheet(wb,wspln,'Rencana')
+                  XLSX.utils.book_append_sheet(wb,wsrl,'Realisasi')
                   // XLSX.utils.book_append_sheet(wb,wscharter,'Charter')
                   // XLSX.utils.book_append_sheet(wb,wsplan,'Plan')
                   // XLSX.utils.book_append_sheet(wb,wsreal,'Real')
@@ -401,7 +612,19 @@ export default function Dashboard(props) {
         FileSaver.saveAs(data,filename+fileExt);
       }
   
-
+      const chartRef = useRef();
+      const onClick = (event) => {
+      
+       printelemet(getElementsAtEvent  (chartRef.current, event));
+      }
+      const printelemet = (element) => {
+        console.log(element[0])
+        const { datasetIndex, index } = element[0];
+        console.log(datasetIndex,index)
+      testlog('list',listProyekAfterSearch[index].IDPROYEK)
+     
+      }
+     
   return (
     <Grid container direction="column" spacing={3}>
       <AlertDialog open={alertDialog.openAlertDialog}
@@ -422,6 +645,62 @@ export default function Dashboard(props) {
           </Card>
         ))}
       </Grid>
+      <Grid item xs={2} container direction="column" justify="flex-start">
+        <TextField
+       
+          id="select-tahuan"
+          select
+          label="pilih tahun"
+          value={year}
+          onChange={handeleChangeYear}
+         
+        > {
+          selecttahun.length>0&&selecttahun.map((d) => (
+          
+          <MenuItem key={"asd"+d.value} value={d.value}>
+            {d.label}
+          </MenuItem>
+         ))
+        
+        }
+        </TextField>
+      </Grid>
+      <Grid item lg container direction="column" justify="flex-start">
+      <Accordion expanded={exp==='mile'} onChange={handleChangeExpandparent('mile')}>
+      <AccordionSummary
+          expandIcon={<ExpandMore />}
+          aria-controls="panel1a-content"
+          id="panel1a-header"
+        >
+          <Typography variant="h5" gutterBottom>Milestone</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          {loading ? <Grid container justify="center"><CircularProgress /></Grid>
+                : listProyek.length > 0 ?
+        <Grid item xs container justify="center" >
+                                <Card style={{ width: '100%'}}>
+                                 
+                                  <Bar options={dataMilestone.opt} data={dataMilestone.dataGrafik} ref={chartRef} onClick={onClick} />
+                                </Card>
+                              </Grid>
+                              :<><Divider style={{ marginTop: 8, marginBottom: 18 }} />
+                              <Grid container justify="center">
+                                <Typography>Tidak ada data.</Typography>
+                              </Grid></>
+                              }
+        </AccordionDetails>
+        </Accordion>
+        </Grid>
+        <Grid item lg container direction="column" justify="flex-start">
+      <Accordion expanded={exp==='list'} onChange={handleChangeExpandparent('list')}>
+      <AccordionSummary
+          expandIcon={<ExpandMore />}
+          aria-controls="panel1a-content"
+          id="panel1a-header"
+        >
+          <Typography variant="h5" gutterBottom>By Project</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
       <Grid item xs container direction="column" >
         <Grid item xs container direction="row" alignItems="center">
           {isPermitted && <TextField
@@ -477,7 +756,25 @@ export default function Dashboard(props) {
               />
             )}
           />}
+          {kategori === "status" && <TextField
+            type="search"
+            variant="outlined"
+            margin="dense"
+            size="small"
+            select
+            value={status}
+            onChange={handleChangeStatusfilter}
+            //style={{ backgroundColor: 'lightblue' }}
+          >
+            {statusProyek.map((d) => (
+              <MenuItem key={"status-" + d} value={d}>
+                {d}
+              </MenuItem>
+            ))}
+          </TextField>}
           <FormControl component="fieldset">
+         
+          <FormLabel  component="div" style={{display:'flex', justifyContent:'right'}}>Filter SAP dan NON SAP</FormLabel>
             <FormGroup aria-label="position" row>
               <FormControlLabel
                 value="start"
@@ -491,8 +788,36 @@ export default function Dashboard(props) {
                 label="Non SAP"
                 labelPlacement="start"
               />
+                  </FormGroup>
+            </FormControl>
+           
+            <Grid item xs container direction="row" justify="flex-end">
+            <FormControl component="fieldset">
+            <FormLabel component="div" style={{display:'flex', justifyContent:'center'}}>Filter Plan dan Real</FormLabel>
+            <FormGroup aria-label="position" row>
+              <FormControlLabel
+                value="start"
+                disabled={ALL}
+                control={<Checkbox checked={PLAN} onChange={handleChangePlan} name="PLAN" />}
+                label="PLAN"
+                labelPlacement="start"
+              />
+              <FormControlLabel
+                value="start"
+                disabled={!PLAN}
+                control={<Checkbox checked={REAL} onChange={handleChangePlan} name="REAL"/>}
+                label="REAL"
+                labelPlacement="start"
+              />
+               <FormControlLabel
+                value="start"
+                control={<Checkbox checked={ALL} onChange={handleChangePlan} name="ALL"/>}
+                label="ALL"
+                labelPlacement="start"
+              />
               </FormGroup>
             </FormControl>
+            </Grid>
             </Grid>
             <Grid item xs>
               {loading ? <Grid container justify="center"><CircularProgress /></Grid>
@@ -510,13 +835,28 @@ export default function Dashboard(props) {
                           <Grid container alignItems="center" justify="space-between" >
                             <Typography key={"no-layanan-" + i}>
                               {d.NOLAYANAN + " | " + d.NAMAPROYEK}
+                              <Divider/>
+                              {d.nik_PM + " - " + d.nama_PM}
+                          
+                             
                             </Typography>
-                            <Chip label={d.STATUSPROYEK} style={{ backgroundColor: setStatusColor(d.STATUSPROYEK, d.plan), color: d.STATUSPROYEK === 'BERJALAN' && d.plan.length > 0 ? 'white' : null }} />
+                            <Grid justify="flex-end">
+                            <Chip label={d.PRIORITAS}/>
+                            <Chip label={setStatusColor(d.STATUSPROYEK, d.plan)} style={{backgroundColor:setStatusColor(d.STATUSPROYEK, d.plan) === "DELAYED"?"red":null}} />
+                            </Grid>
                           </Grid>
                         </AccordionSummary>
                         <AccordionDetails key={"accord-dtl-" + i}>
                           <Grid container direction="column" spacing={2}>
+                          {d.STATUSPROYEK === ("PENDING" || "CANCEL" || "HOLD" || "BLOCKED") ?
+                          <Grid item xs container justify="center">
+                          <Card style={{ width: '75%' }}>
+                          <center><Typography><h4>{d.KETSTATUS || ""}</h4></Typography></center>
+                          </Card>
+                          </Grid>
+                          :null}
                             <Grid item xs container justify="center">
+                            
                               <Card style={{ width: '75%' }}>
                                 <Stepper alternativeLabel activeStep={-1}>
                                   {labelStepper
@@ -558,6 +898,9 @@ export default function Dashboard(props) {
             <Grid item xs container justify="flex-end">
             <Button variant="contained" onClick={exportExcel} color="primary">Excel Export</Button>
             </Grid>
+        </Grid>
+        </AccordionDetails>
+        </Accordion>
         </Grid>
       </Grid>
       );
