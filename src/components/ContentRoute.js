@@ -22,6 +22,7 @@ import BastRouter from "../pages/bast/BastRouter";
 import RoboRouter from "../pages/robo/RoboRouter";
 import Dashboard from '../pages/dashboard/Dashboard';
 import Summary from '../pages/summary/Summary';
+import Porto from '../pages/portofolio/Portofolio';
 
 // import UatAdd from "../pages/uat/UatAdd";
 // import { MuiPickersUtilsProvider } from "@material-ui/pickers";
@@ -65,6 +66,9 @@ export default function Content(props) {
           </PrivateRoute>
           <PrivateRoute exact path='/summary' >
             <Summary/>
+          </PrivateRoute>
+          <PrivateRoute exact path='/portofolio' >
+            <Porto/>
           </PrivateRoute>
           <PrivateRoute exact path='/proyek' >
             <Proyek setProyek={setProyek} setMenuSideBar={setMenuSideBar} />
