@@ -26,10 +26,9 @@ import {
   useGridApiRef,
   GridToolbarContainer,
 } from "@mui/x-data-grid";
-import { createTheme } from "@material-ui/core/styles";
-import { makeStyles } from "@material-ui/styles";
 
-const defaultTheme = createTheme();
+
+
 const defData = {
           "id": 0,
           "TAHUNMULAI": "",
@@ -46,25 +45,6 @@ const defaultAlert = {
 
 
 
-const useStyles = makeStyles(
-  (theme) => ({
-    root: {
-      display: "inline-flex",
-      alignItems: "center",
-      gap: theme.spacing(1),
-      color: theme.palette.text.secondary,
-    },
-    textPrimary: {
-      color: theme.palette.text.primary,
-    },
-    textField: {
-      [theme.breakpoints.down('xs')]: {
-        width: '100%',
-      }
-    }
-  }),
-  { defaultTheme }
-);
 
 
 function EditToolbar(props) {
@@ -168,7 +148,7 @@ export default function Proker(props) {
 
   function AutoEditInputCell(props) {
     const { id, value, api, field } = props;
-    const classes = useStyles();
+    
  
     const handleChange = (event) => {
      
@@ -184,7 +164,7 @@ export default function Proker(props) {
   
   
     return (
-      <div className={classes.root}>
+      <div >
         <Autocomplete 
                       options={mpti||""}
                       value={mpti.find(x=>x.id===value)||null}
@@ -220,7 +200,7 @@ export default function Proker(props) {
   
   function TextEditInputCell(props) {
     const { id, value, api, field } = props;
-    const classes = useStyles();
+   
     let l = 0
     switch (field) {
       case "TAHUNPROKER":
@@ -251,7 +231,7 @@ export default function Proker(props) {
   
   
     return (
-      <div className={classes.root}>
+      <div >
         
         <TextField size="small" value={value} inputProps={{maxLength:l}} onChange={handleChange}/>
         
@@ -274,7 +254,7 @@ export default function Proker(props) {
 
   function RowMenuCell(props) {
     const { api, id } = props;
-    const classes = useStyles();
+   
     const isInEditMode = api.getRowMode(id) === "edit";
   
     const handleEditClick = (event) => {
@@ -338,7 +318,7 @@ export default function Proker(props) {
   
     if (isInEditMode) {
       return (
-        <div className={classes.root}>
+        <div >
           <IconButton
             color="primary"
             size="small"
@@ -351,7 +331,7 @@ export default function Proker(props) {
             color="inherit"
             size="small"
             aria-label="cancel"
-            className={classes.textPrimary}
+           
             onClick={handleCancelClick}
           >
             <CancelIcon fontSize="small" />
@@ -360,10 +340,10 @@ export default function Proker(props) {
       );
     }
     return (
-      <div className={classes.root}>
+      <div>
         <IconButton
           color="inherit"
-          className={classes.textPrimary}
+         
           size="small"
           aria-label="edit"
           onClick={handleEditClick}
