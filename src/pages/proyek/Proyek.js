@@ -135,7 +135,7 @@ export default function Proyek(props) {
                 {(dataSearch ? listProyek.filter(d => d.NAMAPROYEK.toLowerCase().search(dataSearch.replace(wsRegex,"").toLowerCase()) !== -1 || d.NOLAYANAN.toLowerCase().search(dataSearch.replace(wsRegex,"").toLowerCase()) !== -1) : listProyek)
                   .slice((page - 1) * itemsPerPage, page * itemsPerPage)
                   .map((d, i) => (
-                    <ListItem button key={"list-item-" + i} divider onClick={() => handleDetail(d)}>
+                    <ListItem button key={"list-item-" + i} divider onClick={() =>handleDetail(d)}>
                       <ListItemAvatar key={"list-item-avatar-" + i}>
                         <Avatar key={"avatar-" + i} alt={d.NAMAPROYEK ? d.NAMAPROYEK.toUpperCase() : "N"} src="#" />
                       </ListItemAvatar>

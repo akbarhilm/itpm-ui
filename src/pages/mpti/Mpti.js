@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import {
-  addPorto,
-  getPorto,
-  deletePorto,
-  updatePorto,
-} from "../../gateways/api/PortoApi";
+  addMpti,
+  getMpti,
+  deleteMpti,
+  updateMpti,
+} from "../../gateways/api/MptiApi";
 import AlertDialog from "../../components/AlertDialog";
 import { Grid, CircularProgress } from "@material-ui/core";
 import IconButton from "@material-ui/core/IconButton";
@@ -31,12 +31,11 @@ import { makeStyles } from "@material-ui/styles";
 const defaultTheme = createTheme();
 const defData = {
           "id": 0,
-          "KODEBISNIS": "",
-          "NAMAAPLIKASI": "",
-          "NAMAMODUL": "",
-          "KETAPLIKASI": "",
-          "KODESTATUS": "",
-          "NAMAURL": ""
+          "TAHUNMULAI": "",
+          "TAHUNSELESAI": "",
+          "KODEMPTI": "",
+          "KETMPTI": ""
+          
       }
 const defaultAlert = {
   openAlertDialog: false,
@@ -72,13 +71,13 @@ function EditToolbar(props) {
   
   const handleClick =  () => {
    
-    const {setFilteredPorto,porto} = props
+    const {setFilteredMpti,mpti} = props
    props.clearSearch()
     setTimeout(() => {
-      let newarray2 = [...porto]
+      let newarray2 = [...mpti]
       newarray2.unshift(defData)
     
-       setFilteredPorto(newarray2)
+       setFilteredMpti(newarray2)
     }, 500);
     
     //setPorto(newarray)
@@ -127,8 +126,9 @@ function EditToolbar(props) {
 
 
 
-export default function Portofolio() {
-  const [porto, setPorto] = useState([]);
+export default function Mpti() {
+  
+  const [mpti, setMpti] = useState([]);
   const [alertDialog, setAlertDialog] = useState(defaultAlert);
   const [loading, setLoading] = useState(true);
   const [sortModel, setSortModel] = React.useState([
@@ -137,7 +137,8 @@ export default function Portofolio() {
       sort: 'asc',
     },
   ]);
-  const [filteredPorto,setFilteredPorto] = useState([])
+  
+  const [filteredMpti,setFilteredMpti] = useState([])
   const [searchText, setSearchText] = React.useState('');
   const [pageSize, setPageSize] = React.useState(5);
   const apiRef = useGridApiRef();
@@ -155,13 +156,13 @@ export default function Portofolio() {
     setSearchText(searchValue);
    
     const searchRegex = new RegExp(escapeRegExp(searchValue), 'i');
-    const filteredRows = porto.filter((row) => {
+    const filteredRows = mpti.filter((row) => {
       return Object.keys(row).some((field) => {
         return searchRegex.test(row[field].toString());
       });
     });
     
-    setFilteredPorto(filteredRows);
+    setFilteredMpti(filteredRows);
   };
 
 
@@ -170,25 +171,18 @@ export default function Portofolio() {
     const classes = useStyles();
     let l = 0
     switch (field) {
-      case "KODEBISNIS":
-          l = 10
+      case "TAHUNMULAI":
+          l = 7
         break;
-      case "NAMAAPLIKASI":
+      case "TAHUNSELESAI":
+          l = 7
+        break;
+      case "KODEMPTI":
+          l = 5
+        break;
+      case "KETMPTI":
           l = 100
         break;
-      case "NAMAMODUL":
-          l = 100
-        break;
-      case "KETAPLIKASI":
-          l = 250
-          break;
-      case "KODESTATUS":
-          l = 35
-        break;
-      case "NAMAURL":
-          l = 100
-        break;
-        
       default:
         break;
     }
@@ -213,8 +207,7 @@ export default function Portofolio() {
       </div>
     );
   }
-
-
+  
   function inputText7(params) {
     return <AutoEditInputCell {...params} />;
   }
@@ -240,18 +233,20 @@ export default function Portofolio() {
       const row = api.getRow(id);
       
       if(id===0){
-         const rest = await addPorto(row)
+         const rest = await addMpti(row)
          const data = rest.data
          
          
-         setFilteredPorto(data)
-         //api.updateRows([{ ...row,id:rest.data.idporto, isNew: false }]);
+         setFilteredMpti(data)
+         setMpti(data)
+         //api.updateRows([{ ...row,id:rest.data.idmpti, isNew: false }]);
          
       }else{
-     const rest =  await updatePorto(row)
+     const rest =  await updateMpti(row)
       //.then(api.updateRows([{ ...row, isNew: false }]));
       const data = rest.data
-      setFilteredPorto(data)
+      setFilteredMpti(data)
+      setMpti(data)
       }
     };
   
@@ -259,16 +254,17 @@ export default function Portofolio() {
       event.stopPropagation();
       if(window.confirm("hapus data")){
       if(id===0){
-        let newarray = [...filteredPorto]
-        console.log(filteredPorto);
+        let newarray = [...filteredMpti]
+        console.log(filteredMpti);
         newarray.shift()
-        console.log(newarray);
-        setFilteredPorto(newarray)
+        setFilteredMpti(newarray)
+        
       }else{
-     const rest =  await deletePorto({ id: id })
+     const rest =  await deleteMpti({ id: id })
      const data = rest.data
-     setFilteredPorto(data)
-      
+     setFilteredMpti(data)
+     setMpti(data)
+
       }
     }
     };
@@ -345,45 +341,31 @@ export default function Portofolio() {
       hide:true
     },
     {
-      headerName: "Bussiness Type",
-      width: 150,
+      headerName: "Tahun Mulai",
+      width: 180,
       editable: true,
-      field: "KODEBISNIS",
+      field: "TAHUNMULAI",
       renderEditCell: inputText7,
     },
     {
-      headerName: "Nama Applikasi",
+      headerName: "Tahun Selesai",
       width: 180,
       editable: true,
-      field: "NAMAAPLIKASI",
+      field: "TAHUNSELESAI",
       renderEditCell: inputText7,
     },
     {
-      headerName: "Nama Modul",
+      headerName: "Kode MPTI",
       width: 180,
       editable: true,
-      field: "NAMAMODUL",
+      field: "KODEMPTI",
       renderEditCell: inputText7,
     },
     {
       headerName: "Keterangan",
-      width: 200,
+      width: 350,
       editable: true,
-      field: "KETAPLIKASI",
-      renderEditCell: inputText7,
-    },
-    {
-      headerName: "Status",
-      width: 120,
-      editable: true,
-      field: "KODESTATUS",
-      renderEditCell: inputText7,
-    },
-    {
-      headerName: "URL",
-      width: 150,
-      editable: true,
-      field: "NAMAURL",
+      field: "KETMPTI",
       renderEditCell: inputText7,
     },
     {
@@ -391,7 +373,7 @@ export default function Portofolio() {
       headerName: "Actions",
       renderCell: RowMenuCell,
       sortable: false,
-      width: 100,
+      width: 120,
       headerAlign: "center",
       filterable: false,
       align: "center",
@@ -400,7 +382,7 @@ export default function Portofolio() {
     },
   ];
   
-
+  
 
   const handleRowEditStart = (params, event) => {
     event.defaultMuiPrevented = true;
@@ -415,10 +397,10 @@ export default function Portofolio() {
     setAlertDialog({ ...alertDialog, openAlertDialog: false });
   };
   useEffect(() => {
-    getPorto()
+    getMpti()
       .then((res) => {
-        setPorto(res.data);
-        setFilteredPorto(res.data)
+        setMpti(res.data);
+        setFilteredMpti(res.data)
         //columns.map((x,i)=>Object.assign(x,{field:Object.keys(res[0])[i]}))
         setLoading(false);
       })
@@ -454,16 +436,11 @@ export default function Portofolio() {
               <CircularProgress />
             </Grid>
           ) : (
-            <Grid item xs>
-              {/* <div id="myGrid" style={{height: window, width: hw}} class="ag-theme-alpine">
-        
-      <AgGridReact rowData={rowData} columnDefs={columnDefs}></AgGridReact>
-   
-        </div> */}
+            <Grid  container  justifyContent="center" alignItems="center">
              
-              <div style={{ height: 450, width: "100%" }}>
+               <div style={{ height: 450, width: "90%"}}>
                 <DataGrid
-                  rows={filteredPorto}
+                  rows={filteredMpti}
                   columns={columns}
                   pageSize={pageSize}
                   onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
@@ -477,9 +454,9 @@ export default function Portofolio() {
                   componentsProps={{
                     toolbar: { 
                       apiRef,
-                      filteredPorto,
-                      porto,
-                      setFilteredPorto,
+                      filteredMpti,
+                      mpti,
+                      setFilteredMpti,
                       value: searchText,
                       onChange: (event) => requestSearch(event.target.value),
                       clearSearch: () => requestSearch('')
@@ -489,7 +466,7 @@ export default function Portofolio() {
                 onSortModelChange={(model)=>handleChangeSort(model)}
                  rowsPerPageOptions={[5,10,20]}
                 />
-              </div>
+              </div> 
             </Grid>
           )}
         </Grid>

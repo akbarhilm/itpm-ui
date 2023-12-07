@@ -20,12 +20,12 @@ const useStyles = makeStyles((theme) => ({
 function App() {
   const classes = useStyles();
 
-  const { user, setUser, isLoading, karyawan, kegiatan,role } = useFindUser();
+  const { user, setUser, isLoading, karyawan, kegiatan,role,mpti,proker } = useFindUser();
   const [proyek, setProyek] = useState();
   const [menuSideBar, setMenuSideBar] = useState(false);
 
   return (
-    <UserContext.Provider value={{ user, setUser, isLoading, karyawan, kegiatan,role }}>
+    <UserContext.Provider value={{ user, setUser, isLoading, karyawan, kegiatan,role,mpti,proker }}>
       <div className={classes.root}>
         <Router>
           {user && <Header setProyek={setProyek} setMenuSideBar={setMenuSideBar} />}

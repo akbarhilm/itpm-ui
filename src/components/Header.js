@@ -153,6 +153,21 @@ export default function Header(props) {
     //setProyek();
     setMenuSideBar(false);
     history.push("/portofolio");
+    handleClose()
+  };
+
+  const handleLinkToMPTI= () => {
+    //setProyek();
+    setMenuSideBar(false);
+    history.push("/mpti");
+    handleClose()
+  };
+
+  const handleLinkToProker= () => {
+    //setProyek();
+    setMenuSideBar(false);
+    history.push("/proker");
+    handleClose()
   };
 
   return (
@@ -210,11 +225,16 @@ export default function Header(props) {
         style={{marginTop:32}}
       >
        <MenuList>
-        {user.OTORITAS.includes("BOD") && <Box>
-        <MenuItem onClick={handleClose}>MPTI</MenuItem>
-        <MenuItem onClick={handleClose}>Proker</MenuItem></Box>}
-        {user.OTORITAS.includes("PMO") && <Box>
-        <MenuItem onClick={handleLinkToPorto}>Portofolio</MenuItem></Box>}
+        {user.OTORITAS.includes("BOD") && 
+        <Box>
+        <MenuItem onClick={handleLinkToMPTI}>MPTI</MenuItem>
+        <MenuItem onClick={handleLinkToProker}>Proker</MenuItem>
+        </Box>
+        }
+        {user.OTORITAS.includes("PMO") && 
+        <Box>
+        <MenuItem onClick={handleLinkToPorto}>Portofolio</MenuItem></Box>
+       }
         </MenuList>
       </Menu>
               </Grid>

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import {
-  addPorto,
-  getPorto,
-  deletePorto,
-  updatePorto,
-} from "../../gateways/api/PortoApi";
+  addProker,
+  getProker,
+  deleteProker,
+  updateProker,
+} from "../../gateways/api/ProkerApi";
+import { Autocomplete } from '@material-ui/lab';
 import AlertDialog from "../../components/AlertDialog";
 import { Grid, CircularProgress } from "@material-ui/core";
 import IconButton from "@material-ui/core/IconButton";
@@ -31,12 +32,11 @@ import { makeStyles } from "@material-ui/styles";
 const defaultTheme = createTheme();
 const defData = {
           "id": 0,
-          "KODEBISNIS": "",
-          "NAMAAPLIKASI": "",
-          "NAMAMODUL": "",
-          "KETAPLIKASI": "",
-          "KODESTATUS": "",
-          "NAMAURL": ""
+          "TAHUNMULAI": "",
+          "TAHUNSELESAI": "",
+          "KODEMPTI": "",
+          "KETMPTI": ""
+          
       }
 const defaultAlert = {
   openAlertDialog: false,
@@ -72,13 +72,13 @@ function EditToolbar(props) {
   
   const handleClick =  () => {
    
-    const {setFilteredPorto,porto} = props
+    const {setFilteredProker,proker} = props
    props.clearSearch()
     setTimeout(() => {
-      let newarray2 = [...porto]
+      let newarray2 = [...proker]
       newarray2.unshift(defData)
     
-       setFilteredPorto(newarray2)
+       setFilteredProker(newarray2)
     }, 500);
     
     //setPorto(newarray)
@@ -127,8 +127,9 @@ function EditToolbar(props) {
 
 
 
-export default function Portofolio() {
-  const [porto, setPorto] = useState([]);
+export default function Proker(props) {
+  const {mpti} = props
+  const [proker, setProker] = useState([]);
   const [alertDialog, setAlertDialog] = useState(defaultAlert);
   const [loading, setLoading] = useState(true);
   const [sortModel, setSortModel] = React.useState([
@@ -137,7 +138,7 @@ export default function Portofolio() {
       sort: 'asc',
     },
   ]);
-  const [filteredPorto,setFilteredPorto] = useState([])
+  const [filteredProker,setFilteredProker] = useState([])
   const [searchText, setSearchText] = React.useState('');
   const [pageSize, setPageSize] = React.useState(5);
   const apiRef = useGridApiRef();
@@ -155,39 +156,83 @@ export default function Portofolio() {
     setSearchText(searchValue);
    
     const searchRegex = new RegExp(escapeRegExp(searchValue), 'i');
-    const filteredRows = porto.filter((row) => {
+    const filteredRows = proker.filter((row) => {
       return Object.keys(row).some((field) => {
         return searchRegex.test(row[field].toString());
       });
     });
     
-    setFilteredPorto(filteredRows);
+    setFilteredProker(filteredRows);
   };
 
 
   function AutoEditInputCell(props) {
     const { id, value, api, field } = props;
     const classes = useStyles();
+ 
+    const handleChange = (event) => {
+     
+      api.setEditCellValue({ id, field, value: Number(event?.id) });
+      // Check if the event is not from the keyboard
+      // https://github.com/facebook/react/issues/7407
+     // if (event.nativeEvent.clientX !== 0 && event.nativeEvent.clientY !== 0) {
+       // api.commitCellChange({ id, field });
+        //api.setCellMode(id, field, 'view');
+     // }
+    };
+  
+  
+  
+    return (
+      <div className={classes.root}>
+        <Autocomplete 
+                      options={mpti||""}
+                      value={mpti.find(x=>x.id===value)||null}
+                      getOptionLabel={option => option.KODEMPTI +" / "+ option.KETMPTI}
+                      onChange={(e, v) => handleChange(v)}
+                      //inputValue={d.nik + " / " + d.nama || ""}
+                      style={{ width: 330 }}
+                      getOptionSelected={
+                        (option,value)=>option.id === value?.id
+                        }
+                      renderOption={(option) => (
+                        <React.Fragment>
+                          {option.KODEMPTI + " / " + option.KETMPTI }
+                        </React.Fragment>
+                      )}
+                      renderInput={params => (
+                        <TextField
+                          {...params}
+                          fullWidth
+                          variant={"outlined"}
+                          size="small"
+                          required
+                        // error={error[i].error}
+                        // helperText={error[i].text}
+                        />
+                      )}
+                     
+                    />
+      </div>
+    );
+  }
+  
+  
+  function TextEditInputCell(props) {
+    const { id, value, api, field } = props;
+    const classes = useStyles();
     let l = 0
     switch (field) {
-      case "KODEBISNIS":
-          l = 10
+      case "TAHUNPROKER":
+          l = 38
         break;
-      case "NAMAAPLIKASI":
+      case "KODEPROKER":
+          l = 5
+        break;
+      case "KETPROKER":
           l = 100
         break;
-      case "NAMAMODUL":
-          l = 100
-        break;
-      case "KETAPLIKASI":
-          l = 250
-          break;
-      case "KODESTATUS":
-          l = 35
-        break;
-      case "NAMAURL":
-          l = 100
-        break;
+     
         
       default:
         break;
@@ -214,11 +259,17 @@ export default function Portofolio() {
     );
   }
 
-
-  function inputText7(params) {
+  function renderAutoEditInputCell(params) {
     return <AutoEditInputCell {...params} />;
   }
   
+  
+  function inputText7(params) {
+    return <TextEditInputCell {...params} />;
+  }
+
+
+
 
 
   function RowMenuCell(props) {
@@ -240,18 +291,19 @@ export default function Portofolio() {
       const row = api.getRow(id);
       
       if(id===0){
-         const rest = await addPorto(row)
+         const rest = await addProker(row)
          const data = rest.data
          
          
-         setFilteredPorto(data)
-         //api.updateRows([{ ...row,id:rest.data.idporto, isNew: false }]);
+         setFilteredProker(data)
+         setProker(data)
          
       }else{
-     const rest =  await updatePorto(row)
+     const rest =  await updateProker(row)
       //.then(api.updateRows([{ ...row, isNew: false }]));
       const data = rest.data
-      setFilteredPorto(data)
+      setFilteredProker(data)
+      setProker(data)
       }
     };
   
@@ -259,16 +311,17 @@ export default function Portofolio() {
       event.stopPropagation();
       if(window.confirm("hapus data")){
       if(id===0){
-        let newarray = [...filteredPorto]
-        console.log(filteredPorto);
+        let newarray = [...filteredProker]
+        console.log(filteredProker);
         newarray.shift()
-        console.log(newarray);
-        setFilteredPorto(newarray)
+        setFilteredProker(newarray)
+        
       }else{
-     const rest =  await deletePorto({ id: id })
+     const rest =  await deleteProker({ id: id })
      const data = rest.data
-     setFilteredPorto(data)
-      
+     setFilteredProker(data)
+     setProker(data)
+
       }
     }
     };
@@ -345,53 +398,42 @@ export default function Portofolio() {
       hide:true
     },
     {
-      headerName: "Bussiness Type",
-      width: 150,
+      headerName: "Tahun Proker",
+      width: 170,
       editable: true,
-      field: "KODEBISNIS",
+      field: "TAHUNPROKER",
       renderEditCell: inputText7,
     },
     {
-      headerName: "Nama Applikasi",
-      width: 180,
+      headerName: "Kode Proker",
+      width: 160,
       editable: true,
-      field: "NAMAAPLIKASI",
-      renderEditCell: inputText7,
-    },
-    {
-      headerName: "Nama Modul",
-      width: 180,
-      editable: true,
-      field: "NAMAMODUL",
+      field: "KODEPROKER",
       renderEditCell: inputText7,
     },
     {
       headerName: "Keterangan",
-      width: 200,
+      width: 340,
       editable: true,
-      field: "KETAPLIKASI",
+      field: "KETPROKER",
       renderEditCell: inputText7,
     },
     {
-      headerName: "Status",
-      width: 120,
+      headerName: "MPTI",
+      width: 340,
       editable: true,
-      field: "KODESTATUS",
-      renderEditCell: inputText7,
-    },
-    {
-      headerName: "URL",
-      width: 150,
-      editable: true,
-      field: "NAMAURL",
-      renderEditCell: inputText7,
+      renderEditCell: renderAutoEditInputCell,
+      field: "IDMPTI",
+      valueFormatter: ({value}) =>value?mpti.find(x=>x.id===value)?.KODEMPTI + ' / ' + mpti.find(x=>x.id===value)?.KETMPTI:""
+      //mpti.find(x=>x.id === `${params.getValue(params.id, 'IDMPTI')} `)?.KODEMPTI +' / '+
+      //mpti.find(x=>x.id === `${params.getValue(params.id, 'IDMPTI')} `)?.KETMPTI,
     },
     {
       field: "actions",
       headerName: "Actions",
       renderCell: RowMenuCell,
       sortable: false,
-      width: 100,
+      width: 120,
       headerAlign: "center",
       filterable: false,
       align: "center",
@@ -415,10 +457,10 @@ export default function Portofolio() {
     setAlertDialog({ ...alertDialog, openAlertDialog: false });
   };
   useEffect(() => {
-    getPorto()
+    getProker()
       .then((res) => {
-        setPorto(res.data);
-        setFilteredPorto(res.data)
+        setProker(res.data);
+        setFilteredProker(res.data)
         //columns.map((x,i)=>Object.assign(x,{field:Object.keys(res[0])[i]}))
         setLoading(false);
       })
@@ -454,16 +496,11 @@ export default function Portofolio() {
               <CircularProgress />
             </Grid>
           ) : (
-            <Grid item xs>
-              {/* <div id="myGrid" style={{height: window, width: hw}} class="ag-theme-alpine">
-        
-      <AgGridReact rowData={rowData} columnDefs={columnDefs}></AgGridReact>
-   
-        </div> */}
+            <Grid  container  justifyContent="center" alignItems="center">
              
-              <div style={{ height: 450, width: "100%" }}>
+               <div style={{ height: 450, width: "100%"}}>
                 <DataGrid
-                  rows={filteredPorto}
+                  rows={filteredProker}
                   columns={columns}
                   pageSize={pageSize}
                   onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
@@ -477,9 +514,9 @@ export default function Portofolio() {
                   componentsProps={{
                     toolbar: { 
                       apiRef,
-                      filteredPorto,
-                      porto,
-                      setFilteredPorto,
+                      filteredProker,
+                      proker,
+                      setFilteredProker,
                       value: searchText,
                       onChange: (event) => requestSearch(event.target.value),
                       clearSearch: () => requestSearch('')
@@ -489,7 +526,7 @@ export default function Portofolio() {
                 onSortModelChange={(model)=>handleChangeSort(model)}
                  rowsPerPageOptions={[5,10,20]}
                 />
-              </div>
+              </div> 
             </Grid>
           )}
         </Grid>
