@@ -19,8 +19,8 @@ export default function RealisasiRouter(props) {
   const [roles, setRoles] = useState(null);
   const [kegiatan, setKegiatan] = useState(null);
   const [karyawan, setKaryawan] = useState(null);
-
-  const otoritas = user.NIK === proyek.NIKREQ ? "BPO" : user.NIK === proyek.NIKPM ? "PM" : "PMO";
+  const oto = user.OTORITAS.includes('PMO')
+  const otoritas = oto ? "PMO" : user.NIK === proyek.NIKREQ ? "BPO" : user.NIK === proyek.NIKPM ? "PM":""
   // const otoritas = "PM";
 
   useEffect(() => {
@@ -59,7 +59,7 @@ export default function RealisasiRouter(props) {
 
   if (loading)
     return <CircularProgress />;
-  else if (otoritas === "PM" && realisasi && status && status.NOPLAN && !status.NOBA)
+  else if ((otoritas === "PM" || otoritas === "PMO") && realisasi && status && status.NOPLAN && !status.NOBA)
     return <Realisasi realisasi={realisasi} proyek={proyek} karyawan={karyawan} kegiatan={kegiatan} plan={plan} roles={roles} />;
   else if (realisasi && Object.keys(realisasi).length === 0)
     return <ErrorPage code="" message={otoritas === "PM" ? "Rencana Pelaksanaan belum diinput" : "Realisasi belum diinput"} />;

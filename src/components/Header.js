@@ -27,6 +27,8 @@ import MenuItem from "@material-ui/core/MenuItem";
 import Popover from "@material-ui/core/Popover";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
+import Menu from '@material-ui/core/Menu';
+import MenuList from '@material-ui/core/MenuList';
 // import AccountCircleIcon from "@material-ui/icons/AccountCircle";
 // import AppsIcon from "@material-ui/icons/Apps";
 import ExitToAppIcon from "@material-ui/icons/ExitToApp";
@@ -82,10 +84,11 @@ export default function Header(props) {
   const cookies = new Cookies();
   const classes = useStyles();
   // const [user, setUser] = useState();
-  const [anchor, setAnchor] = useState({ menu: null, pengguna: null});
+  const [anchor, setAnchor] = useState({ menu: null, pengguna: null,ref:null});
   const popover = {
     menu: Boolean(anchor.menu),
     pengguna: Boolean(anchor.pengguna),
+    ref:Boolean(anchor.ref)
   };
 
   // useEffect(() => {
@@ -99,6 +102,7 @@ export default function Header(props) {
   //   setAnchorEl(event.currentTarget);
   // };
   const isPermitted = ["BOD", "PMO", "QA"].some(x => user.OTORITAS.includes(x));
+  const permitRef = ["BOD","PMO"].some(x => user.OTORITAS.includes(x));
   const handleAnchor = (event) => {
     setAnchor((prevState) => ({
       ...prevState,
@@ -115,6 +119,7 @@ export default function Header(props) {
       ...prevState,
       menu: null,
       pengguna: null,
+      ref:null
       
     }));
   };
@@ -142,6 +147,27 @@ export default function Header(props) {
     setProyek();
     setMenuSideBar(false);
     history.push("/summary");
+  };
+
+  const handleLinkToPorto= () => {
+    //setProyek();
+    setMenuSideBar(false);
+    history.push("/portofolio");
+    handleClose()
+  };
+
+  const handleLinkToMPTI= () => {
+    //setProyek();
+    setMenuSideBar(false);
+    history.push("/mpti");
+    handleClose()
+  };
+
+  const handleLinkToProker= () => {
+    //setProyek();
+    setMenuSideBar(false);
+    history.push("/proker");
+    handleClose()
   };
 
   return (
@@ -181,6 +207,36 @@ export default function Header(props) {
                   </Typography>
                 </ButtonBase>
                    
+              </Grid>
+              } 
+              {permitRef &&
+              <Grid item>
+                <ButtonBase onClick={handleAnchor} id="ref">
+                  <Typography>
+                    {"Referensi"}
+                  </Typography>
+                </ButtonBase>
+                <Menu
+        id="simple-menu"
+        anchorEl={anchor.ref}
+        keepMounted
+        open={Boolean(anchor.ref)}
+        onClose={handleClose}
+        style={{marginTop:32}}
+      >
+       <MenuList>
+        {user.OTORITAS.includes("BOD") && 
+        <Box>
+        <MenuItem onClick={handleLinkToMPTI}>MPTI</MenuItem>
+        <MenuItem onClick={handleLinkToProker}>Proker</MenuItem>
+        </Box>
+        }
+        {user.OTORITAS.includes("PMO") && 
+        <Box>
+        <MenuItem onClick={handleLinkToPorto}>Portofolio</MenuItem></Box>
+       }
+        </MenuList>
+      </Menu>
               </Grid>
               } 
             </Grid>
