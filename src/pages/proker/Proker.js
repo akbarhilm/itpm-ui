@@ -122,7 +122,7 @@ export default function Proker(props) {
   const [searchText, setSearchText] = React.useState('');
   const [pageSize, setPageSize] = React.useState(5);
   const apiRef = useGridApiRef();
-  console.log(apiRef);
+
 
   const handleChangeSort = (newmodel) =>{
     if(JSON.stringify(newmodel) !== JSON.stringify(sortModel)){
@@ -138,7 +138,7 @@ export default function Proker(props) {
     const searchRegex = new RegExp(escapeRegExp(searchValue), 'i');
     const filteredRows = proker.filter((row) => {
       return Object.keys(row).some((field) => {
-        return searchRegex.test(row[field].toString());
+        return searchRegex.test(row[field]?.toString());
       });
     });
     
