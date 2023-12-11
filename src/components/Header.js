@@ -231,10 +231,10 @@ export default function Header(props) {
         <MenuItem onClick={handleLinkToProker}>Proker</MenuItem>
         </Box>
         }
-        {user.OTORITAS.includes("PMO") && 
+        {/* {user.OTORITAS.includes("PMO") && 
         <Box>
         <MenuItem onClick={handleLinkToPorto}>Portofolio</MenuItem></Box>
-       }
+       } */}
         </MenuList>
       </Menu>
               </Grid>
