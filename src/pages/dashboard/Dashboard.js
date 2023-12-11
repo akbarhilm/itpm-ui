@@ -626,13 +626,13 @@ selecttahun.push({label:tahun,value:tahun})
       }
       function tp(v){
      switch (v) {
-      case "BERJALAN":
+      case "ONGOING":
         return "Project yang sedang Berjalan"
        
-      case "BARU":
+      case "NEW":
         return "Project Baru"
 
-      case "SELESAI":
+      case "CLOSED":
         return "Project yang Selesai dikerjakan"
 
       case "DELAY":
