@@ -149,12 +149,12 @@ export default function Header(props) {
     history.push("/summary");
   };
 
-  const handleLinkToPorto= () => {
-    //setProyek();
-    setMenuSideBar(false);
-    history.push("/portofolio");
-    handleClose()
-  };
+  // const handleLinkToPorto= () => {
+  //   //setProyek();
+  //   setMenuSideBar(false);
+  //   history.push("/portofolio");
+  //   handleClose()
+  // };
 
   const handleLinkToMPTI= () => {
     //setProyek();
