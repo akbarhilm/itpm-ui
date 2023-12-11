@@ -126,7 +126,7 @@ export default function DetailProyek(props) {
                     className={classes.fieldDisabled}
                     fullWidth
                     disabled
-                    value={dataProyek ? karyawan.find(d => d.nik === dataProyek?.NIKREQ)?.nik + ' - ' + karyawan.find(d => d.nik === dataProyek?.NIKREQ)?.nama : ""}
+                    value={dataProyek ? karyawan.find(d => d.nik === dataProyek?.NIKREQ)?.nik || dataProyek?.NIKREQ  + ' - ' + (karyawan.find(d => d.nik === dataProyek?.NIKREQ)?.nama || 'N/A') : ""}
                   />
                 </Grid>
                 <Grid item xs>
@@ -136,7 +136,7 @@ export default function DetailProyek(props) {
                     className={classes.fieldDisabled}
                     fullWidth
                     disabled
-                    value={dataProyek ? karyawan.find(d => d.nik === dataProyek?.NIKPM)?.nik + ' - ' + karyawan.find(d => d.nik === dataProyek?.NIKPM)?.nama : ""}
+                    value={dataProyek ? karyawan.find(d => d.nik === dataProyek?.NIKPM)?.nik || dataProyek?.NIKPM  + ' - ' + (karyawan.find(d => d.nik === dataProyek?.NIKPM)?.nama || 'N/A') : ""}
                   />
                 </Grid>
               </Grid>

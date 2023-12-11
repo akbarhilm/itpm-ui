@@ -27,3 +27,9 @@ export const getKaryawanIT = async () => {
 export const getAllRole = async () => {
   return await api.get('/profil/otoritas');
 };
+export const getMpti = async () => {
+  return await api.get('/ref/mpti');
+};
+export const getProker = async () => {
+  return await api.get('/ref/proker');
+};
