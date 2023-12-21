@@ -1,4 +1,4 @@
-import React from "react";
+import React,{useContext} from "react";
 // import MUIContainer from "@material-ui/core/Container";
 import MomentUtils from '@date-io/moment';
 import { makeStyles } from "@material-ui/core";
@@ -22,6 +22,10 @@ import BastRouter from "../pages/bast/BastRouter";
 import RoboRouter from "../pages/robo/RoboRouter";
 import Dashboard from '../pages/dashboard/Dashboard';
 import Summary from '../pages/summary/Summary';
+import Porto from '../pages/portofolio/Portofolio'
+import Proker from '../pages/proker/Proker'
+import Mpti from '../pages/mpti/Mpti'
+import { UserContext } from '../utils/UserContext';
 
 // import UatAdd from "../pages/uat/UatAdd";
 // import { MuiPickersUtilsProvider } from "@material-ui/pickers";
@@ -48,6 +52,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Content(props) {
   const { proyek, setProyek, setMenuSideBar } = props;
+  const { mpti } = useContext(UserContext);
   const classes = useStyles();
 
   return (
@@ -65,6 +70,15 @@ export default function Content(props) {
           </PrivateRoute>
           <PrivateRoute exact path='/summary' >
             <Summary/>
+          </PrivateRoute>
+          <PrivateRoute exact path='/portofolio' >
+            <Porto/>
+          </PrivateRoute>
+          <PrivateRoute exact path='/mpti' >
+            <Mpti/>
+          </PrivateRoute>
+          <PrivateRoute exact path='/proker' >
+            <Proker mpti={mpti}/>
           </PrivateRoute>
           <PrivateRoute exact path='/proyek' >
             <Proyek setProyek={setProyek} setMenuSideBar={setMenuSideBar} />

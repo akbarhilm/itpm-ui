@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Grid, makeStyles, Typography, TextField, FormControl,Checkbox, FormLabel, RadioGroup, FormControlLabel, Radio, Paper, Button, Divider, FormHelperText, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, MenuItem } from '@material-ui/core';
+import React, { useState, useEffect,useContext } from 'react';
+import { Grid, makeStyles, Typography, TextField, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Paper, Button, Divider, FormHelperText, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, MenuItem } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { jenisLayanan, jenisAplikasi, statusProyek } from '../../utils/DataEnum';
 import { getAplikasi, createAplikasi } from '../../gateways/api/AplikasiAPI';
@@ -9,6 +9,7 @@ import { getLayananUnused } from '../../gateways/api/LayananAPI';
 import { createProyek, getProyekById, ubahStatusProyek, updateProyek } from '../../gateways/api/ProyekAPI';
 import { AddCircleOutline } from '@material-ui/icons';
 import AlertDialog from '../../components/AlertDialog';
+import { UserContext } from "../../utils/UserContext";
 
 
 
@@ -48,12 +49,14 @@ const defaultDataProyek = {
   jenisAplikasi: null,
   aplikasi: null,
   modul: null,
-  deskripsimpti:null,
-  deskripsiproker:null
+  //deskripsimpti:null,
+  //deskripsiproker:null
 };
 
 const defaultError = {
   layanan: { error: false, message: "" },
+  mpti: { error: false, message: "" },
+  proker: { error: false, message: "" },
   namaProyek: { error: false, message: "" },
  // namaUri: { error: false, message: "" },
   deskripsi: { error: false, message: "" },
@@ -61,8 +64,7 @@ const defaultError = {
   jenisAplikasi: { error: false, message: "" },
   aplikasi: { error: false, message: "" },
   modul: { error: false, message: "" },
-  deskripsimpti:{error:false,message:""},
-  deskripsiproker:{error:false,message:""}
+ 
 };
 
 const defaultAlert = { openAlertDialog: false, messageAlertDialog: "", severity: "info" };
@@ -71,14 +73,16 @@ export default function TambahProyek(props) {
   const { proyek } = props;
   const classes = useStyles();
   const history = useHistory();
+  const { mpti:listmpti,proker:cproker } =  useContext(UserContext);
 
   const isDisabled = proyek && proyek.STATUSPROYEK !== "BARU" ? true : false;
   const [listLayanan, setListLayanan] = useState([]);
   const [dataLayanan, setDataLayanan] = useState(null);
   const [loadingButton, setLoadingButton] = useState({ submit: false, submitDialog: false });
   const [sap, setSap] = useState(false);
-  const [mpti,setMpti] = useState(false);
-  const [proker,setProker] = useState(false)
+  const [dataMpti, setDataMpti] = useState(null)
+  const [listProker,setListProker]=useState(null)
+  const [dataProker,setDataProker] = useState(null)
   const [dataProyek, setDataProyek] = useState(defaultDataProyek);
   const [listAplikasi, setListAplikasi] = useState([]);
   const [listModul, setListModul] = useState([]);
@@ -114,13 +118,12 @@ export default function TambahProyek(props) {
             jenisAplikasi: response.data.KODEAPLIKASI,
             aplikasi: response.data.APLIKASI,
             modul: response.data.MODUL,
-            deskripsimpti : response.data.KETMPTI,
-            deskripsiproker : response.data.KETPROKER,
-            mpti : response.data.KODEMPTI,
-            proker : response.data.KODEPROKER
+           
+            
           });
-          setMpti(response.data.KODEMPTI === "1" ? true : false)
-          setProker(response.data.KODEPROKER === "1"? true:false)
+          setDataMpti(listmpti.find((d)=>d.id===Number(response.data.IDMPTI)))
+          setListProker(cproker.filter((d)=>d.id===Number(response.data.IDMPTI)))
+          setDataProker(cproker.find((d)=>d.id===Number(response.data.IDPROKER)))
           setDataLayanan({
             idLayanan: response.data.LAYANAN.IDLAYANAN,
             nomorLayanan: response.data.LAYANAN.NOLAYANAN,
@@ -140,7 +143,7 @@ export default function TambahProyek(props) {
             setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
         });
     }
-  }, [proyek]);
+  }, [proyek,cproker,listmpti]);
 
   useEffect(() => {
     if (listLayanan.length === 0)
@@ -211,14 +214,7 @@ export default function TambahProyek(props) {
     if (value.length <= 255) return true;
     else return false;
   };
-  const validateInputDeskripsimpti = (value) => {
-    if (value.length <= 50) return true;
-    else return false;
-  };
-  const validateInputDeskripsiproker = (value) => {
-    if (value.length <= 50) return true;
-    else return false;
-  };
+  
   const handleChangeTextField = (event) => {
     const id = event.target.id;
     const value = event.target.value;
@@ -233,11 +229,6 @@ export default function TambahProyek(props) {
         //   validateInputNamaUri(value)
           : id === "deskripsi" ?
             validateInputDeskripsi(value)
-            : id === "deskripsimpti" ?
-            validateInputDeskripsimpti(value)
-            : id === "deskripsiproker" ?
-            validateInputDeskripsiproker(value)
-            
             : false
     )
       setDataProyek(prevDataProyek => ({ ...prevDataProyek, [id]: value }));
@@ -263,14 +254,6 @@ export default function TambahProyek(props) {
     setDataProyek(prevDataProyek => ({ ...prevDataProyek, [event.target.name]: event.target.value }));
   };
 
-  const handleChangecheckbox = (event)=>{
-    if(event.target.name === 'mpti'){
-    setMpti(event.target.checked)
-    }
-    if(event.target.name === 'proker'){
-      setProker(event.target.checked)
-    }
-  }
 
   const handleChangeAplikasi = (jenis, value) => {
     setListModul([]);
@@ -301,8 +284,8 @@ export default function TambahProyek(props) {
       aplikasi: !dataProyek.aplikasi ? err : def,
       modul: !dataProyek.modul ? err : def,
       deskripsi: !dataProyek.deskripsi ? err : def,
-      deskripsimpti: mpti? !dataProyek.deskripsimpti ? err : def:def,
-      deskripsiproker: proker? !dataProyek.deskripsiproker ? err : def:def,
+      mpti: !(dataMpti && dataLayanan.id) ? err : def,
+      proker: !(dataProker && dataProker.id) ? err : def,
     });
     if (
       !(dataLayanan && dataLayanan.idLayanan) ||
@@ -312,9 +295,10 @@ export default function TambahProyek(props) {
       !dataProyek.jenisAplikasi ||
       !dataProyek.aplikasi ||
       !dataProyek.modul ||
-      !dataProyek.deskripsi ||
-      (mpti && !dataProyek.deskripsimpti)||
-      (proker && !dataProyek.deskripsiproker)
+      !dataProyek.deskripsi||
+      //||
+      !(dataMpti && dataMpti.id)||
+      !(dataProker && dataProker.id)
     )
       valid = false;
 
@@ -329,10 +313,8 @@ export default function TambahProyek(props) {
       jenislayanan: dataProyek.jenisLayanan,
       namaproj: dataProyek.namaProyek,
       ketproj: dataProyek.deskripsi ? dataProyek.deskripsi : "",
-      kodempti:mpti?"1":"0",
-      ketmpti:dataProyek.deskripsimpti ? dataProyek.deskripsimpti : "",
-      kodeproker:proker?"1":"0",
-      ketproker:dataProyek.deskripsiproker ? dataProyek.deskripsiproker : "",
+      idmpti:dataMpti.id,
+      idproker:dataProker.id,
       
       //namauri: dataProyek.namaUri,
       nikreq: dataLayanan.nikBPO,
@@ -361,7 +343,7 @@ export default function TambahProyek(props) {
           });
       }
       else {
-        //console.log(formatDataCreate());
+        console.log(formatDataCreate());
         createProyek(formatDataCreate())
           .then((response) => {
             setDataProyek(prev => ({ ...prev, idProyek: response.data.idproyek }));
@@ -725,67 +707,81 @@ export default function TambahProyek(props) {
           <Grid item container direction="row" spacing={2} justify="space-between">
           
       <Grid item xs>
-      <TextField
-            id="deskripsimpti"
-            label="Deskripsi MPTI"
-            multiline
-            variant="outlined"
-            className={classes.field}
-            fullWidth
-            onChange={handleChangeTextField}
-            value={dataProyek && dataProyek.deskripsimpti ? dataProyek.deskripsimpti : ""}
-            required
-            error={error.deskripsimpti.error}
-            helperText={error.deskripsimpti.message}
-            disabled={!mpti || isDisabled}
-          />
+      <Autocomplete id="mpti"
+                  options={listmpti}
+                  getOptionLabel={option =>  option.KODEMPTI +" / "+ option.KETMPTI}
+                  onChange={(e, v) => {
+                    setError((prev) => ({
+                      ...prev,
+                      mpti: v ? { error: false, message: "" } : { error: true, message: "Tidak Boleh Kosong" }
+                    }));
+                    setListProker(v?cproker.filter((x)=>x.IDMPTI === v.id):[])
+                    setDataProker(null)
+                    setDataMpti(v);
+                  }}
+                  value={dataMpti||null}
+                  getOptionSelected={
+                    (option, value) => option.KODEMPTI === value?.KODEMPTI
+                  }
+                  renderOption={(option) => (
+                    <React.Fragment>
+                      {option.KODEMPTI +" / "+ option.KETMPTI}
+                    </React.Fragment>
+                  )}
+                  renderInput={params => (
+                    <TextField
+                      {...params}
+                      label="MPTI"
+                      fullWidth
+                      variant="outlined"
+                      className={classes.field}
+                      //required={mpti}
+                     error={error.mpti.error}
+                      helperText={error.mpti.message}
+                    />
+                  )}
+                  //disabled={!mpti}
+                />
           </Grid>
-          <Grid item xs>
-          <FormControlLabel
-        control={
-          <Checkbox
-            checked={mpti}
-            onChange={handleChangecheckbox}
-            name="mpti"
-            color="primary"
-          disabled={isDisabled}
-          />
-        }
-        label="MPTI"
-      />
-      </Grid>
+          
       </Grid>
       <Grid item container direction="row" spacing={2} justify="space-between">
       <Grid item xs>
-      <TextField
-            id="deskripsiproker"
-            label="Deskripsi Proker"
-            multiline
-            variant="outlined"
-            className={classes.field}
-            fullWidth
-            onChange={handleChangeTextField}
-            value={dataProyek && dataProyek.deskripsiproker ? dataProyek.deskripsiproker : ""}
-            required
-            error={error.deskripsiproker.error}
-            helperText={error.deskripsiproker.message}
-            disabled={!proker || isDisabled}
-          />
+      <Autocomplete id="proker"
+                  options={listProker}
+                  getOptionLabel={option =>  option.KODEPROKER +" / "+ option.KETPROKER}
+                  onChange={(e, v) => {
+                    setError((prev) => ({
+                      ...prev,
+                      proker: v ? { error: false, message: "" } : { error: true, message: "Tidak Boleh Kosong" }
+                    }));
+                    setDataProker(v);
+                  }}
+                  value={dataProker||null}
+                  getOptionSelected={
+                    (option, value) => option.KODEPROKER === value?.KODEPROKER
+                  }
+                  renderOption={(option) => (
+                    <React.Fragment>
+                      {option.KODEPROKER +" / "+ option.KETPROKER}
+                    </React.Fragment>
+                  )}
+                  renderInput={params => (
+                    <TextField
+                      {...params}
+                      label="Proker"
+                      fullWidth
+                      variant="outlined"
+                      className={classes.field}
+                      //required={proker}
+                      error={ error.proker.error}
+                      helperText={error.proker.message}
+                    />
+                  )}
+                  disabled={!dataMpti}
+                />
           </Grid>
-          <Grid item xs>
-          <FormControlLabel
-        control={
-          <Checkbox
-            checked={proker}
-            onChange={handleChangecheckbox}
-            name="proker"
-            color="primary"
-          disabled={isDisabled}
-          />
-        }
-        label="Proker"
-      />
-      </Grid>
+          
           </Grid>
            
           <FormControl disabled={isDisabled} component="fieldset" className={classes.radio} fullWidth error={error.jenisAplikasi.error}>
@@ -1037,7 +1033,7 @@ export default function TambahProyek(props) {
                       <MenuItem value="">
                         <em>Pilih</em>
                       </MenuItem>
-                      {statusProyek.filter(x => x !== "BARU" && x!=="ALL" && x !== proyek.STATUSPROYEK).map((d) => (
+                      {statusProyek.filter(x => x !== "BARU" && x!=="ALL" && x!=="DELAYED" && x !== proyek.STATUSPROYEK).map((d) => (
                         <MenuItem key={"menu-likely-faktor-" + d} value={d}>
                           {d}
                         </MenuItem>

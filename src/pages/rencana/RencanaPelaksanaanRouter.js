@@ -19,8 +19,8 @@ export default function RencanaPelaksanaanRouter(props) {
   const [kegiatan, setKegiatan] = useState(null);
   //const [roles, setRoles] = useState(null);
   const [karyawan, setKaryawan] = useState(null);
-
-  const otoritas = user.NIK === proyek.NIKREQ ? "BPO" : user.NIK === proyek.NIKPM ? "PM" : "PMO";
+  const oto = user.OTORITAS.includes('PMO')
+  const otoritas = oto? "PMO" : user.NIK === proyek.NIKREQ ? "BPO" : user.NIK === proyek.NIKPM ? "PM" : "";
   // const otoritas = "PM";
 
   useEffect(() => {
@@ -63,7 +63,7 @@ export default function RencanaPelaksanaanRouter(props) {
 
   if (loading)
     return <CircularProgress />;
-  else if (otoritas === "PM" && plan && status && status.NOUREQ && !status.NOBA)
+  else if ((otoritas === "PM" || otoritas === "PMO") && plan && status && status.NOUREQ && !status.NOBA)
     return <RencanaPelaksanaan plan={plan} proyek={proyek} kegiatan={kegiatan}  karyawan={karyawan} minDate={tglAwalCharter} />;
   else if (plan && Object.keys(plan).length === 0)
     return <ErrorPage code="" message={"Rencana Pelaksanaan belum diinput"} />;

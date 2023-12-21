@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext,useRef  } from "react";
-import { Checkbox, FormControlLabel, FormControl,FormLabel, FormGroup, Grid, Typography, Divider, CircularProgress, TextField, InputAdornment, Card, CardActionArea, CardContent, Accordion, AccordionSummary, AccordionDetails, Stepper, Step, StepLabel, Chip, MenuItem, Button } from "@material-ui/core";
+import { Tooltip as Tp ,Zoom, Checkbox, FormControlLabel, FormControl,FormLabel, FormGroup, Grid, Typography, Divider, CircularProgress, TextField, InputAdornment, Card, CardActionArea, CardContent, Accordion, AccordionSummary, AccordionDetails, Stepper, Step, StepLabel, Chip, MenuItem, Button } from "@material-ui/core";
 import { ExpandMore, Search } from '@material-ui/icons';
 import Pagination from "@material-ui/lab/Pagination";
 import { getListProyek, getSummaryProyek } from '../../gateways/api/ProyekAPI';
@@ -624,7 +624,40 @@ selecttahun.push({label:tahun,value:tahun})
       testlog('list',listProyekAfterSearch[index].IDPROYEK)
      
       }
-     
+      function tp(v){
+     switch (v) {
+      case "ONGOING":
+        return "Project yang sedang Berjalan"
+       
+      case "NEW":
+        return "Project Baru"
+
+      case "CLOSED":
+        return "Project yang Selesai dikerjakan"
+
+      case "DELAY":
+        return "Keterlambatan penyelesaian proyek"
+
+      case "PENDING":
+          return "Internal problem, ketersediaan resource, kebijakan"
+
+      case "CANCEL":
+          return "Project dibatal kan sesuai konfirmasi dengan BPO"
+    
+      case "HOLD":
+          return "Permintaan BPO terkait kebijakan manajemen, user req belum lengkap dll"
+    
+      case "BLOCKED":
+          return "tidak ada konfirmasi dari BPO mengenai kelanjutan project"
+      
+      case "TOTAL":
+          return "Jumlah Proyek yang ada"
+         
+      default:
+        return "-"
+        
+     }
+    }
   return (
     <Grid container direction="column" spacing={3}>
       <AlertDialog open={alertDialog.openAlertDialog}
@@ -634,7 +667,10 @@ selecttahun.push({label:tahun,value:tahun})
         severity={alertDialog.severity}
       />
       <Grid item xs container direction="row" justify="space-around">
+     
         {summary.map((dt, i) => (
+          
+          <Tp TransitionComponent={Zoom} title={tp(dt.label)} key={"tp-"+i} arrow>
           <Card key={"card-" + i}>
             <CardActionArea key={"card-action-" + i} onClick={handleChangeStatus(dt.status)}>
               <CardContent key={"card-content-" + i}>
@@ -643,7 +679,9 @@ selecttahun.push({label:tahun,value:tahun})
               </CardContent>
             </CardActionArea>
           </Card>
+          </Tp>
         ))}
+      
       </Grid>
       <Grid item xs={2} container direction="column" justify="flex-start">
         <TextField
