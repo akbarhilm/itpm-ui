@@ -5,7 +5,11 @@ import AlertDialog from '../../components/AlertDialog';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import { AddCircleOutline, RemoveCircleOutline } from '@material-ui/icons';
 import moment from 'moment';
-import { createCharter, updateCharter } from '../../gateways/api/CharterAPI';
+import { createCharter, updateCharter,uploadFile,downloadFile } from '../../gateways/api/CharterAPI';
+import PublishIcon from '@material-ui/icons/Publish';
+import GetAppIcon from '@material-ui/icons/GetApp';
+import fileDownload from 'js-file-download';
+
 
 function AddTextFiels(props) {
   const { required, label, error, helperText, data, onAdd, onChange, onDelete } = props;
@@ -68,7 +72,7 @@ const err = { error: true, text: "Tidak boleh kosong." };
 const noErr = { error: false, text: "" };
 const defaultError = { tanggalMulai: noErr, tanggalSelesai: noErr, benefitFinansial: noErr, benefitNonFinansial: noErr, tujuan: noErr, scope: noErr, target: noErr };
 
-const defaultData = { nomor: "", tanggalMulai: null, tanggalSelesai: null, benefitFinansial: "", benefitNonFinansial: "", tujuan: [""], scope: [""], target: [""] };
+const defaultData = { dokumen:"", nomor: "", tanggalMulai: null, tanggalSelesai: null, benefitFinansial: "", benefitNonFinansial: "", tujuan: [""], scope: [""], target: [""] };
 
 const defaultAlert = { openAlertDialog: false, messageAlertDialog: "", severity: "info" };
 
@@ -84,6 +88,8 @@ export default function Charter(props) {
   const [target, setTarget] = useState([""]);
   const [error, setError] = useState(defaultError);
   const [alertDialog, setAlertDialog] = useState(defaultAlert);
+  const [file,setFile] = useState()
+  const [upl,setUpl] = useState(false)
 
   const handleCloseAlertDialog = () => {
     setAlertDialog({ ...alertDialog, openAlertDialog: false });
@@ -97,6 +103,7 @@ export default function Charter(props) {
       tanggalSelesai: moment(data.TGLSELESAI, "DD/MM/YYYY"),
       benefitFinansial: data.BENEFITFINANSIAL ?? "",
       benefitNonFinansial: data.BENEFITNONFINANSIAL ?? "",
+      dokumen : data.DOKUMEN ?? "",
       tujuan: data.TUJUAN,
       scope: data.SCOPE,
       target: data.TARGET
@@ -227,6 +234,36 @@ export default function Charter(props) {
     else
       return false;
   };
+const handleFile = (e)=>{
+  if(e.target.files){
+    setFile(e.target.files[0])
+    console.log(e.target.files[0]);
+  }
+
+}
+
+const handleDownload = () =>{
+  if(data.dokumen){
+  downloadFile({filename:data.dokumen})
+  .then(res=>fileDownload(res.data,data.dokumen))
+ 
+  }else{
+    setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Tidak ada file", severity: "error" });
+  }
+  
+}
+const handleSubmit = ()=>{
+  if(file){
+    const formData = new FormData();
+    formData.append("file", file, proyek.IDPROYEK+'-'+file.name);
+   
+    uploadFile(formData)
+    .then(res=>setAlertDialog({ openAlertDialog: true, messageAlertDialog: res.data.message, severity: res.status === 200?'info':'error' }))
+    .then(  setUpl(true) )
+  }else{
+    setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Pilih File terlebih dahulu", severity: "error" });
+  }
+}
 
   const simpan = () => {
     if (validateAll()) {
@@ -242,6 +279,7 @@ export default function Charter(props) {
         tglselesai: moment(data.tanggalSelesai).format("DD/MM/YYYY"),
         benffin: data.benefitFinansial,
         benfnonfin: data.benefitNonFinansial,
+        dokumen:proyek.IDPROYEK+"-"+file.name,
         listdetail: listdetail
       };
       // console.log(formatData);
@@ -420,6 +458,47 @@ export default function Charter(props) {
           </Grid>
         </Grid>
       </Grid>
+      <Divider />
+      
+      <Grid item  container  justify='flex-end' >
+         
+          <TextField
+        accept="image/*"
+        //style={{display:'none'}}
+        id="contained-button-file"
+        name='file'
+        onChange={e=>handleFile(e)}
+        multiple
+        type="file"
+        //value={data?.dokumen??file}
+      />
+      
+      
+        <Button variant="contained" disabled={upl} onClick={handleSubmit} color="primary" startIcon={<PublishIcon />} component="span">
+          Upload  
+        </Button>
+      
+      </Grid>
+      <Grid item container  justify='flex-end' >
+      <Grid item xs={3}>
+      <TextField
+       
+        //style={{display:'none'}}
+        id="contained-button-file"
+        name='file'
+       // onChange={e=>handleFile(e)}
+       fullWidth
+        value={data?.dokumen??""}
+      />
+      </Grid>
+      <Button variant="contained" color="primary" onClick={handleDownload}  startIcon={<GetAppIcon />} component="span">
+          Download
+        </Button>
+        
+        </Grid>
+
+      
+       
       <Divider />
       <Grid item container justify="flex-end">
         <Button onClick={loadingButton ? null : simpan} color="primary" variant="contained" >

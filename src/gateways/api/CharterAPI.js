@@ -15,3 +15,14 @@ export const updateCharter = async (data) => {
 export const approveCharter = async (data) => {
   return await api.put('/proyek/charter/approve', data);
 };
+
+export const uploadFile = async(data)=>{
+  return await api.post('/proyek/charter/upload',data,{headers: {
+    'Content-Type': 'multipart/form-data'
+  }});
+}
+
+export const downloadFile = async(data)=>{
+  
+  return await api.get('/proyek/charter/download',{params:{filename:data.filename}})
+}
