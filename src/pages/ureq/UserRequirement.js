@@ -3,6 +3,9 @@ import { Grid, Typography, Button, TextField, IconButton, Paper, makeStyles, Div
 import { RemoveCircleOutline, AddCircleOutline } from '@material-ui/icons';
 import AlertDialog from '../../components/AlertDialog';
 import { createUreq, updateUreq } from '../../gateways/api/UreqAPI';
+import PublishIcon from '@material-ui/icons/Publish';
+import GetAppIcon from '@material-ui/icons/GetApp';
+
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -293,6 +296,30 @@ export default function UserRequirement(props) {
           </Grid>
         </Paper>
       </Grid>
+      <Divider />
+     
+      <Grid item  container  justify='flex-end' >
+          
+         
+          <TextField
+        accept="image/*"
+        //style={{display:'none'}}
+        id="contained-button-file"
+        multiple
+        type="file"
+      />
+      <label htmlFor="contained-button-file">
+        <Button variant="contained" color="primary" startIcon={<PublishIcon />} component="span">
+          Upload  
+        </Button>
+      </label>
+      </Grid>
+      <Grid item container  justify='flex-end' >
+      <Button variant="contained" color="primary" startIcon={<GetAppIcon />} component="span">
+          Download
+        </Button>
+        </Grid>
+     
       <Divider />
       <Grid item container direction="row" justify="flex-end">
         <Button onClick={loadingButton ? null : simpan} variant="contained" color="primary">

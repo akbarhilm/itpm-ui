@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Grid, Typography, TextField, makeStyles, Divider, Paper, IconButton, Checkbox, Dialog, DialogContent, Tooltip, DialogTitle } from '@material-ui/core';
+import { Grid, Typography, Button,TextField, makeStyles, Divider, Paper, IconButton, Checkbox, Dialog, DialogContent, Tooltip, DialogTitle } from '@material-ui/core';
 import { AddCircleOutline, InfoOutlined, EditOutlined, Close, AssignmentTurnedInOutlined } from '@material-ui/icons';
 import UatAdd from './UatAdd';
 import { approveQA, getUatByIdProyek, getUatByIdUat } from '../../gateways/api/UatAPI';
 import UatDetail from './UatDetail';
 import UatApproval from './UatApproval';
 import AlertDialog from '../../components/AlertDialog';
+import PublishIcon from '@material-ui/icons/Publish';
+import GetAppIcon from '@material-ui/icons/GetApp';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -213,7 +215,32 @@ export default function Uat(props) {
             </Grid>
           </Grid>
         </Paper>
+       
       </Grid >
+      <Divider/>
+      <Grid item  container  justify='flex-end' >
+          
+         
+          <TextField
+        accept="image/*"
+        //style={{display:'none'}}
+        id="contained-button-file"
+        multiple
+        type="file"
+      />
+      <label htmlFor="contained-button-file">
+        <Button variant="contained" color="primary" startIcon={<PublishIcon />} component="span">
+          Upload  
+        </Button>
+      </label>
+      </Grid>
+      <Grid item container  justify='flex-end' >
+      <Button variant="contained" color="primary" startIcon={<GetAppIcon />} component="span">
+          Download
+        </Button>
+        </Grid>
+      <Divider/>
+
       < Dialog open={openDialogAdd} onClose={handleCloseDialogAdd} maxWidth="lg" fullWidth >
         <DialogTitle disableTypography >
           <Grid container justify="flex-end">
