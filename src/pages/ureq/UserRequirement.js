@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Grid, Typography, Button, TextField, IconButton, Paper, makeStyles, Divider, CircularProgress } from '@material-ui/core';
 import { RemoveCircleOutline, AddCircleOutline } from '@material-ui/icons';
 import AlertDialog from '../../components/AlertDialog';
-import { createUreq, updateUreq } from '../../gateways/api/UreqAPI';
+import { createUreq, updateUreq,uploadFile,downloadFile } from '../../gateways/api/UreqAPI';
 import PublishIcon from '@material-ui/icons/Publish';
 import GetAppIcon from '@material-ui/icons/GetApp';
-
+import fileDownload from 'js-file-download';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -39,7 +39,9 @@ export default function UserRequirement(props) {
   const [data, setData] = useState();
   const [error, setError] = useState();
   const [alertDialog, setAlertDialog] = useState(defaultAlert);
-
+  const [file,setFile] = useState();
+  const [upl,setUpl] = useState(false)
+  const [dokumen,setDokumen] = useState("")
   const handleCloseAlertDialog = () => {
     setAlertDialog({ ...alertDialog, openAlertDialog: false });
   };
@@ -54,9 +56,11 @@ export default function UserRequirement(props) {
         newData.push({
           kebutuhan: d.NAMAUREQ,
           rincian: d.KETUREQ,
-          useCase: d.USECASE
+          useCase: d.USECASE,
+        
         });
       });
+      setDokumen(ureq.LISTDETAIL[0].DOKUMEN)
       setData(newData);
       setError(newError);
       setNomor(ureq.NOUREQ);
@@ -112,6 +116,37 @@ export default function UserRequirement(props) {
     setData(newArray);
   };
 
+  const handleFile = (e)=>{
+    if(e.target.files){
+      setFile(e.target.files[0])
+      console.log(e.target.files[0]);
+    }
+  
+  }
+  
+  const handleDownload = () =>{
+    if(data.dokumen){
+    downloadFile({filename:data.dokumen})
+    .then(res=>fileDownload(res.data,data.dokumen))
+   
+    }else{
+      setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Tidak ada file", severity: "error" });
+    }
+    
+  }
+  const handleSubmit = ()=>{
+    if(file){
+      const formData = new FormData();
+      formData.append("file", file, proyek.IDPROYEK+'-'+file.name);
+     
+      uploadFile(formData)
+      .then(res=>setAlertDialog({ openAlertDialog: true, messageAlertDialog: res.data.message, severity: res.status === 200?'info':'error' }))
+      .then(  setUpl(true) )
+    }else{
+      setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Pilih File terlebih dahulu", severity: "error" });
+    }
+  }
+
   const validateAll = () => {
     setError(prev =>
       prev.map((er, i) => {
@@ -139,12 +174,14 @@ export default function UserRequirement(props) {
         }));
         const formatData = {
           idproj: proyek.IDPROYEK,
+          dokumen:proyek.IDPROYEK+"-ureq-"+file.name,
           listdetail: listdetail
         };
         if (edit) {
           updateUreq(formatData)
             .then((response) => {
-              setData(response.data.LISTDETAIL.map(d => ({ kebutuhan: d.NAMAUREQ, rincian: d.KETUREQ, useCase: d.USECASE })));
+              setData(response.data.LISTDETAIL.map(d => ({ kebutuhan: d.NAMAUREQ, rincian: d.KETUREQ, useCase: d.USECASE,dokumen:d.DOKUMEN })));
+              setDokumen(response.data.LISTDETAIL[0].DOKUMEN)
               setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil ubah", severity: "success" });
               setLoadingButton(false);
             })
@@ -165,9 +202,11 @@ export default function UserRequirement(props) {
                 newData.push({
                   kebutuhan: d.NAMAUREQ,
                   rincian: d.KETUREQ,
-                  useCase: d.USECASE
+                  useCase: d.USECASE,
+                  
                 });
               });
+              setDokumen(response.data.LISTDETAIL[0].DOKUMEN)
               setData(newData);
               setError(newError);
               setNomor(response.data.NOUREQ);
@@ -299,26 +338,41 @@ export default function UserRequirement(props) {
       <Divider />
      
       <Grid item  container  justify='flex-end' >
-          
          
-          <TextField
-        accept="image/*"
-        //style={{display:'none'}}
-        id="contained-button-file"
-        multiple
-        type="file"
-      />
-      <label htmlFor="contained-button-file">
-        <Button variant="contained" color="primary" startIcon={<PublishIcon />} component="span">
-          Upload  
-        </Button>
-      </label>
-      </Grid>
-      <Grid item container  justify='flex-end' >
-      <Button variant="contained" color="primary" startIcon={<GetAppIcon />} component="span">
-          Download
-        </Button>
-        </Grid>
+         <TextField
+       accept="*.pdf, *.doc, *.docx, *.xls, *.xlsx"
+       //style={{display:'none'}}
+       id="contained-button-file"
+       name='file'
+       onChange={e=>handleFile(e)}
+       multiple
+       type="file"
+       //value={data?.dokumen??file}
+     />
+     
+     
+       <Button variant="contained" disabled={upl} onClick={handleSubmit} color="primary" startIcon={<PublishIcon />} component="span">
+         Upload  
+       </Button>
+     
+     </Grid>
+     <Grid item container  justify='flex-end' >
+     <Grid item xs={3}>
+     <TextField
+      
+       //style={{display:'none'}}
+       id="contained-button-file"
+       name='file'
+      // onChange={e=>handleFile(e)}
+      fullWidth
+       value={dokumen??""}
+     />
+     </Grid>
+     <Button variant="contained" color="primary" onClick={handleDownload}  startIcon={<GetAppIcon />} component="span">
+         Download
+       </Button>
+       
+       </Grid>
      
       <Divider />
       <Grid item container direction="row" justify="flex-end">

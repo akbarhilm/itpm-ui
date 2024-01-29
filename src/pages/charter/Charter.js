@@ -255,7 +255,7 @@ const handleDownload = () =>{
 const handleSubmit = ()=>{
   if(file){
     const formData = new FormData();
-    formData.append("file", file, proyek.IDPROYEK+'-'+file.name);
+    formData.append("file", file, proyek.IDPROYEK+'-charter-'+file.name);
    
     uploadFile(formData)
     .then(res=>setAlertDialog({ openAlertDialog: true, messageAlertDialog: res.data.message, severity: res.status === 200?'info':'error' }))
@@ -279,7 +279,7 @@ const handleSubmit = ()=>{
         tglselesai: moment(data.tanggalSelesai).format("DD/MM/YYYY"),
         benffin: data.benefitFinansial,
         benfnonfin: data.benefitNonFinansial,
-        dokumen:proyek.IDPROYEK+"-"+file.name,
+        dokumen:proyek.IDPROYEK+"-charter-"+file.name,
         listdetail: listdetail
       };
       // console.log(formatData);
@@ -290,6 +290,17 @@ const handleSubmit = ()=>{
         // console.log("update", formatData);
         updateCharter(formatData)
           .then((response) => {
+            const tujuan = response.data.LISTDETAIL.filter(d => d.KODEDETAIL === "TUJUAN");
+            const scope = response.data.LISTDETAIL.filter(d => d.KODEDETAIL === "SCOPE");
+            const target = response.data.LISTDETAIL.filter(d => d.KODEDETAIL === "TARGET");
+            delete response.data.LISTDETAIL;
+            const newData = {
+              ...response.data,
+              TUJUAN: tujuan,
+              SCOPE: scope,
+              TARGET: target
+            };
+            setData(formatDataCharter(newData));
             setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil ubah", severity: "success" });
             setLoadingButton(false);
           })

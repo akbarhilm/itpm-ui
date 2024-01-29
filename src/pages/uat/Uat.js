@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Grid, Typography, Button,TextField, makeStyles, Divider, Paper, IconButton, Checkbox, Dialog, DialogContent, Tooltip, DialogTitle } from '@material-ui/core';
+import { Grid, Typography, CircularProgress, Button,TextField, makeStyles, Divider, Paper, IconButton, Checkbox, Dialog, DialogContent, Tooltip, DialogTitle } from '@material-ui/core';
 import { AddCircleOutline, InfoOutlined, EditOutlined, Close, AssignmentTurnedInOutlined } from '@material-ui/icons';
 import UatAdd from './UatAdd';
-import { approveQA, getUatByIdProyek, getUatByIdUat } from '../../gateways/api/UatAPI';
+import { approveQA, getUatByIdProyek, getUatByIdUat,uploadFile,downloadFile,simpanUpl } from '../../gateways/api/UatAPI';
 import UatDetail from './UatDetail';
 import UatApproval from './UatApproval';
 import AlertDialog from '../../components/AlertDialog';
 import PublishIcon from '@material-ui/icons/Publish';
 import GetAppIcon from '@material-ui/icons/GetApp';
+import fileDownload from 'js-file-download';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -43,6 +44,9 @@ export default function Uat(props) {
   const [openDialogDetail, setOpenDialogDetail] = useState(false);
   const [openDialogApproval, setOpenDialogApproval] = useState(false);
   const [alertDialog, setAlertDialog] = useState(defaultAlert);
+  const [file,setFile] = useState();
+  const [upl,setUpl] = useState(false)
+  const [loadingButton, setLoadingButton] = useState(false);
 
   const handleCloseAlertDialog = () => {
     setAlertDialog({ ...alertDialog, openAlertDialog: false });
@@ -58,7 +62,8 @@ export default function Uat(props) {
         id: d.IDUAT,
         nomor: d.NOUAT,
         approveQA: d.APROVEQA === "1" ? true : false,
-        approveUser: d.APROVEUSER === "1" ? true : false
+        approveUser: d.APROVEUSER === "1" ? true : false,
+        dokumen:d.DOKUMEN
       })));
     }
   }, [listUat]);
@@ -71,7 +76,8 @@ export default function Uat(props) {
             id: d.IDUAT,
             nomor: d.NOUAT,
             approveQA: d.APROVEQA === "1" ? true : false,
-            approveUser: d.APROVEUSER === "1" ? true : false
+            approveUser: d.APROVEUSER === "1" ? true : false,
+            dokumen:d.DOKUMEN
           })));
           setRefreshData(false);
         })
@@ -120,6 +126,53 @@ export default function Uat(props) {
           setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
       });
   };
+
+  const handleFile = (e)=>{
+    if(e.target.files){
+      setFile(e.target.files[0])
+      console.log(e.target.files[0]);
+    }
+  
+  }
+  
+  const handleDownload = () =>{
+    if(data.dokumen){
+    downloadFile({filename:data.dokumen})
+    .then(res=>fileDownload(res.data,data.dokumen))
+   
+    }else{
+      setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Tidak ada file", severity: "error" });
+    }
+    
+  }
+  const handleSubmit = ()=>{
+    if(file){
+      const formData = new FormData();
+      formData.append("file", file, proyek.IDPROYEK+'-uat-'+file.name);
+     
+      uploadFile(formData)
+      .then(res=>setAlertDialog({ openAlertDialog: true, messageAlertDialog: res.data.message, severity: res.status === 200?'info':'error' }))
+      .then(  setUpl(true) )
+      
+    }else{
+      setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Pilih File terlebih dahulu", severity: "error" });
+    }
+  }
+
+  const simpanupl = ()=>{
+    if(file){
+      setLoadingButton(true);
+    const data = {}
+    data.filename = proyek.IDPROYEK+'-uat-'+file.name
+    data.idproyek = proyek.IDPROYEK
+    simpanUpl(data)
+    .then(res=>setAlertDialog({ openAlertDialog: true, messageAlertDialog: res.data.message, severity: res.status === 200?'info':'error' }))
+    .then(setRefreshData(true))
+    setLoadingButton(false);
+  }else{
+    setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Pilih File terlebih dahulu", severity: "error" });
+  }
+}
 
   return (
     <Grid container direction="column" spacing={2}>
@@ -219,28 +272,48 @@ export default function Uat(props) {
       </Grid >
       <Divider/>
       <Grid item  container  justify='flex-end' >
-          
          
-          <TextField
-        accept="image/*"
-        //style={{display:'none'}}
-        id="contained-button-file"
-        multiple
-        type="file"
-      />
-      <label htmlFor="contained-button-file">
-        <Button variant="contained" color="primary" startIcon={<PublishIcon />} component="span">
-          Upload  
-        </Button>
-      </label>
-      </Grid>
-      <Grid item container  justify='flex-end' >
-      <Button variant="contained" color="primary" startIcon={<GetAppIcon />} component="span">
-          Download
-        </Button>
-        </Grid>
+         <TextField
+       accept="image/*"
+       //style={{display:'none'}}
+       id="contained-button-file"
+       name='file'
+       onChange={e=>handleFile(e)}
+       multiple
+       type="file"
+       //value={data?.dokumen??file}
+     />
+     
+     
+       <Button variant="contained" disabled={upl} onClick={handleSubmit} color="primary" startIcon={<PublishIcon />} component="span">
+         Upload  
+       </Button>
+     
+     </Grid>
+     <Grid item container  justify='flex-end' >
+     <Grid item xs={3}>
+     <TextField
+      
+       //style={{display:'none'}}
+       id="contained-button-file"
+       name='file'
+      // onChange={e=>handleFile(e)}
+      fullWidth
+       value={data[0]?.dokumen??""}
+     />
+     </Grid>
+     <Button variant="contained" color="primary" onClick={handleDownload}  startIcon={<GetAppIcon />} component="span">
+         Download
+       </Button>
+       
+       </Grid>
       <Divider/>
-
+      <Grid item container justify="flex-end">
+      
+        <Button disabled={upl?data.length>0?false:true:true} onClick={loadingButton ? null : simpanupl} color="primary" variant="contained" >
+          {loadingButton ? <CircularProgress size={20} color="inherit" /> : "Simpan"}
+        </Button>
+      </Grid>
       < Dialog open={openDialogAdd} onClose={handleCloseDialogAdd} maxWidth="lg" fullWidth >
         <DialogTitle disableTypography >
           <Grid container justify="flex-end">
