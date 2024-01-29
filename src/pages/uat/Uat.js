@@ -136,9 +136,10 @@ export default function Uat(props) {
   }
   
   const handleDownload = () =>{
-    if(data.dokumen){
-    downloadFile({filename:data.dokumen})
-    .then(res=>fileDownload(res.data,data.dokumen))
+   
+    if(data[0].dokumen){
+    downloadFile({filename:data[0].dokumen})
+    .then(res=>fileDownload(res.data,data[0].dokumen))
    
     }else{
       setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Tidak ada file", severity: "error" });
