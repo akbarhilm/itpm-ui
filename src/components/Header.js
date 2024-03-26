@@ -149,12 +149,13 @@ export default function Header(props) {
     history.push("/summary");
   };
 
-  // const handleLinkToPorto= () => {
-  //   //setProyek();
-  //   setMenuSideBar(false);
-  //   history.push("/portofolio");
-  //   handleClose()
-  // };
+  const handleLinkToPorto= () => {
+    //setProyek();
+   
+    setMenuSideBar(false);
+    history.push("/portofolio");
+    handleClose()
+  };
 
   const handleLinkToMPTI= () => {
     //setProyek();
@@ -231,10 +232,10 @@ export default function Header(props) {
         <MenuItem onClick={handleLinkToProker}>Proker</MenuItem>
         </Box>
         }
-        {/* {user.OTORITAS.includes("PMO") && 
+         {user.OTORITAS.includes("PMO") && 
         <Box>
         <MenuItem onClick={handleLinkToPorto}>Portofolio</MenuItem></Box>
-       } */}
+       } 
         </MenuList>
       </Menu>
               </Grid>

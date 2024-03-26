@@ -23,6 +23,7 @@ import RoboRouter from "../pages/robo/RoboRouter";
 import Dashboard from '../pages/dashboard/Dashboard';
 import Summary from '../pages/summary/Summary';
 import Porto from '../pages/portofolio/Portofolio'
+import TambahPorto from '../pages/portofolio/TambahPorto'
 import Proker from '../pages/proker/Proker'
 import Mpti from '../pages/mpti/Mpti'
 import { UserContext } from '../utils/UserContext';
@@ -62,6 +63,15 @@ export default function Content(props) {
           <Route exact path='/401' >
             <Page401 />
           </Route>
+          <PrivateRoute exact path='/portofolio' >
+            <Porto setProyek={setProyek} setMenuSideBar={setMenuSideBar} />
+          </PrivateRoute>
+          <PrivateRoute exact path='/portofolio/tambah' >
+            <TambahPorto/>
+          </PrivateRoute>
+          <PrivateRoute exact path='/portofolio/ubah' >
+            <TambahPorto proyek={proyek}/>
+          </PrivateRoute>
           <PrivateRoute exact path='/' >
             <Proyek setProyek={setProyek} setMenuSideBar={setMenuSideBar} />
           </PrivateRoute>
@@ -71,9 +81,7 @@ export default function Content(props) {
           <PrivateRoute exact path='/summary' >
             <Summary/>
           </PrivateRoute>
-          <PrivateRoute exact path='/portofolio' >
-            <Porto/>
-          </PrivateRoute>
+         
           <PrivateRoute exact path='/mpti' >
             <Mpti/>
           </PrivateRoute>
