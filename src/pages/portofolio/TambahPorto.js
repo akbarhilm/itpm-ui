@@ -1,4 +1,4 @@
-import React, { useState, useEffect,useCallback, useContext } from "react";
+import React, { useState, useEffect,useCallback } from "react";
 import AlertDialog from "../../components/AlertDialog";
 import {
   Grid,
@@ -24,7 +24,6 @@ import {
   getPortoById,
   updatePorto
 } from "../../gateways/api/PortoApi";
-import { useHistory } from "react-router-dom";
 import {
   AddCircleOutline,
   RemoveCircleOutline,
