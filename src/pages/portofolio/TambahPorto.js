@@ -91,9 +91,9 @@ const defaultAlert = {
   severity: "info",
 };
 const defaultDataDetail = {
-  item: null,
-  nama: null,
-  keterangan: null,
+  item: '',
+  nama: '',
+  keterangan: '',
   status: "",
 };
 const defaultDataHead = {
@@ -117,7 +117,7 @@ export default function TambahPorto(props) {
   const [loadingButton, setLoadingButton] = useState(false);
   const [edit, setEdit] = useState(false);
   const [errorHead, setErrorHead] = useState(defaultError);
-  const [errorDetail, setErrorDetail] = useState([defaultErrorDetail]);
+  const [errorDetail, setErrorDetail] = useState([]);
   const [alertDialog, setAlertDialog] = useState(defaultAlert);
   const [kode, setKode] = useState([]);
   const [grup, setGrup] = useState([]);
@@ -205,6 +205,7 @@ export default function TambahPorto(props) {
     console.log(errorDetail);
     let newArrayError = [...errorDetail];
     newArrayError.push(defaultErrorDetail);
+    console.log(newArrayError);
     setErrorDetail(newArrayError);
 
     let newArray = [...dataDetail];
@@ -349,11 +350,12 @@ export default function TambahPorto(props) {
             : err
           : noErr,
     });
-
+    
     setErrorDetail((prev) =>
+   
       prev.map((er, i) => {
         const newObj = {
-          item: dataDetail[i].item ? noErr : err,
+        item: dataDetail[i].item ? noErr : err,
           nama: dataDetail[i].nama ? noErr : err,
           // role: data[i].role ? noErr : err,
           keterangan: dataDetail[i].keterangan ? noErr : err,
@@ -375,11 +377,12 @@ export default function TambahPorto(props) {
       dataDetail.every(
         (dt) => dt.item && dt.nama && dt.keterangan && dt.status
       ) &&
+      (
       file
         ? dataHead.namafile
           ? true
           : false
-        : true
+        : true)
     ) {
       return true;
     } else return false;
@@ -423,6 +426,7 @@ export default function TambahPorto(props) {
                 setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
             });
         } else {
+         
           addPorto(formatData)
             .then((response) => {
               setEdit(true);
@@ -815,8 +819,10 @@ export default function TambahPorto(props) {
                         }}
                         onChange={(e) => handleChangeTFD(e, i, "item")}
                         value={d.item}
-                        error={errorDetail[i].item.error}
-                        helperText={errorDetail[i].item.text}
+                        //error={d.item === ''?true:false}
+                       // helperText={d.item === ''?'Tidak Boleh Kosong':''}
+                          error={errorDetail[i].item.error}
+                       helperText={errorDetail[i].item.text}
                       />
                     </Grid>
                     <Grid key={"grid-nama-" + i} item xs>
@@ -830,6 +836,8 @@ export default function TambahPorto(props) {
                         }}
                         onChange={(e) => handleChangeTFD(e, i, "nama")}
                         value={d.nama}
+                        // error={d.nama === ''?true:false}
+                        // helperText={d.nama === ''?'Tidak Boleh Kosong':''}
                         error={errorDetail[i].nama.error}
                         helperText={errorDetail[i].nama.text}
                       />
@@ -847,6 +855,8 @@ export default function TambahPorto(props) {
                         value={d.keterangan}
                         error={errorDetail[i].keterangan.error}
                         helperText={errorDetail[i].keterangan.text}
+                        // error={d.keterangan === ''?true:false}
+                        // helperText={d.keterangan === ''?'Tidak Boleh Kosong':''}
                       />
                     </Grid>
                     <Grid key={"grid-status-" + i} item xs>
