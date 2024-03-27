@@ -34,24 +34,24 @@ import { KeyboardDatePicker } from "@material-ui/pickers";
 import moment from "moment";
 
 const defaultError = {
-  kode: { error: false, message: "" },
-  cata: { error: false, message: "" },
-  aplikasi: { error: false, message: "" },
-  bpo: { error: false, message: "" },
-  grup: { error: false, message: "" },
-  url: { error: false, message: "" },
-  status: { error: false, message: "" },
-  dev: { error: false, message: "" },
-  tipe: { error: false, message: "" },
-  namafile: { error: false, message: "" },
-  publish: { error: false, message: "" },
-  retired: { error: false, message: "" },
+  kode: { error: false, text: "" },
+  cata: { error: false, text: "" },
+  aplikasi: { error: false, text: "" },
+  bpo: { error: false, text: "" },
+  grup: { error: false, text: "" },
+  url: { error: false, text: "" },
+  status: { error: false, text: "" },
+  dev: { error: false, text: "" },
+  tipe: { error: false, text: "" },
+  namafile: { error: false, text: "" },
+  publish: { error: false, text: "" },
+  retired: { error: false, text: "" },
 };
 const defaultErrorDetail = {
-  item: { error: false, message: "" },
-  nama: { error: false, message: "" },
-  keterangan: { error: false, message: "" },
-  status: { error: false, message: "" },
+  item: { error: false, text: "" },
+  nama: { error: false, text: "" },
+  keterangan: { error: false, text: "" },
+  status: { error: false, text: "" },
 };
 
 const err = { error: true, text: "Tidak boleh kosong." };
@@ -97,6 +97,7 @@ const defaultDataDetail = {
   status: "",
 };
 const defaultDataHead = {
+  idporto:"",
   kode: "",
   cata: "",
   aplikasi: "",
@@ -140,6 +141,7 @@ export default function TambahPorto(props) {
 
   useEffect(() => {
     if (proyek) {
+     
       getPortoById(proyek.IDPORTO).then((res) => {
         setEdit(true);
         setDataHead({
@@ -155,13 +157,15 @@ export default function TambahPorto(props) {
           dev: res.data.PENGEMBANG,
           tipe: res.data.TIPEAPLIKASI,
           namafile: res.data.NAMAFILE,
-          publish: res.data.PUBLISH,
-          retired: res.data.RETIRED,
+          publish: moment(res.data.PUBLISH,"DD/MM/YYYY"),
+          retired: moment(res.data.RETIRED,"DD/MM/YYYY"),
         });
         
         const dtl = formatdetail(res.data.LISTDETAIL)
-        setDataDetail(dtl)
         setErrorDetail(dtl.map(d=>defaultErrorDetail))
+        setDataDetail(dtl)
+       
+       
        
       })
       .catch((error) => {
@@ -330,6 +334,7 @@ export default function TambahPorto(props) {
     setErrorHead({
       kode: dataHead.kode ? noErr : err,
       aplikasi: dataHead.aplikasi ? noErr : err,
+      cata : dataHead.cata?noErr : err,
       bpo: dataHead.bpo ? noErr : err,
       grup: dataHead.grup ? noErr : err,
       url: dataHead.url ? noErr : err,
@@ -368,12 +373,15 @@ export default function TambahPorto(props) {
     if (
       dataHead.kode &&
       dataHead.aplikasi &&
+      dataHead.cata &&
       dataHead.bpo &&
       dataHead.grup &&
       dataHead.url &&
       dataHead.status &&
       dataHead.dev &&
       dataHead.tipe &&
+      (dataHead.status === 'KATALOG'? dataHead.publish? true : false : true) &&
+      (dataHead.status === 'RETIRED'? dataHead.retired? true : false : true) &&
       dataDetail.every(
         (dt) => dt.item && dt.nama && dt.keterangan && dt.status
       ) &&
@@ -429,7 +437,9 @@ export default function TambahPorto(props) {
          
           addPorto(formatData)
             .then((response) => {
+              console.log(response);
               setEdit(true);
+              setDataHead((prev)=>({...prev,idporto:response.data[0].IDPORTO}))
               setAlertDialog({
                 openAlertDialog: true,
                 messageAlertDialog: "Berhasil simpan",
@@ -474,6 +484,7 @@ export default function TambahPorto(props) {
 
   return (
     <Grid container direction="column" spacing={2}>
+    {console.log(dataHead)}
       <AlertDialog
         open={alertDialog.openAlertDialog}
         id="alert-dialog"
@@ -519,12 +530,15 @@ export default function TambahPorto(props) {
                   select
                   onChange={(e) => handleSelect(e, "cata")}
                   value={dataHead ? dataHead.cata : ''}
+                  error={errorHead.cata.error}
+                      helperText={errorHead.cata.text}
                 >
                   {cata.map((d, i) => (
                     <MenuItem value={d.KODE} key={i}>
                       {d.NAMA}
                     </MenuItem>
                   ))}
+                 
                 </TextField>
 
                 <Grid
@@ -575,12 +589,15 @@ export default function TambahPorto(props) {
                       select
                       onChange={(e) => handleSelect(e, "grup")}
                       value={dataHead ? dataHead.grup : ""}
+                      error={errorHead.grup.error}
+                      helperText={errorHead.grup.text}
                     >
                       {grup.map((d, i) => (
                         <MenuItem value={d.KODEGRUP} key={i}>
                           {d.NAMAGRUP}
                         </MenuItem>
                       ))}
+                     
                     </TextField>
                   </Grid>
                 </Grid>
@@ -614,10 +631,13 @@ export default function TambahPorto(props) {
                       select
                       onChange={(e) => handleSelect(e, "status")}
                       value={dataHead ? dataHead.status : ""}
+                      error={errorHead.status.error}
+                      helperText={errorHead.status.text}
                     >
                       <MenuItem value={"PIPELINE"}>PIPELINE</MenuItem>
                       <MenuItem value={"KATALOG"}>KATALOG</MenuItem>
                       <MenuItem value={"RETIRED"}>RETIRED</MenuItem>
+                    
                     </TextField>
                   </Grid>
                 </Grid>
@@ -629,9 +649,12 @@ export default function TambahPorto(props) {
                   select
                   onChange={(e) => handleSelect(e, "dev")}
                   value={dataHead ? dataHead.dev : ""}
+                  error={errorHead.dev.error}
+                      helperText={errorHead.dev.text}
                 >
                   <MenuItem value={"IT"}>Divisi IT</MenuItem>
                   <MenuItem value={"EXTERNAL"}>External</MenuItem>
+                
                 </TextField>
                 <Grid
                   item
@@ -649,11 +672,14 @@ export default function TambahPorto(props) {
                       select
                       onChange={(e) => handleSelect(e, "tipe")}
                       value={dataHead ? dataHead.tipe : ""}
+                      error={errorHead.tipe.error}
+                      helperText={errorHead.tipe.text}
                     >
                       <MenuItem value={"INTERNET"}>Internet</MenuItem>
                       <MenuItem value={"INTRANET"}>Intranet</MenuItem>
 
                       {/* </Select> */}
+                    
                     </TextField>
                   </Grid>
                   <Grid item xs>
