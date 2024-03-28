@@ -125,9 +125,10 @@ export default function UserRequirement(props) {
   }
   
   const handleDownload = () =>{
-    if(data.dokumen){
-    downloadFile({filename:data.dokumen})
-    .then(res=>fileDownload(res.data,data.dokumen))
+    console.log(dokumen);
+    if(dokumen){
+    downloadFile({filename:dokumen})
+    .then(res=>fileDownload(res.data,dokumen))
    
     }else{
       setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Tidak ada file", severity: "error" });
@@ -137,7 +138,7 @@ export default function UserRequirement(props) {
   const handleSubmit = ()=>{
     if(file){
       const formData = new FormData();
-      formData.append("file", file, proyek.IDPROYEK+'-'+file.name);
+      formData.append("file", file, proyek.IDPROYEK+'-ureq-'+file.name);
      
       uploadFile(formData)
       .then(res=>setAlertDialog({ openAlertDialog: true, messageAlertDialog: res.data.message, severity: res.status === 200?'info':'error' }))

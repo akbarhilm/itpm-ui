@@ -20,5 +20,5 @@ export const uploadFile = async(data)=>{
 
 export const downloadFile = async(data)=>{
   
-  return await api.get('/proyek/ureq/download',{params:{filename:data.filename}})
+  return await api.get('/proyek/ureq/download',{responseType:'blob', params:{filename:data.filename}})
 }
