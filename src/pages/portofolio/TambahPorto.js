@@ -157,8 +157,8 @@ export default function TambahPorto(props) {
           dev: res.data.PENGEMBANG,
           tipe: res.data.TIPEAPLIKASI,
           namafile: res.data.NAMAFILE,
-          publish: moment(res.data.PUBLISH,"DD/MM/YYYY"),
-          retired: moment(res.data.RETIRED,"DD/MM/YYYY"),
+          publish: res.data.PUBLISH?moment(res.data.PUBLISH,"DD/MM/YYYY"):null,
+          retired: res.data.RETIRED?moment(res.data.RETIRED,"DD/MM/YYYY"):null,
         });
         
         const dtl = formatdetail(res.data.LISTDETAIL)
