@@ -35,7 +35,7 @@ import PublishIcon from "@material-ui/icons/Publish";
 import { KeyboardDatePicker } from "@material-ui/pickers";
 import moment from "moment";
 
-import DialogTitle from '@material-ui/core/DialogTitle';
+
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import Dialog from '@material-ui/core/Dialog';
@@ -127,20 +127,16 @@ const defaultDataHead = {
 
 function ConfirmationDialogRaw(props) {
   const { onClose, value: valueProp, open, ...other } = props;
-  const [value, setValue] = React.useState(valueProp);
-  const radioGroupRef = React.useRef(null);
+  // const [value, setValue] = React.useState(valueProp);
 
-  React.useEffect(() => {
-    if (!open) {
-      setValue(valueProp);
-    }
-  }, [valueProp, open]);
 
-  const handleEntering = () => {
-    if (radioGroupRef.current != null) {
-      radioGroupRef.current.focus();
-    }
-  };
+  // React.useEffect(() => {
+  //   if (!open) {
+  //     setValue(valueProp);
+  //   }
+  // }, [valueProp, open]);
+
+
 
   const handleCancel = () => {
     onClose();
@@ -155,7 +151,7 @@ function ConfirmationDialogRaw(props) {
   return (
     <Dialog
       maxWidth="xs"
-      onEntering={handleEntering}
+     
       aria-labelledby="confirmation-dialog-title"
       open={open}
       {...other}
@@ -193,7 +189,7 @@ export default function TambahPorto(props) {
   const [upl, setUpl] = useState(false);
   const [cata, setCata] = useState([]);
   const [openDialog, setOpenDialog] = React.useState(false);
-  const [valueDialog, setValueDialog] = React.useState('');
+  // const [valueDialog, setValueDialog] = React.useState('');
 
   const formatdetail = useCallback((listdetail) => {
    const dt =  listdetail.map((d)=>({
@@ -1181,7 +1177,7 @@ console.log(value);
           keepMounted
           open={openDialog}
           onClose={handleCloseDialog}
-          value={valueDialog}
+          // value={valueDialog}
         />
     </Grid>
   );
