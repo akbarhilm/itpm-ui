@@ -53,7 +53,7 @@ build_test:
     - export REACT_APP_HOST=$HOST_TEST
     - export REACT_APP_HOST_API=$HOST_TEST
     - export REACT_APP_HOST_LOGIN=$HOST_TEST_LOGIN
-    - export NODE_OPTIONS="--max-old-space-size=1024"
+    - export NODE_OPTIONS="--max-old-space-size=2048"
   script: 
     - npm run build
     - cp -f ~/project/wait/wait .
