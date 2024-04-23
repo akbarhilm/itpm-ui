@@ -15,6 +15,7 @@ import {
   CircularProgress,
   MenuItem,
 } from "@material-ui/core";
+
 import {
   addPorto,
   getgrup,
@@ -22,7 +23,8 @@ import {
   uploadFile,
   getCata,
   getPortoById,
-  updatePorto
+  updatePorto,
+  deletePorto
 } from "../../gateways/api/PortoApi";
 import {
   AddCircleOutline,
@@ -32,6 +34,12 @@ import {
 import PublishIcon from "@material-ui/icons/Publish";
 import { KeyboardDatePicker } from "@material-ui/pickers";
 import moment from "moment";
+
+
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogActions from '@material-ui/core/DialogActions';
+import Dialog from '@material-ui/core/Dialog';
+import { useHistory } from "react-router-dom";
 
 const defaultError = {
   kode: { error: false, text: "" },
@@ -52,6 +60,8 @@ const defaultErrorDetail = {
   nama: { error: false, text: "" },
   keterangan: { error: false, text: "" },
   status: { error: false, text: "" },
+  publishdetail:{ error: false, text: "" },
+  retireddetail:{ error: false, text: "" }
 };
 
 const err = { error: true, text: "Tidak boleh kosong." };
@@ -95,6 +105,8 @@ const defaultDataDetail = {
   nama: '',
   keterangan: '',
   status: "",
+  publishdetail:null,
+  retireddetail:null
 };
 const defaultDataHead = {
   idporto:"",
@@ -110,11 +122,60 @@ const defaultDataHead = {
   namafile: "",
   publish: null,
   retired: null,
+  hapus:""
 };
+
+function ConfirmationDialogRaw(props) {
+  const { onClose, value: valueProp, open, ...other } = props;
+  // const [value, setValue] = React.useState(valueProp);
+
+
+  // React.useEffect(() => {
+  //   if (!open) {
+  //     setValue(valueProp);
+  //   }
+  // }, [valueProp, open]);
+
+
+
+  const handleCancel = () => {
+    onClose();
+  };
+
+  const handleOk = () => {
+    onClose(true);
+  };
+
+
+
+  return (
+    <Dialog
+      maxWidth="xs"
+     
+      aria-labelledby="confirmation-dialog-title"
+      open={open}
+      {...other}
+    >
+      
+      <DialogContent dividers>
+       <Typography>Apakah Anda Yakin Data akan dihapus?</Typography>
+      </DialogContent>
+      <DialogActions>
+        <Button autoFocus onClick={handleCancel} color="primary">
+          Cancel
+        </Button>
+        <Button onClick={handleOk} color="primary">
+          Ok
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
 export default function TambahPorto(props) {
   const { proyek } = props;
   const classes = useStyles();
-
+  const history = useHistory();
   const [loadingButton, setLoadingButton] = useState(false);
   const [edit, setEdit] = useState(false);
   const [errorHead, setErrorHead] = useState(defaultError);
@@ -127,13 +188,17 @@ export default function TambahPorto(props) {
   const [file, setFile] = useState(null);
   const [upl, setUpl] = useState(false);
   const [cata, setCata] = useState([]);
+  const [openDialog, setOpenDialog] = React.useState(false);
+  // const [valueDialog, setValueDialog] = React.useState('');
 
   const formatdetail = useCallback((listdetail) => {
    const dt =  listdetail.map((d)=>({
       item:d.MODELNUMBER,
       nama:d.NAMAMODUL,
       keterangan:d.KETMODUL,
-      status:d.STATUSITEM
+      status:d.STATUSITEM,
+      publishdetail:d.TGLITEMPUBISH,
+      retireddetail:d.TGLITEMRETIRED
     }))
     console.log(dt);
     return dt
@@ -159,6 +224,7 @@ export default function TambahPorto(props) {
           namafile: res.data.NAMAFILE,
           publish: res.data.PUBLISH?moment(res.data.PUBLISH,"DD/MM/YYYY"):null,
           retired: res.data.RETIRED?moment(res.data.RETIRED,"DD/MM/YYYY"):null,
+          hapus:res.data.FLAG_HAPUS === 'BOLEH DIHAPUS'?true:false
         });
         
         const dtl = formatdetail(res.data.LISTDETAIL)
@@ -215,7 +281,7 @@ export default function TambahPorto(props) {
     let newArray = [...dataDetail];
 
     newArray.push(defaultDataDetail);
-
+    console.log(newArray);
     setDataDetail(newArray);
   };
 
@@ -232,12 +298,22 @@ export default function TambahPorto(props) {
   const handleSelect = (event, key) => {
     if (key === "status") {
       const st = event.target.value;
+      if(edit){
       setDataHead((prev) => ({
         ...prev,
-        [key]: st,
-        publish: null,
-        retired: null,
-      }));
+        [key]: st
+       
+        
+      }))
+      }else{
+        setDataHead((prev) => ({
+          ...prev,
+          [key]: st,
+          publish: null,
+          retired: null,
+          
+        }))
+      };
     } else if (key === "publish" || key === "retired") {
       setDataHead((prev) => ({ ...prev, [key]: event }));
     } else if (key === "dev") {
@@ -256,6 +332,18 @@ export default function TambahPorto(props) {
       }));
     } else {
       setDataHead((prev) => ({ ...prev, [key]: event.target.value }));
+    }
+  };
+
+  const handleHapusDialog = () => {
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = (newValue) => {
+    setOpenDialog(false);
+
+    if (newValue) {
+      hapus()
     }
   };
 
@@ -309,23 +397,30 @@ export default function TambahPorto(props) {
     // let newError = [...errorFaktor];
     // newError[index] = { ...newError[index], [key]: value ? noErr : err };
     // setErrorFaktor(newError);
-
-    const val = value.target.value;
+console.log(value);
+    //const val = value.target.value;
 
     let newArray = [...dataDetail];
 
     if (key === "item") {
       newArray[index] = {
         ...newArray[index],
-        [key]: val.replace(/[^\d]/g, ""),
+        [key]: value.target.value.replace(/[^\d]/g, ""),
       };
 
       setDataDetail(newArray);
-    } else if (key === "nama" || key === "status") {
-      newArray[index] = { ...newArray[index], [key]: val };
+    } else if (key === "nama") {
+      newArray[index] = { ...newArray[index], [key]: value.target.value };
       setDataDetail(newArray);
-    } else if (key === "keterangan" && validateLength255(val)) {
-      newArray[index] = { ...newArray[index], [key]: val };
+    }else if(key === "status"){
+     
+      newArray[index] = { ...newArray[index], [key]: value.target.value,publishdetail:null,retireddetail:null };
+      setDataDetail(newArray);
+    } else if (key === "keterangan" && validateLength255(value.target.value)) {
+      newArray[index] = { ...newArray[index], [key]: value.target.value };
+      setDataDetail(newArray);
+    }else if(key==="publishdetail" || key==="retireddetail"){
+      newArray[index] = { ...newArray[index], [key]: value };
       setDataDetail(newArray);
     }
   };
@@ -365,6 +460,16 @@ export default function TambahPorto(props) {
           // role: data[i].role ? noErr : err,
           keterangan: dataDetail[i].keterangan ? noErr : err,
           status: dataDetail[i].status ? noErr : err,
+          publishdetail:dataDetail[i].status === "AKTIF"
+            ?dataDetail[i].publishdetail
+              ? noErr
+              :err
+            : noErr,
+          retireddetail:dataDetail[i].status === "TIDAK AKTIF"
+            ?dataDetail[i].retireddetail
+              ? noErr
+              :err
+            : noErr, 
         };
         return newObj;
       })
@@ -396,6 +501,33 @@ export default function TambahPorto(props) {
     } else return false;
   };
 
+  const hapus=()=>{
+    setLoadingButton(true);
+    deletePorto({id:dataHead.idporto})
+    .then((response) => {
+      console.log(response);
+      setAlertDialog({
+        openAlertDialog: true,
+        messageAlertDialog: response.data.message,
+        severity: "success",
+      });
+      setLoadingButton(false);
+      setTimeout(() => {
+        history.push("/portofolio");
+      }, 1000);
+    })
+    //.then(history.push("/portofolio"))
+    .catch((error) => {
+      setLoadingButton(false);
+      if (error.response)
+        setAlertDialog({
+          openAlertDialog: true,
+          messageAlertDialog: error.response.data.message,
+          severity: "error",
+        });
+  })
+}
+
   const simpan = () => {
     setLoadingButton(true);
     if (dataDetail.length > 0) {
@@ -406,16 +538,20 @@ export default function TambahPorto(props) {
           // idrole : dt.role.id,
           keterangan: dt.keterangan,
           status: dt.status,
+          tglitempublish:dt.publishdetail ? moment(dt.publishdetail).format("DD/MM/YYYY")
+          : null,
+          tglitemretired:dt.retireddetail ? moment(dt.retireddetail).format("DD/MM/YYYY")
+          : null
         }));
         console.log(dataHead);
         const formatData = {
           ...dataHead,
           publish: dataHead.publish
             ? moment(dataHead.publish).format("DD/MM/YYYY")
-            : "",
+            : null,
           retired: dataHead.retired
             ? moment(dataHead.retired).format("DD/MM/YYYY")
-            : "",
+            : null,
           listdetail: listdetail,
         };
 
@@ -425,6 +561,9 @@ export default function TambahPorto(props) {
               //setData(formatNewData(response.data.LISTDETAIL));
               setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil ubah", severity: "success" });
               setLoadingButton(false);
+              setTimeout(() => {
+                history.push("/portofolio");
+              }, 1000);
             })
             .catch((error) => {
               setLoadingButton(false);
@@ -446,6 +585,9 @@ export default function TambahPorto(props) {
                 severity: "success",
               });
               setLoadingButton(false);
+              setTimeout(() => {
+                history.push("/portofolio");
+              }, 1000);
             })
             .catch((error) => {
               setLoadingButton(false);
@@ -797,24 +939,34 @@ export default function TambahPorto(props) {
                 spacing={1}
                 justify="space-between"
               >
-                <Grid item xs={2}>
+                <Grid item xs>
                   <Typography align="center" variant="body2">
                     <b>Item</b>
                   </Typography>
                 </Grid>
-                <Grid item xs={2}>
+                <Grid item xs>
                   <Typography align="center" variant="body2">
                     <b>Modul</b>
                   </Typography>
                 </Grid>
-                <Grid item xs={2}>
+                <Grid item xs>
                   <Typography align="center" variant="body2">
                     <b>Keterangan</b>
                   </Typography>
                 </Grid>
-                <Grid item xs={1}>
+                <Grid item xs>
                   <Typography align="center" variant="body2">
                     <b>Status</b>
+                  </Typography>
+                </Grid>
+                <Grid item xs>
+                  <Typography align="center" variant="body2">
+                    <b>Tanggal Publish</b>
+                  </Typography>
+                </Grid>
+                <Grid item xs>
+                  <Typography align="center" variant="body2">
+                    <b>Tanggal Non aktif</b>
                   </Typography>
                 </Grid>
                 <Grid item xs={1}>
@@ -899,6 +1051,54 @@ export default function TambahPorto(props) {
                         <MenuItem value={"D"}>TIDAK AKTIF</MenuItem>
                       </TextField>
                     </Grid>
+                    <Grid key={"grid-publish-" + i} item xs>
+                    <KeyboardDatePicker
+                      key={"mulai-"}
+                      id={"mulai-"}
+                      name={"mulai-"}
+                      fullWidth
+                      clearable
+                      format="DD/MM/YYYY"
+                      size="small"
+                      value={d.publishdetail||null}
+                      // minDate={minDate ? moment(minDate, "DD/MM/YYYY") : moment("1900-01-01", "YYYY-MM-DD")}
+                      onChange={(e) => handleChangeTFD(e,i, "publishdetail")}
+                      // error={error[i].tanggalMulai.error}
+                      // helperText={error[i].tanggalMulai.text}
+                      // inputVariant={d.disabled ? "standard" : "outlined"}
+                      views={["year", "month", "date"]}
+                      disabled={
+                        d.status === "A" ? false : true || true
+                      }
+                      // className={classes.field}
+                      // error={errorHead.retired.error}
+                      // helperText={errorHead.retired.text}
+                    />
+                    </Grid>
+                    <Grid key={"grid-non-" + i} item xs>
+                    <KeyboardDatePicker
+                      key={"mulai-"}
+                      id={"mulai-"}
+                      name={"mulai-"}
+                      fullWidth
+                      clearable
+                      format="DD/MM/YYYY"
+                      size="small"
+                      value={d.retireddetail||null}
+                      // minDate={minDate ? moment(minDate, "DD/MM/YYYY") : moment("1900-01-01", "YYYY-MM-DD")}
+                      onChange={(e) => handleChangeTFD(e,i, "retireddetail")}
+                      // error={error[i].tanggalMulai.error}
+                      // helperText={error[i].tanggalMulai.text}
+                      // inputVariant={d.disabled ? "standard" : "outlined"}
+                      views={["year", "month", "date"]}
+                      disabled={
+                        d.status === "D" ? false : true || true
+                      }
+                      // className={classes.field}
+                      // error={errorHead.retired.error}
+                      // helperText={errorHead.retired.text}
+                    />
+                    </Grid>
                     <Grid item xs={1} container justify="center">
                       <IconButton
                         size="small"
@@ -925,7 +1125,9 @@ export default function TambahPorto(props) {
         </Paper>
       </Grid>
       <Divider />
-      <Grid item container direction="row" justify="flex-end">
+     
+      {/* <Grid item xs container direction="row" justify="space-around" >
+      <Grid item xs container justify="flex-end" >
         <Button
           onClick={loadingButton ? null : simpan}
           variant="contained"
@@ -939,7 +1141,44 @@ export default function TambahPorto(props) {
             "Simpan"
           )}
         </Button>
+        
       </Grid>
+      </Grid> */}
+      
+      <Grid item xs container direction="row" justify='space-between'>
+        
+        <Grid item xs container justify="flex-end">
+        <Button
+          onClick={loadingButton ? null : simpan}
+          variant="contained"
+          color="primary"
+        >
+          {loadingButton ? (
+            <CircularProgress size={20} color="inherit" />
+          ) : edit ? (
+            "Ubah"
+          ) : (
+            "Simpan"
+          )}
+        </Button>
+          {dataHead && dataHead.hapus ? 
+          <Button  onClick={loadingButton ? null : handleHapusDialog} 
+          variant="contained" 
+          color="secondary" style={{ marginLeft: 10 }} >{"hapus"}</Button>
+            :null}
+        </Grid>
+      </Grid>
+      
+        <ConfirmationDialogRaw
+          classes={{
+            paper: classes.paper,
+          }}
+          id="ringtone-menu"
+          keepMounted
+          open={openDialog}
+          onClose={handleCloseDialog}
+          // value={valueDialog}
+        />
     </Grid>
   );
 }
