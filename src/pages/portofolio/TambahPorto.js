@@ -189,6 +189,7 @@ export default function TambahPorto(props) {
   const [file, setFile] = useState(null);
   const [cata, setCata] = useState([]);
   const [openDialog, setOpenDialog] = React.useState(false);
+
   // const [valueDialog, setValueDialog] = React.useState('');
 
   const formatdetail = useCallback((listdetail) => {
@@ -289,7 +290,7 @@ export default function TambahPorto(props) {
     let newArray = [...dataDetail];
 
     newArray.push(defaultDataDetail);
-    console.log(newArray);
+
     setDataDetail(newArray);
   };
 
@@ -324,6 +325,12 @@ export default function TambahPorto(props) {
       };
     } else if (key === "publish" || key === "retired") {
       setDataHead((prev) => ({ ...prev, [key]: event }));
+      
+
+      if (key === "retired" && dataDetail.length>0){
+      setDataDetail([...dataDetail].map(obj=>({...obj,retireddetail:event,status:"D"})))
+
+      }
     } else if (key === "dev") {
       const kd =
         "PORTO-" +
@@ -457,6 +464,8 @@ console.log(value);
     }
   };
 
+
+
   const validateAll = () => {
     setErrorHead({
       kode: dataHead.kode ? noErr : err,
@@ -519,9 +528,10 @@ console.log(value);
       dataHead.tipe &&
       (dataHead.status === 'KATALOG'? dataHead.publish? true : false : true) &&
       (dataHead.status === 'RETIRED'? dataHead.retired? true : false : true) &&
+      (dataHead.status !== 'PIPELINE'? dataDetail.length>0?
       dataDetail.every(
-        (dt) => dt.item && dt.nama && dt.keterangan && dt.status
-      ) &&
+        (dt) => dt.item && dt.nama && dt.keterangan && dt.status && dt.status==="A"? dt.publishdetail : dt.retireddetail
+      ):false:true) &&
       (
       file
         ? dataHead.namafile
@@ -562,7 +572,9 @@ console.log(value);
 
   const simpan = () => {
     setLoadingButton(true);
-    if (dataDetail.length > 0) {
+    // if(dataHead.status !== 'PIPELINE'){
+    //   if(dataDetail.length>0){
+      console.log(dataDetail);
       if (validateAll()) {
         const listdetail = dataDetail.map((dt) => ({
           item: dt.item,
@@ -589,6 +601,7 @@ console.log(value);
         };
 
         if (edit) {
+          
           updatePorto(formatData)
             .then((response) => {
               //setData(formatNewData(response.data.LISTDETAIL));
@@ -608,7 +621,7 @@ console.log(value);
         } else {
          
              handleSubmit()
-          
+         
           addPorto(formatData)
             .then((response) => {
               console.log(response);
@@ -643,25 +656,27 @@ console.log(value);
       } else {
         setAlertDialog({
           openAlertDialog: true,
-          messageAlertDialog: "Silahkan periksa data yang anda masukkan.",
+         
+          messageAlertDialog: "Data belum lengkap, Silahkan periksa data yang anda masukkan.",
           severity: "warning",
         });
         setLoadingButton(false);
       }
-    } else {
-      setAlertDialog({
-        openAlertDialog: true,
-        messageAlertDialog:
-          "Data kosong. Silahkan periksa data yang anda masukkan.",
-        severity: "warning",
-      });
-      setLoadingButton(false);
-    }
+    // }
+    // else{
+    //   setAlertDialog({
+    //     openAlertDialog: true,
+    //     messageAlertDialog: "Data Detail Tidak Boleh Kosong",
+    //     severity: "warning",
+    //   });
+    //   setLoadingButton(false);
+    // }
+    
   };
 
   return (
     <Grid container direction="column" spacing={2}>
-    {console.log(dataHead)}
+    
       <AlertDialog
         open={alertDialog.openAlertDialog}
         id="alert-dialog"
@@ -839,7 +854,7 @@ console.log(value);
                       helperText={errorHead.dev.text}
                 >
                   <MenuItem value={"IT"}>Divisi IT</MenuItem>
-                  <MenuItem value={"EXTERNAL"}>External</MenuItem>
+                  <MenuItem value={"EX"}>External</MenuItem>
                 
                 </TextField>
                 <Grid
@@ -938,6 +953,7 @@ console.log(value);
                       clearable
                       format="DD/MM/YYYY"
                       size="small"
+                      label="Tanggal Publish"
                       value={dataHead ? dataHead.publish : null}
                       // minDate={minDate ? moment(minDate, "DD/MM/YYYY") : moment("1900-01-01", "YYYY-MM-DD")}
                       onChange={(value) => handleSelect(value, "publish")}
@@ -959,6 +975,7 @@ console.log(value);
                       id={"mulai-"}
                       name={"mulai-"}
                       fullWidth
+                      label="Tanggal Retired"
                       clearable
                       format="DD/MM/YYYY"
                       size="small"
