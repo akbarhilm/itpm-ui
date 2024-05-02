@@ -304,6 +304,17 @@ export default function TambahPorto(props) {
     setDataDetail(newArray);
   };
 
+  const ClearAll = () =>{
+    setDataHead(defaultDataHead)
+    setErrorHead(defaultError)
+    setDataDetail([])
+    setErrorDetail([])
+  }
+
+  const procBack = () =>{
+    history.push("/portofolio");
+  }
+
   const handleSelect = (event, key) => {
     if (key === "status") {
       const st = event.target.value;
@@ -453,7 +464,7 @@ console.log(value);
       setDataDetail(newArray);
     }else if(key === "status"){
      
-      newArray[index] = { ...newArray[index], [key]: value.target.value,publishdetail:null,retireddetail:null };
+      newArray[index] = { ...newArray[index], [key]: value.target.value };
       setDataDetail(newArray);
     } else if (key === "keterangan" && validateLength255(value.target.value)) {
       newArray[index] = { ...newArray[index], [key]: value.target.value };
@@ -601,7 +612,10 @@ console.log(value);
         };
 
         if (edit) {
-          
+          handleSubmit()
+          setTimeout(() => {
+            
+          }, 500);
           updatePorto(formatData)
             .then((response) => {
               //setData(formatNewData(response.data.LISTDETAIL));
@@ -1226,7 +1240,16 @@ console.log(value);
       </Grid> */}
       
       <Grid item xs container direction="row" justify='space-between'>
-        
+<Grid item xs container justify="flex-start">
+ <Button  onClick={loadingButton ? null : procBack} 
+          variant="contained" 
+          color="primary" >{"Back"}</Button>
+          {edit?null:
+            <Button  onClick={loadingButton ? null : ClearAll} 
+          variant="contained" 
+          color="secondary" style={{ marginLeft: 10 }} >{"Clear"}</Button>
+          }
+            </Grid>
         <Grid item xs container justify="flex-end">
         <Button
           onClick={loadingButton ? null : simpan}
