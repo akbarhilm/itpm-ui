@@ -37,6 +37,11 @@ export const uploadFile = async(data)=>{
   }});
 }
 
+export const downloadFile = async(data)=>{
+  
+  return await api.get('/ref/porto/download',{responseType:'blob', params:{filename:data.filename}})
+}
+
 export const getCata = async()=>{
   return await api.get('/ref/cata/combocat')
 }

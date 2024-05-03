@@ -24,14 +24,15 @@ import {
   getCata,
   getPortoById,
   updatePorto,
-  deletePorto
+  deletePorto,
+  downloadFile
 } from "../../gateways/api/PortoApi";
 import {
   AddCircleOutline,
   RemoveCircleOutline,
   
 } from "@material-ui/icons";
-import PublishIcon from "@material-ui/icons/Publish";
+import VisibilityIcon from '@material-ui/icons/Visibility';
 import { KeyboardDatePicker } from "@material-ui/pickers";
 import moment from "moment";
 
@@ -186,9 +187,9 @@ export default function TambahPorto(props) {
   const [dataHead, setDataHead] = useState(defaultDataHead);
   const [dataDetail, setDataDetail] = useState([]);
   const [file, setFile] = useState(null);
-  const [upl, setUpl] = useState(false);
   const [cata, setCata] = useState([]);
   const [openDialog, setOpenDialog] = React.useState(false);
+
   // const [valueDialog, setValueDialog] = React.useState('');
 
   const formatdetail = useCallback((listdetail) => {
@@ -267,6 +268,14 @@ export default function TambahPorto(props) {
     }
   }, [cata]);
 
+  useEffect(()=>{
+    if(dataHead.kode && file){
+      setDataHead((prev) => ({ ...prev, namafile: setDataHead((prev) => ({ ...prev, namafile: dataHead.kode+'.'+file.name.split('.').pop() }))}));
+    }
+  },[dataHead.kode,file])
+
+
+
   const handleCloseAlertDialog = () => {
     setAlertDialog({ ...alertDialog, openAlertDialog: false });
   };
@@ -281,7 +290,7 @@ export default function TambahPorto(props) {
     let newArray = [...dataDetail];
 
     newArray.push(defaultDataDetail);
-    console.log(newArray);
+
     setDataDetail(newArray);
   };
 
@@ -294,6 +303,17 @@ export default function TambahPorto(props) {
     newArray.splice(index, 1);
     setDataDetail(newArray);
   };
+
+  const ClearAll = () =>{
+    setDataHead(defaultDataHead)
+    setErrorHead(defaultError)
+    setDataDetail([])
+    setErrorDetail([])
+  }
+
+  const procBack = () =>{
+    history.push("/portofolio");
+  }
 
   const handleSelect = (event, key) => {
     if (key === "status") {
@@ -316,6 +336,12 @@ export default function TambahPorto(props) {
       };
     } else if (key === "publish" || key === "retired") {
       setDataHead((prev) => ({ ...prev, [key]: event }));
+      
+
+      if (key === "retired" && dataDetail.length>0){
+      setDataDetail([...dataDetail].map(obj=>({...obj,retireddetail:event,status:"D"})))
+
+      }
     } else if (key === "dev") {
       const kd =
         "PORTO-" +
@@ -347,22 +373,57 @@ export default function TambahPorto(props) {
     }
   };
 
+
+
   const handleChangeTF = (event, key) => {
     setDataHead((prev) => ({ ...prev, [key]: event.target.value }));
   };
 
   const handleFile = (e) => {
-    if (e.target.files) {
-      setFile(e.target.files[0]);
+    if (e.target.files[0].name.length<30) {
 
+      setFile(e.target.files[0]);
+      
       console.log(e.target.files[0]);
+    }else{
+      setFile("");
+      
+      e.target.value = ""
     }
   };
 
-  const handleSubmit = () => {
+  const handleViewFile=()=>{
+    if(dataHead.namafile){
+    downloadFile({filename:dataHead.namafile})
+    .then(res=>  
+      {const file = new Blob([res.data], { type: 'image/'+dataHead.namafile.split('.').pop()});
+    //Build a URL from the file
+    const fileURL = URL.createObjectURL(file);
+    //Open the URL on new Window
+     const pdfWindow = window.open();
+     pdfWindow.location.href = fileURL;    
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+   
+    //saveAs('image_url', 'image.jpg') 
+  }else{
+    
+    setAlertDialog({
+      openAlertDialog: true,
+      messageAlertDialog: "file belum disimpan",
+      severity: "error",
+    })
+    
+  }
+}
+
+  const  handleSubmit = () => {
     if (file) {
+      const ext = file.name.split('.').pop();
       const formData = new FormData();
-      formData.append("file", file, kode[0].NEXT + "-porto-" + file.name);
+      formData.append("file", file, dataHead.kode+'.'+ext);
 
       uploadFile(formData)
         .then((res) =>
@@ -372,19 +433,8 @@ export default function TambahPorto(props) {
             severity: res.status === 200 ? "info" : "error",
           })
         )
-        .then(setUpl(true))
-        .then(
-          setDataHead((prev) => ({
-            ...prev,
-            namafile: kode[0].NEXT + "-porto-" + file.name,
-          }))
-        );
-    } else {
-      setAlertDialog({
-        openAlertDialog: true,
-        messageAlertDialog: "Pilih File terlebih dahulu",
-        severity: "error",
-      });
+       
+        
     }
   };
 
@@ -414,7 +464,7 @@ console.log(value);
       setDataDetail(newArray);
     }else if(key === "status"){
      
-      newArray[index] = { ...newArray[index], [key]: value.target.value,publishdetail:null,retireddetail:null };
+      newArray[index] = { ...newArray[index], [key]: value.target.value };
       setDataDetail(newArray);
     } else if (key === "keterangan" && validateLength255(value.target.value)) {
       newArray[index] = { ...newArray[index], [key]: value.target.value };
@@ -424,6 +474,8 @@ console.log(value);
       setDataDetail(newArray);
     }
   };
+
+
 
   const validateAll = () => {
     setErrorHead({
@@ -487,9 +539,10 @@ console.log(value);
       dataHead.tipe &&
       (dataHead.status === 'KATALOG'? dataHead.publish? true : false : true) &&
       (dataHead.status === 'RETIRED'? dataHead.retired? true : false : true) &&
+      (dataHead.status !== 'PIPELINE'? dataDetail.length>0?
       dataDetail.every(
-        (dt) => dt.item && dt.nama && dt.keterangan && dt.status
-      ) &&
+        (dt) => dt.item && dt.nama && dt.keterangan && dt.status && dt.status==="A"? dt.publishdetail : dt.retireddetail
+      ):false:true) &&
       (
       file
         ? dataHead.namafile
@@ -530,7 +583,9 @@ console.log(value);
 
   const simpan = () => {
     setLoadingButton(true);
-    if (dataDetail.length > 0) {
+    // if(dataHead.status !== 'PIPELINE'){
+    //   if(dataDetail.length>0){
+      console.log(dataDetail);
       if (validateAll()) {
         const listdetail = dataDetail.map((dt) => ({
           item: dt.item,
@@ -546,6 +601,7 @@ console.log(value);
         console.log(dataHead);
         const formatData = {
           ...dataHead,
+          namafile:file?dataHead.kode+'.'+file.name.split('.').pop():"",
           publish: dataHead.publish
             ? moment(dataHead.publish).format("DD/MM/YYYY")
             : null,
@@ -556,6 +612,10 @@ console.log(value);
         };
 
         if (edit) {
+          handleSubmit()
+          setTimeout(() => {
+            
+          }, 500);
           updatePorto(formatData)
             .then((response) => {
               //setData(formatNewData(response.data.LISTDETAIL));
@@ -573,6 +633,8 @@ console.log(value);
                 setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
             });
         } else {
+         
+             handleSubmit()
          
           addPorto(formatData)
             .then((response) => {
@@ -608,25 +670,27 @@ console.log(value);
       } else {
         setAlertDialog({
           openAlertDialog: true,
-          messageAlertDialog: "Silahkan periksa data yang anda masukkan.",
+         
+          messageAlertDialog: "Data belum lengkap, Silahkan periksa data yang anda masukkan.",
           severity: "warning",
         });
         setLoadingButton(false);
       }
-    } else {
-      setAlertDialog({
-        openAlertDialog: true,
-        messageAlertDialog:
-          "Data kosong. Silahkan periksa data yang anda masukkan.",
-        severity: "warning",
-      });
-      setLoadingButton(false);
-    }
+    // }
+    // else{
+    //   setAlertDialog({
+    //     openAlertDialog: true,
+    //     messageAlertDialog: "Data Detail Tidak Boleh Kosong",
+    //     severity: "warning",
+    //   });
+    //   setLoadingButton(false);
+    // }
+    
   };
 
   return (
     <Grid container direction="column" spacing={2}>
-    {console.log(dataHead)}
+    
       <AlertDialog
         open={alertDialog.openAlertDialog}
         id="alert-dialog"
@@ -696,6 +760,9 @@ console.log(value);
                       variant="outlined"
                       className={classes.field}
                       fullWidth
+                      inputProps={{
+                          maxLength: 50,
+                        }}
                       onChange={(e) => handleChangeTF(e, "aplikasi")}
                       value={dataHead ? dataHead.aplikasi : ""}
                       error={errorHead.aplikasi.error}
@@ -708,6 +775,9 @@ console.log(value);
                       variant="outlined"
                       className={classes.field}
                       fullWidth
+                       inputProps={{
+                          maxLength: 50,
+                        }}
                       onChange={(e) => handleChangeTF(e, "bpo")}
                       value={dataHead ? dataHead.bpo : ""}
                       error={errorHead.bpo.error}
@@ -758,6 +828,9 @@ console.log(value);
                       variant="outlined"
                       className={classes.field}
                       fullWidth
+                       inputProps={{
+                          maxLength: 150,
+                        }}
                       onChange={(e) => handleChangeTF(e, "url")}
                       value={dataHead ? dataHead.url : ""}
                       error={errorHead.url.error}
@@ -795,7 +868,7 @@ console.log(value);
                       helperText={errorHead.dev.text}
                 >
                   <MenuItem value={"IT"}>Divisi IT</MenuItem>
-                  <MenuItem value={"EXTERNAL"}>External</MenuItem>
+                  <MenuItem value={"EX"}>External</MenuItem>
                 
                 </TextField>
                 <Grid
@@ -830,14 +903,54 @@ console.log(value);
                       variant="outlined"
                       className={classes.field}
                       fullWidth
+                      
                       //onChange={(e) => handleChangeTF(e, "logo")}
                       disabled
                       value={dataHead ? dataHead.namafile : ""}
                       error={errorHead.namafile.error}
                       helperText={errorHead.namafile.text}
                     />
+                    
+                  </Grid>
+                  </Grid>
+                <Grid
+                  item
+                  container
+                  direction="row"
+                  spacing={2}
+                  justify="space-between"
+                >
+                  <Grid item xs>
+                  <TextField
+                  variant="outlined"
+                      className={classes.field}
+                    inputProps={{ accept: "image/*" }}
+                    //style={{display:'none'}}
+                    id="contained-button-file"
+                    name="file"
+                    onChange={(e) => handleFile(e)}
+                  
+                    type="file"
+                    helperText="file sebaiknya ukuran 2x5.72 cm"
+                  />
+
+                  
+                </Grid>
+                <Grid item xs>
+                <Button
+                style={{marginTop:10}}
+                    variant="contained"
+                    
+                    onClick={handleViewFile}
+                    color="primary"
+                    startIcon={<VisibilityIcon />}
+                    component="span"
+                  >
+                    View
+                  </Button>
                   </Grid>
                 </Grid>
+                
                 <Grid
                   item
                   container
@@ -854,6 +967,7 @@ console.log(value);
                       clearable
                       format="DD/MM/YYYY"
                       size="small"
+                      label="Tanggal Publish"
                       value={dataHead ? dataHead.publish : null}
                       // minDate={minDate ? moment(minDate, "DD/MM/YYYY") : moment("1900-01-01", "YYYY-MM-DD")}
                       onChange={(value) => handleSelect(value, "publish")}
@@ -875,6 +989,7 @@ console.log(value);
                       id={"mulai-"}
                       name={"mulai-"}
                       fullWidth
+                      label="Tanggal Retired"
                       clearable
                       format="DD/MM/YYYY"
                       size="small"
@@ -893,30 +1008,9 @@ console.log(value);
                       helperText={errorHead.retired.text}
                     />
                   </Grid>
+                  
                 </Grid>
-                <Grid item xs>
-                  <TextField
-                    accept="image/*"
-                    //style={{display:'none'}}
-                    id="contained-button-file"
-                    name="file"
-                    onChange={(e) => handleFile(e)}
-                    multiple
-                    type="file"
-                    value={dataHead?.logo}
-                  />
 
-                  <Button
-                    variant="contained"
-                    disabled={upl}
-                    onClick={handleSubmit}
-                    color="primary"
-                    startIcon={<PublishIcon />}
-                    component="span"
-                  >
-                    Upload
-                  </Button>
-                </Grid>
               </Grid>
             </Grid>
           </Grid>
@@ -1146,7 +1240,16 @@ console.log(value);
       </Grid> */}
       
       <Grid item xs container direction="row" justify='space-between'>
-        
+<Grid item xs container justify="flex-start">
+ <Button  onClick={loadingButton ? null : procBack} 
+          variant="contained" 
+          color="primary" >{"Back"}</Button>
+          {edit?null:
+            <Button  onClick={loadingButton ? null : ClearAll} 
+          variant="contained" 
+          color="secondary" style={{ marginLeft: 10 }} >{"Clear"}</Button>
+          }
+            </Grid>
         <Grid item xs container justify="flex-end">
         <Button
           onClick={loadingButton ? null : simpan}
