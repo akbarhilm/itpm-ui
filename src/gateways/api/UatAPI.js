@@ -23,3 +23,18 @@ export const approveQA = async (data) => {
 export const approveUser = async (data) => {
   return await api.put('/proyek/uat/approveuser', data);
 };
+
+export const uploadFile = async(data)=>{
+  return await api.post('/proyek/uat/upload',data,{headers: {
+    'Content-Type': 'multipart/form-data'
+  }});
+}
+
+export const downloadFile = async(data)=>{
+  
+  return await api.get('/proyek/uat/download',{params:{filename:data.filename}})
+}
+
+export const simpanUpl = async(data)=>{
+  return await api.put('/proyek/uat/file',data);
+}

@@ -11,3 +11,14 @@ export const createUreq = async (data) => {
 export const updateUreq = async (data) => {
   return await api.put('/proyek/ureq/ubah', data);
 };
+
+export const uploadFile = async(data)=>{
+  return await api.post('/proyek/ureq/upload',data,{headers: {
+    'Content-Type': 'multipart/form-data'
+  }});
+}
+
+export const downloadFile = async(data)=>{
+  
+  return await api.get('/proyek/ureq/download',{responseType:'blob', params:{filename:data.filename}})
+}
