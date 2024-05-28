@@ -1,5 +1,5 @@
 import React, { useState, useEffect,useContext } from 'react';
-import { Grid, makeStyles, Typography, TextField, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Paper, Button, Divider, FormHelperText, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, MenuItem } from '@material-ui/core';
+import { Grid, makeStyles, Typography, TextField, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Paper, Button, Divider, FormHelperText,  Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, MenuItem } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { jenisLayanan, jenisAplikasi, statusProyek } from '../../utils/DataEnum';
 import { getAplikasi, createAplikasi } from '../../gateways/api/AplikasiAPI';
@@ -7,7 +7,7 @@ import { getModulByAplikasiId, createModul } from '../../gateways/api/ModulAPI';
 import { useHistory } from "react-router-dom";
 import { getLayananUnused } from '../../gateways/api/LayananAPI';
 import { createProyek, getProyekById, ubahStatusProyek, updateProyek } from '../../gateways/api/ProyekAPI';
-import { AddCircleOutline } from '@material-ui/icons';
+
 import AlertDialog from '../../components/AlertDialog';
 import { UserContext } from "../../utils/UserContext";
 
