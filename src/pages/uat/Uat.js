@@ -275,7 +275,7 @@ export default function Uat(props) {
       <Grid item  container  justify='flex-end' >
          
          <TextField
-       accept="image/*"
+       inputProps={{ accept: "application/pdf" }}
        //style={{display:'none'}}
        id="contained-button-file"
        name='file'

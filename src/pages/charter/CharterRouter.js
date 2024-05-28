@@ -53,7 +53,7 @@ export default function CharterRouter(props) {
 
   if (loading)
     return <CircularProgress />;
-  else if ((otoritas === "PM" && charter && Object.keys(charter).length === 0) || (otoritas === "PM" && charter && charter.KODEAPPROVE === "0"))
+  else if (((otoritas === "PM" || otoritas === "PMO") && charter && Object.keys(charter).length === 0) || ((otoritas === "PM" || otoritas === "PMO") && charter && charter.KODEAPPROVE === "0"))
     return <Charter charter={charter} proyek={proyek} />;
   else if (charter && Object.keys(charter).length === 0)
     return <ErrorPage code="" message="Charter belum diinput" />;

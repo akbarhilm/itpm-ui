@@ -7,6 +7,8 @@ import { useHistory } from "react-router-dom";
 import { useCallback } from "react";
 import AlertDialog from '../../components/AlertDialog';
 import { UserContext } from "../../utils/UserContext";
+import WarningIcon from '@material-ui/icons/Warning';
+import moment from "moment";
 
 const itemsPerPage = 10;
 
@@ -41,6 +43,7 @@ export default function Proyek(props) {
   const getProyek = useCallback(() => {
     setLoading(true);
     getListProyek('ALL')
+    //getListPro()
       .then((response) => {
         setAuthPMO(response.data.otoritas.PMO);
         setListProyek(response.data.list);
@@ -89,6 +92,7 @@ export default function Proyek(props) {
   };
 
   const handleDetail = (project) => {
+   
     setProyek(project);
     setMenuSideBar(true);
     history.push("/" + project.NAMAURI);
@@ -139,7 +143,25 @@ export default function Proyek(props) {
                       <ListItemAvatar key={"list-item-avatar-" + i}>
                         <Avatar key={"avatar-" + i} alt={d.NAMAPROYEK ? d.NAMAPROYEK.toUpperCase() : "N"} src="#" />
                       </ListItemAvatar>
-                      <ListItemText key={"list-item-text-" + i} primary={d.NAMAPROYEK} secondary={d.NOLAYANAN} />
+                      <ListItemText key={"list-item-text-" + i} primary={d.NAMAPROYEK} 
+                      secondary={
+            <React.Fragment>
+              <Typography
+                component="span"
+                variant="body2"
+                //className={classes.inline}
+                color="textPrimary"
+              >
+               {d.NOLAYANAN}
+              </Typography>
+              {" — "+d.PM+" — "+d.D_START+" s/d "+d.D_FINISH}
+             {d.STATUSPROYEK === "BERJALAN" &&  moment().format()>=moment(d.D_REMINDER? d.D_REMINDER.split('-').reduce((a,b,c,d)=>d[1]+'-'+d[0]+'-'+d[2]):null).format()? 
+          
+              <WarningIcon color="error" fontSize="small"/>
+              :null}
+            </React.Fragment>
+          }
+        />
                       <ListItemSecondaryAction key={"list-item-secondary-action-" + i}>
                         <Chip label={d.STATUSPROYEK} />
                         {authPMO && d.STATUSPROYEK !== "SELESAI" && <IconButton key={"secondary-action" + i} edge="end" aria-label="edit" onClick={() => handleEdit(d)}>

@@ -612,12 +612,17 @@ export default function Porto(props) {
                       <ListItemAvatar key={"list-item-avatar-" + i}>
                         <Avatar key={"avatar-" + i} alt={d.NAMAAPLIKASI ? d.NAMAAPLIKASI.toUpperCase() : "N"} src="#" />
                       </ListItemAvatar>
-                      <ListItemText key={"list-item-text-" + i} primary={d.NAMAAPLIKASI} secondary={d.KODEBISNIS} />
-                      <ListItemSecondaryAction key={"list-item-secondary-action-" + i}>
+                      <ListItemText key={"list-item-text-" + i} primary={d.NAMAAPLIKASI} secondary={d.KODEPORTO +" | "+d.NAMASERVIS + " | "+d.NAMAGRUP} />
+                      <ListItemSecondaryAction key={"list-item-secondary-action-" + i} >
+                      <Grid container alignItems="center" justify="space-evenly">
+                        {/* <ListItemText key={"list-item-text2-" + i} primary={d.NAMAOWNER} secondary={d.STATUS === "KATALOG"?d.PUBLISH:d.STATUS === "RETIRED"?d.RETIRED:null} /> */}
+                        
                         <Chip label={d.STATUS} />
+                        <Typography key={"t"+i} color="textSecondary" variant="button">&nbsp;{d.STATUS === "KATALOG"?d.PUBLISH:d.STATUS === "RETIRED"?d.RETIRED:null}  </Typography>
                          <IconButton key={"secondary-action" + i} edge="end" aria-label="edit" onClick={() => handleEdit(d)}>
                           <EditOutlined key={"secondary-action-icon-" + i} />
                         </IconButton>
+                        </Grid>
                       </ListItemSecondaryAction>
                     </ListItem>
                   ))

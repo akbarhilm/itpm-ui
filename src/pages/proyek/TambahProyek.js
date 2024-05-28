@@ -236,10 +236,12 @@ export default function TambahProyek(props) {
 
   const handleChangeRadio = (event) => {
     if (event.target.name === "jenisAplikasi") {
+      setListModul([]);
       if (event.target.value === "SAP") {
-        setDataProyek(prev => ({ ...prev, jenisLayanan: "PERUBAHAN", aplikasi: listAplikasi ? listAplikasi.find(d => d.KODEAPLIKASI === "SAP") : null, modul: null }));
+        
+        setDataProyek(prev => ({ ...prev, jenisLayanan: "PERUBAHAN", aplikasi:  null, modul: null }));
         setSap(true);
-        setDataDialogModul(prev => ({ ...prev, idapl: listAplikasi ? listAplikasi.find(d => d.KODEAPLIKASI === "SAP").IDAPLIKASI : null }));
+        setDataDialogModul(prev => ({ ...prev, idapl:  null }));
       }
       else {
         setDataProyek(prev => ({ ...prev, jenisLayanan: null, aplikasi: null }));
@@ -800,11 +802,11 @@ export default function TambahProyek(props) {
             </RadioGroup>
             <FormHelperText id="my-helper-text">{error.jenisLayanan.message}</FormHelperText>
           </FormControl>
-          {dataProyek && dataProyek.jenisAplikasi && !sap &&
+          {dataProyek && dataProyek.jenisAplikasi && 
             <Grid container direction="row" justify="space-between" alignItems="center" spacing={1}>
               <Grid item xs>
                 <Autocomplete id="aplikasi"
-                  options={listAplikasi.filter(d => d.KODEAPLIKASI !== "SAP")}
+                  options={listAplikasi.filter(d => dataProyek.jenisAplikasi === "SAP"?d.KODEAPLIKASI.substr(0,2) === "ES":d.KODEAPLIKASI.substr(0,2) === "BS")}
                   getOptionLabel={option => option.NAMAAPLIKASI}
                   onChange={(e, v) => handleChangeAplikasi("aplikasi", v)}
                   value={dataProyek && dataProyek.aplikasi ? dataProyek.aplikasi : null}
@@ -831,11 +833,11 @@ export default function TambahProyek(props) {
                   disabled={isDisabled}
                 />
               </Grid>
-              <Grid item xs={1}>
+              {/* <Grid item xs={1}>
                 <IconButton onClick={() => setOpenDialogAplikasi(true)} disabled={isDisabled}>
                   <AddCircleOutline />
                 </IconButton>
-              </Grid>
+              </Grid> */}
             </Grid>
           }
           {dataProyek && dataProyek.jenisAplikasi &&
@@ -869,11 +871,11 @@ export default function TambahProyek(props) {
                   disabled={isDisabled}
                 />
               </Grid>
-              <Grid item xs={1}>
+              {/* <Grid item xs={1}>
                 {dataDialogModul.idapl && <IconButton onClick={() => setOpenDialogModul(true)} disabled={isDisabled}>
                   <AddCircleOutline />
                 </IconButton>}
-              </Grid>
+              </Grid> */}
             </Grid>
           }
         </Grid>
