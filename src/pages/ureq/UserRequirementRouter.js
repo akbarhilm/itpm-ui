@@ -14,7 +14,7 @@ export default function UserRequirementRouter(props) {
   const [loading, setLoading] = useState(true);
   const [ureq, setUreq] = useState(null);
   const [status, setStatus] = useState(null);
-  const [nofd,setNofd] = useState(null)
+  const [nofd,setNofd] = useState("")
 
   const otoritas = user.NIK === proyek.NIKREQ ? "BPO" : user.NIK === proyek.NIKPM ? "PM" : "PMO";
   // const otoritas = "PM";
@@ -27,10 +27,12 @@ export default function UserRequirementRouter(props) {
           // setLoading(false);
         });
       // .catch(() => setLoading(false));
+      if(proyek.APLIKASI!==null){
       await getUreqNoFD(proyek.APLIKASI.GRUPAPLIKASI)
         .then(res=>{
           setNofd(res.data[0].NOFD);
         })
+      }
       await getStepperProyekById(proyek.IDPROYEK)
         .then((response) => {
           setStatus(response.data);

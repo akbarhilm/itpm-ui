@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { Grid, Typography, IconButton, List, ListItem, ListItemAvatar, Avatar, ListItemText, ListItemSecondaryAction, Divider, CircularProgress, TextField, InputAdornment, Chip } from "@material-ui/core";
 import { AddBoxOutlined, EditOutlined, Search } from '@material-ui/icons';
 import Pagination from "@material-ui/lab/Pagination";
-import { getListProyek } from '../../gateways/api/ProyekAPI';
+import { getListProyek2 } from '../../gateways/api/ProyekAPI';
 import { useHistory } from "react-router-dom";
 import { useCallback } from "react";
 import AlertDialog from '../../components/AlertDialog';
@@ -42,7 +42,7 @@ export default function Proyek(props) {
 
   const getProyek = useCallback(() => {
     setLoading(true);
-    getListProyek('ALL')
+    getListProyek2('ALL')
     //getListPro()
       .then((response) => {
         setAuthPMO(response.data.otoritas.PMO);

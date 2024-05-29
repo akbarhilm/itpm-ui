@@ -1,8 +1,12 @@
 import api from '../../utils/ApiConfig';
 
-export const getListProyek = async (status, dashboard, nik,state) => {
+export const getListProyek2 = async (status, dashboard, nik,state) => {
   //return await api.get('/profil/pengguna/proyek/nik', { params: { status: status, d: dashboard || null, nik: nik || null , sap : state?state.SAP : null, non:state?state.NON_SAP:null} });
   return await api.get('/proyek/listproyek');
+};
+export const getListProyek = async (status, dashboard, nik,state) => {
+  return await api.get('/profil/pengguna/proyek/nik', { params: { status: status, d: dashboard || null, nik: nik || null , sap : state?state.SAP : null, non:state?state.NON_SAP:null} });
+  //return await api.get('/proyek/listproyek');
 };
 
 export const getSummaryProyek = async (year) => {

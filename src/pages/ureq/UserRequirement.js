@@ -270,7 +270,7 @@ export default function UserRequirement(props) {
           fullWidth
           disabled
           className={classes.fieldDisabled}
-          value={noFd?noFd:fd}
+          value={noFd?noFd:edit?"":fd}
         />
       </Grid>
       </Grid>
