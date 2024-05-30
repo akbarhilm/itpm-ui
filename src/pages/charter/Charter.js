@@ -843,7 +843,7 @@ export default function Charter(props) {
               startIcon={<PublishIcon />}
               component="span"
             >
-              Pilih
+              Upload MoM
             </Button>
           </label>
         </>
@@ -857,7 +857,7 @@ export default function Charter(props) {
             // onChange={e=>handleFile(e)}
             fullWidth
             value={data?.dokumen ?? ""}
-            helperText={"Terupload"}
+            
           />
         </Grid>
         <Button

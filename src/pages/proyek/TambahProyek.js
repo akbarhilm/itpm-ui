@@ -335,7 +335,9 @@ export default function TambahProyek(props) {
             setEdit(true);
             setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil ubah", severity: "success" });
             setLoadingButton(prev => ({ ...prev, submit: false }));
+
           })
+          .then(handleBackToProyek)
           .catch((error) => {
             setLoadingButton(prev => ({ ...prev, submit: false }));
             if (error.response)
@@ -353,6 +355,7 @@ export default function TambahProyek(props) {
             setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil simpan", severity: "success" });
             setLoadingButton(prev => ({ ...prev, submit: false }));
           })
+          .then(handleBackToProyek)
           .catch((error) => {
             setLoadingButton(prev => ({ ...prev, submit: false }));
             if (error.response)
@@ -806,7 +809,7 @@ export default function TambahProyek(props) {
             <Grid container direction="row" justify="space-between" alignItems="center" spacing={1}>
               <Grid item xs>
                 <Autocomplete id="aplikasi"
-                  options={listAplikasi.filter(d => dataProyek.jenisAplikasi === "SAP"?d.KODEAPLIKASI.substr(0,2) === "ES":d.KODEAPLIKASI.substr(0,2) === "BS")}
+                  options={listAplikasi.filter(d => dataProyek.jenisAplikasi === "SAP"?d.KODEAPLIKASI.substr(0,2) === "ER":d.KODEAPLIKASI.substr(0,2) === "BS")}
                   getOptionLabel={option => option.NAMAAPLIKASI}
                   onChange={(e, v) => handleChangeAplikasi("aplikasi", v)}
                   value={dataProyek && dataProyek.aplikasi ? dataProyek.aplikasi : null}
