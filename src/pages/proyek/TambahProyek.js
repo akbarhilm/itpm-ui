@@ -286,7 +286,7 @@ export default function TambahProyek(props) {
       aplikasi: !dataProyek.aplikasi ? err : def,
       modul: !dataProyek.modul ? err : def,
       deskripsi: !dataProyek.deskripsi ? err : def,
-      mpti: !(dataMpti && dataLayanan.id) ? err : def,
+      mpti: !(dataMpti && dataMpti.id) ? err : def,
       proker: !(dataProker && dataProker.id) ? err : def,
     });
     if (

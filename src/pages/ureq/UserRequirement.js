@@ -120,9 +120,13 @@ export default function UserRequirement(props) {
 
   const handleFile = (e)=>{
     if(e.target.files){
+      if(e.target.files[0].type !=="application/pdf"){
+        setAlertDialog({ openAlertDialog: true, messageAlertDialog: "File harus PDF", severity: "error" });
+      }else{
       setFile(e.target.files[0])
       console.log(e.target.files[0]);
     }
+  }
   
   }
   
@@ -131,13 +135,16 @@ export default function UserRequirement(props) {
     if(dokumen){
     downloadFile({filename:dokumen})
     .then(res=>fileDownload(res.data,dokumen))
+    .catch((error)=>{
+      setAlertDialog({ openAlertDialog: true, messageAlertDialog: "file tidak ditemukan", severity: "error" });
+    })
    
     }else{
       setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Tidak ada file", severity: "error" });
     }
     
   }
-  const handleSubmit = ()=>{
+  const handleSubmit = async ()=>{
     if(file){
       const formData = new FormData();
       formData.append("file", file, proyek.IDPROYEK+'-ureq-'+file.name);
@@ -181,15 +188,18 @@ export default function UserRequirement(props) {
           listdetail: listdetail
         };
         if (edit) {
-          handleSubmit();
-        setTimeout(() => {}, 1000);
+         
+        
           updateUreq(formatData)
             .then((response) => {
               setData(response.data.LISTDETAIL.map(d => ({ kebutuhan: d.NAMAUREQ, rincian: d.KETUREQ, useCase: d.USECASE,dokumen:d.DOKUMEN })));
               setDokumen(response.data.LISTDETAIL[0].DOKUMEN)
+              setNoFd(response.data.LISTDETAIL[0].NOFD)
               setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil ubah", severity: "success" });
               setLoadingButton(false);
             })
+            .then( handleSubmit())
+
             .catch((error) => {
               setLoadingButton(false);
               if (error.response)
@@ -198,8 +208,8 @@ export default function UserRequirement(props) {
                 setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
             });
         } else {
-          handleSubmit();
-        setTimeout(() => {}, 1000);
+         
+       
           createUreq(formatData)
             .then((response) => {
               let newData = [];
@@ -214,6 +224,7 @@ export default function UserRequirement(props) {
                 });
               });
               setDokumen(response.data.LISTDETAIL[0].DOKUMEN)
+              setNoFd(response.data.LISTDETAIL[0].NOFD)
               setData(newData);
               setError(newError);
               setNomor(response.data.NOUREQ);
@@ -221,6 +232,7 @@ export default function UserRequirement(props) {
               setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil simpan", severity: "success" });
               setLoadingButton(false);
             })
+            .then( handleSubmit())
             .catch((error) => {
               setLoadingButton(false);
               if (error.response)

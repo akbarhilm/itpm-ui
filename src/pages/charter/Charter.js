@@ -406,8 +406,12 @@ export default function Charter(props) {
   };
   const handleFile = (e) => {
     if (e.target.files) {
-      setFile(e.target.files[0]);
+      if(e.target.files[0].type !=="application/pdf"){
+        setAlertDialog({ openAlertDialog: true, messageAlertDialog: "File harus PDF", severity: "error" });
+      }else{
+      setFile(e.target.files[0])
       console.log(e.target.files[0]);
+    }
     }
   };
 
@@ -415,7 +419,10 @@ export default function Charter(props) {
     if (data.dokumen) {
       downloadFile({ filename: data.dokumen }).then((res) =>
         fileDownload(res.data, data.dokumen)
-      );
+      )
+      .catch((error)=>{
+        setAlertDialog({ openAlertDialog: true, messageAlertDialog: "file tidak ditemukan", severity: "error" });
+      })
     } else {
       setAlertDialog({
         openAlertDialog: true,
