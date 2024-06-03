@@ -31,16 +31,17 @@ const noErr = { error: false, text: "" };
 const defaultError = { kebutuhan: noErr, rincian: noErr, useCase: noErr };
 
 export default function UserRequirement(props) {
-  const { ureq, proyek } = props;
+  const { ureq, proyek,fd } = props;
   const classes = useStyles();
   const [loadingButton, setLoadingButton] = useState(false);
   const [edit, setEdit] = useState(false);
   const [nomor, setNomor] = useState("");
   const [data, setData] = useState();
   const [error, setError] = useState();
+  const [noFd,setNoFd] = useState()
   const [alertDialog, setAlertDialog] = useState(defaultAlert);
   const [file,setFile] = useState();
-  const [upl,setUpl] = useState(false)
+ 
   const [dokumen,setDokumen] = useState("")
   const handleCloseAlertDialog = () => {
     setAlertDialog({ ...alertDialog, openAlertDialog: false });
@@ -61,6 +62,7 @@ export default function UserRequirement(props) {
         });
       });
       setDokumen(ureq.LISTDETAIL[0].DOKUMEN)
+      setNoFd(ureq.LISTDETAIL[0].NOFD)
       setData(newData);
       setError(newError);
       setNomor(ureq.NOUREQ);
@@ -118,9 +120,13 @@ export default function UserRequirement(props) {
 
   const handleFile = (e)=>{
     if(e.target.files){
+      if(e.target.files[0].type !=="application/pdf"){
+        setAlertDialog({ openAlertDialog: true, messageAlertDialog: "File harus PDF", severity: "error" });
+      }else{
       setFile(e.target.files[0])
       console.log(e.target.files[0]);
     }
+  }
   
   }
   
@@ -129,24 +135,25 @@ export default function UserRequirement(props) {
     if(dokumen){
     downloadFile({filename:dokumen})
     .then(res=>fileDownload(res.data,dokumen))
+    .catch((error)=>{
+      setAlertDialog({ openAlertDialog: true, messageAlertDialog: "file tidak ditemukan", severity: "error" });
+    })
    
     }else{
       setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Tidak ada file", severity: "error" });
     }
     
   }
-  const handleSubmit = ()=>{
+  const handleSubmit = async ()=>{
     if(file){
       const formData = new FormData();
       formData.append("file", file, proyek.IDPROYEK+'-ureq-'+file.name);
      
       uploadFile(formData)
       .then(res=>setAlertDialog({ openAlertDialog: true, messageAlertDialog: res.data.message, severity: res.status === 200?'info':'error' }))
-      .then(  setUpl(true) )
-    }else{
-      setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Pilih File terlebih dahulu", severity: "error" });
-    }
+      
   }
+}
 
   const validateAll = () => {
     setError(prev =>
@@ -175,17 +182,24 @@ export default function UserRequirement(props) {
         }));
         const formatData = {
           idproj: proyek.IDPROYEK,
-          dokumen:proyek.IDPROYEK+"-ureq-"+file.name,
+          dokumen:file?proyek.IDPROYEK+"-ureq-"+file.name:dokumen,
+          nofd : noFd?noFd:fd,
+          grup: proyek.APLIKASI.GRUPAPLIKASI,
           listdetail: listdetail
         };
         if (edit) {
+         
+        
           updateUreq(formatData)
             .then((response) => {
               setData(response.data.LISTDETAIL.map(d => ({ kebutuhan: d.NAMAUREQ, rincian: d.KETUREQ, useCase: d.USECASE,dokumen:d.DOKUMEN })));
               setDokumen(response.data.LISTDETAIL[0].DOKUMEN)
+              setNoFd(response.data.LISTDETAIL[0].NOFD)
               setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil ubah", severity: "success" });
               setLoadingButton(false);
             })
+            .then( handleSubmit())
+
             .catch((error) => {
               setLoadingButton(false);
               if (error.response)
@@ -194,6 +208,8 @@ export default function UserRequirement(props) {
                 setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
             });
         } else {
+         
+       
           createUreq(formatData)
             .then((response) => {
               let newData = [];
@@ -208,6 +224,7 @@ export default function UserRequirement(props) {
                 });
               });
               setDokumen(response.data.LISTDETAIL[0].DOKUMEN)
+              setNoFd(response.data.LISTDETAIL[0].NOFD)
               setData(newData);
               setError(newError);
               setNomor(response.data.NOUREQ);
@@ -215,6 +232,7 @@ export default function UserRequirement(props) {
               setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil simpan", severity: "success" });
               setLoadingButton(false);
             })
+            .then( handleSubmit())
             .catch((error) => {
               setLoadingButton(false);
               if (error.response)
@@ -248,7 +266,8 @@ export default function UserRequirement(props) {
         </Typography>
       </Grid>
       <Divider />
-      <Grid item xs={6}>
+      <Grid item container direction="row" justify="space-between">
+      <Grid item xs={5}>
         <TextField id="nomor"
           label="Nomor Kebutuhan Pengguna"
           fullWidth
@@ -256,6 +275,16 @@ export default function UserRequirement(props) {
           className={classes.fieldDisabled}
           value={nomor}
         />
+      </Grid>
+      <Grid item xs={5}>
+        <TextField id="nomor fd"
+          label="Nomor FD"
+          fullWidth
+          disabled
+          className={classes.fieldDisabled}
+          value={noFd?noFd:edit?"":fd}
+        />
+      </Grid>
       </Grid>
       <Grid item >
         <Paper className={classes.paper}>
@@ -337,44 +366,59 @@ export default function UserRequirement(props) {
         </Paper>
       </Grid>
       <Divider />
-     
-      <Grid item  container  justify='flex-end' >
-         
-         <TextField
-       accept="*.pdf, *.doc, *.docx, *.xls, *.xlsx"
-       //style={{display:'none'}}
-       id="contained-button-file"
-       name='file'
-       onChange={e=>handleFile(e)}
-       multiple
-       type="file"
-       //value={data?.dokumen??file}
-     />
-     
-     
-       <Button variant="contained" disabled={upl} onClick={handleSubmit} color="primary" startIcon={<PublishIcon />} component="span">
-         Upload  
-       </Button>
-     
-     </Grid>
-     <Grid item container  justify='flex-end' >
-     <Grid item xs={3}>
-     <TextField
-      
-       //style={{display:'none'}}
-       id="contained-button-file"
-       name='file'
-      // onChange={e=>handleFile(e)}
-      fullWidth
-       value={dokumen??""}
-     />
-     </Grid>
-     <Button variant="contained" color="primary" onClick={handleDownload}  startIcon={<GetAppIcon />} component="span">
-         Download
-       </Button>
-       
-       </Grid>
-     
+
+      <Grid item container justify="flex-end">
+        <>
+          <Grid item xs={3}>
+            <TextField
+              inputProps={{ accept: "application/pdf" }}
+              style={{ display: "none" }}
+              id="contained-button-file"
+              name="file"
+              onChange={(e) => handleFile(e)}
+              multiple
+              type="file"
+
+              //value={data?.dokumen??file}
+            />
+
+            <TextField fullWidth value={file?.name} />
+          </Grid>
+          <label htmlFor="contained-button-file">
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<PublishIcon />}
+              component="span"
+            >
+              Pilih
+            </Button>
+          </label>
+        </>
+      </Grid>
+      <Grid item container justify="flex-end">
+        <Grid item xs={3}>
+          <TextField
+            //style={{display:'none'}}
+            id="contained-button-file"
+            name="file"
+            // onChange={e=>handleFile(e)}
+            fullWidth
+            value={dokumen}
+            helperText={"Terupload"}
+          />
+        </Grid>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleDownload}
+          startIcon={<GetAppIcon />}
+          component="span"
+        >
+          Download
+        </Button>
+      </Grid>
+
       <Divider />
       <Grid item container direction="row" justify="flex-end">
         <Button onClick={loadingButton ? null : simpan} variant="contained" color="primary">

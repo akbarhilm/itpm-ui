@@ -601,7 +601,7 @@ console.log(value);
         console.log(dataHead);
         const formatData = {
           ...dataHead,
-          namafile:file?dataHead.kode+'.'+file.name.split('.').pop():"",
+          namafile:file?dataHead.kode+'.'+file.name.split('.').pop():dataHead.namafile,
           publish: dataHead.publish
             ? moment(dataHead.publish).format("DD/MM/YYYY")
             : null,
@@ -634,7 +634,10 @@ console.log(value);
             });
         } else {
          
-             handleSubmit()
+          handleSubmit()
+          setTimeout(() => {
+            
+          }, 500);
          
           addPorto(formatData)
             .then((response) => {

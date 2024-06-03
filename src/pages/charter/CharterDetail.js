@@ -2,6 +2,7 @@ import React from 'react';
 import { Grid, makeStyles, Typography, TextField, FormControl, FormLabel, Divider } from '@material-ui/core';
 import PropTypes from 'prop-types';
 
+
 function ListDetail(props) {
   const { label, data, classes } = props;
 
@@ -46,6 +47,8 @@ const useStyles = makeStyles((theme) => ({
 export default function CharterDetail(props) {
   const { charter, proyek, approval } = props;
   const classes = useStyles();
+
+ 
 
   return (
     <Grid container spacing={3} direction="column" >
@@ -136,6 +139,7 @@ export default function CharterDetail(props) {
           </Grid>
         </Grid>
       </Grid>
+     
     </Grid>
   );
 };

@@ -4,6 +4,10 @@ export const getUreqByIdProyek = async (id) => {
   return await api.get('/proyek/ureq/' + id);
 };
 
+export const getUreqNoFD = async (grup) => {
+  return await api.get('/proyek/ureq/nofd',{params:{grupaplikasi:grup}} );
+};
+
 export const createUreq = async (data) => {
   return await api.post('/proyek/ureq/tambah', data);
 };

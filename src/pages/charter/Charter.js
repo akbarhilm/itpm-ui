@@ -1,42 +1,85 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import PropTypes from 'prop-types';
-import { Button, CircularProgress, FormControl, FormHelperText, FormLabel, Grid, IconButton, makeStyles, TextField, Typography, Divider } from '@material-ui/core';
-import AlertDialog from '../../components/AlertDialog';
-import { KeyboardDatePicker } from '@material-ui/pickers';
-import { AddCircleOutline, RemoveCircleOutline } from '@material-ui/icons';
-import moment from 'moment';
-import { createCharter, updateCharter,uploadFile,downloadFile } from '../../gateways/api/CharterAPI';
-import PublishIcon from '@material-ui/icons/Publish';
-import GetAppIcon from '@material-ui/icons/GetApp';
-import fileDownload from 'js-file-download';
-
+import React, { useEffect, useState, useCallback } from "react";
+import PropTypes from "prop-types";
+import {
+  Button,
+  CircularProgress,
+  FormControl,
+  FormHelperText,
+  FormLabel,
+  Grid,
+  IconButton,
+  makeStyles,
+  TextField,
+  Typography,
+  Divider,
+} from "@material-ui/core";
+import AlertDialog from "../../components/AlertDialog";
+import { KeyboardDatePicker } from "@material-ui/pickers";
+import { AddCircleOutline, RemoveCircleOutline } from "@material-ui/icons";
+import moment from "moment";
+import {
+  createCharter,
+  updateCharter,
+  uploadFile,
+  downloadFile,
+  getCharterReminder,
+} from "../../gateways/api/CharterAPI";
+import PublishIcon from "@material-ui/icons/Publish";
+import GetAppIcon from "@material-ui/icons/GetApp";
+import fileDownload from "js-file-download";
+import { getCharterByIdProyek } from "../../gateways/api/CharterAPI";
 
 function AddTextFiels(props) {
-  const { required, label, error, helperText, data, onAdd, onChange, onDelete } = props;
+  const {
+    required,
+    label,
+    error,
+    helperText,
+    data,
+    onAdd,
+    onChange,
+    onDelete,
+  } = props;
 
   return (
-    <FormControl required={required} component="fieldset" fullWidth error={error} style={{ marginBottom: 10 }}>
-      <FormLabel component="legend">{label} <IconButton onClick={onAdd} size="small"><AddCircleOutline /></IconButton></FormLabel>
-      <Grid container direction="column" justify="flex-start" spacing={1} >
-        {data.map((d, i) =>
+    <FormControl
+      required={required}
+      component="fieldset"
+      fullWidth
+      error={error}
+      style={{ marginBottom: 10 }}
+    >
+      <FormLabel component="legend">
+        {label}{" "}
+        <IconButton onClick={onAdd} size="small">
+          <AddCircleOutline />
+        </IconButton>
+      </FormLabel>
+      <Grid container direction="column" justify="flex-start" spacing={1}>
+        {data.map((d, i) => (
           <Grid item key={"grid-" + i}>
-            <TextField key={"field-" + i} id={i.toString()} name={i.toString()} fullWidth
+            <TextField
+              key={"field-" + i}
+              id={i.toString()}
+              name={i.toString()}
+              fullWidth
               multiline
               value={d}
               onChange={onChange}
               variant="outlined"
               InputProps={{
-                endAdornment:
+                endAdornment: (
                   <IconButton onClick={() => onDelete(i)} size="small">
                     <RemoveCircleOutline />
                   </IconButton>
+                ),
               }}
               size="small"
             />
           </Grid>
-        )}
+        ))}
       </Grid>
-      < FormHelperText > {helperText}</FormHelperText>
+      <FormHelperText> {helperText}</FormHelperText>
     </FormControl>
   );
 }
@@ -48,7 +91,7 @@ AddTextFiels.propTypes = {
   data: PropTypes.array.isRequired,
   onAdd: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
-  onDelete: PropTypes.func.isRequired
+  onDelete: PropTypes.func.isRequired,
 };
 
 const useStyles = makeStyles((theme) => ({
@@ -63,23 +106,47 @@ const useStyles = makeStyles((theme) => ({
   textFieldDisabled: {
     margin: "6px 0px 6px 0px",
     "& .MuiInputBase-root.Mui-disabled": {
-      color: "rgba(0, 0, 0, 1)" // (default alpha is 0.38)
-    }
+      color: "rgba(0, 0, 0, 1)", // (default alpha is 0.38)
+    },
   },
 }));
 
 const err = { error: true, text: "Tidak boleh kosong." };
 const noErr = { error: false, text: "" };
-const defaultError = { tanggalMulai: noErr, tanggalSelesai: noErr, benefitFinansial: noErr, benefitNonFinansial: noErr, tujuan: noErr, scope: noErr, target: noErr };
+const defaultError = {
+  tanggalMulai: noErr,
+  tanggalSelesai: noErr,
+  tanggalReminder: noErr,
+  benefitFinansial: noErr,
+  benefitNonFinansial: noErr,
+  tujuan: noErr,
+  scope: noErr,
+  target: noErr,
+};
 
-const defaultData = { dokumen:"", nomor: "", tanggalMulai: null, tanggalSelesai: null, benefitFinansial: "", benefitNonFinansial: "", tujuan: [""], scope: [""], target: [""] };
+const defaultData = {
+  dokumen: "",
+  nomor: "",
+  tanggalMulai: null,
+  tanggalSelesai: null,
+  tanggalReminder: null,
+  benefitFinansial: "",
+  benefitNonFinansial: "",
+  tujuan: [""],
+  scope: [""],
+  target: [""],
+};
 
-const defaultAlert = { openAlertDialog: false, messageAlertDialog: "", severity: "info" };
+const defaultAlert = {
+  openAlertDialog: false,
+  messageAlertDialog: "",
+  severity: "info",
+};
 
 export default function Charter(props) {
   const { charter, proyek } = props;
   const classes = useStyles();
-
+  const [refreshData, setRefreshData] = useState(false);
   const [edit, setEdit] = useState(false);
   const [loadingButton, setLoadingButton] = useState(false);
   const [data, setData] = useState();
@@ -88,8 +155,8 @@ export default function Charter(props) {
   const [target, setTarget] = useState([""]);
   const [error, setError] = useState(defaultError);
   const [alertDialog, setAlertDialog] = useState(defaultAlert);
-  const [file,setFile] = useState()
-  const [upl,setUpl] = useState(false)
+  const [file, setFile] = useState();
+
 
   const handleCloseAlertDialog = () => {
     setAlertDialog({ ...alertDialog, openAlertDialog: false });
@@ -101,14 +168,14 @@ export default function Charter(props) {
       nomor: data.NOCHARTER,
       tanggalMulai: moment(data.TGLMULAI, "DD/MM/YYYY"),
       tanggalSelesai: moment(data.TGLSELESAI, "DD/MM/YYYY"),
+      tanggalReminder: moment(data.TGLREMINDER, "DD/MM/YYYY"),
       benefitFinansial: data.BENEFITFINANSIAL ?? "",
       benefitNonFinansial: data.BENEFITNONFINANSIAL ?? "",
-      dokumen : data.DOKUMEN ?? "",
+      dokumen: data.DOKUMEN ?? "",
       tujuan: data.TUJUAN,
       scope: data.SCOPE,
-      target: data.TARGET
+      target: data.TARGET,
     };
-
   }, []);
 
   // set first data
@@ -117,31 +184,108 @@ export default function Charter(props) {
       const newData = formatDataCharter(charter);
       setEdit(true);
       setData(newData);
-      setTujuan(newData.tujuan.sort((a, b) => a.KODESORT - b.KODESORT).map(d => d.KETERANGAN));
-      setScope(newData.scope.sort((a, b) => a.KODESORT - b.KODESORT).map(d => d.KETERANGAN));
-      setTarget(newData.target.sort((a, b) => a.KODESORT - b.KODESORT).map(d => d.KETERANGAN));
-    } else { // jika belum ada charter
+      setTujuan(
+        newData.tujuan
+          .sort((a, b) => a.KODESORT - b.KODESORT)
+          .map((d) => d.KETERANGAN)
+      );
+      setScope(
+        newData.scope
+          .sort((a, b) => a.KODESORT - b.KODESORT)
+          .map((d) => d.KETERANGAN)
+      );
+      setTarget(
+        newData.target
+          .sort((a, b) => a.KODESORT - b.KODESORT)
+          .map((d) => d.KETERANGAN)
+      );
+    } else {
+      // jika belum ada charter
       setData(defaultData);
     }
     console.log(charter);
   }, [charter, formatDataCharter]);
 
+  useEffect(() => {
+    if (refreshData) {
+      getCharterByIdProyek(proyek.IDPROYEK).then((response) => {
+        const tujuan = response.data.LISTDETAIL.filter(
+          (d) => d.KODEDETAIL === "TUJUAN"
+        );
+        const scope = response.data.LISTDETAIL.filter(
+          (d) => d.KODEDETAIL === "SCOPE"
+        );
+        const target = response.data.LISTDETAIL.filter(
+          (d) => d.KODEDETAIL === "TARGET"
+        );
+        delete response.data.LISTDETAIL;
+        const formatData = {
+          ...response.data,
+          TUJUAN: tujuan,
+          SCOPE: scope,
+          TARGET: target,
+        };
+        const newData = formatDataCharter(formatData);
+        setData(newData);
+        setTujuan(
+          newData.tujuan
+            .sort((a, b) => a.KODESORT - b.KODESORT)
+            .map((d) => d.KETERANGAN)
+        );
+        setScope(
+          newData.scope
+            .sort((a, b) => a.KODESORT - b.KODESORT)
+            .map((d) => d.KETERANGAN)
+        );
+        setTarget(
+          newData.target
+            .sort((a, b) => a.KODESORT - b.KODESORT)
+            .map((d) => d.KETERANGAN)
+        );
+        setRefreshData(false);
+      })
+      .catch(() => setRefreshData(false));
+    }
+  }, [proyek.IDPROYEK, formatDataCharter, refreshData]);
+
   const handleChangeDate = (value, jenis) => {
-    setError(prev => ({ ...prev, [jenis]: value ? noErr : err }));
+    setError((prev) => ({ ...prev, [jenis]: value ? noErr : err }));
     if (jenis === "tanggalMulai")
-      setData(prev => ({ ...prev, [jenis]: value, tanggalSelesai: value < prev.tanggalSelesai ? prev.tanggalSelesai : null }));
-    else
-      setData(prev => ({ ...prev, [jenis]: value }));
+      setData((prev) => ({
+        ...prev,
+        [jenis]: value,
+        tanggalSelesai:
+          value < prev.tanggalSelesai ? prev.tanggalSelesai : null,
+        tanggalReminder:
+          value < prev.tanggalSelesai ? prev.tanggalReminder : null,
+      }));
+    else if (jenis === "tanggalSelesai") {
+      console.log(moment(value).format("YYYY-MM-DD"));
+      //const tgl = value.split('/').reduce((w,x,y,z)=>z[2]+'-'+z[1]+'-'+z[0])
+      getCharterReminder({ tgl: moment(value).format("YYYY-MM-DD") }).then(
+        (res) =>
+          setData((prev) => ({
+            ...prev,
+            [jenis]: value,
+            tanggalReminder: res.data.D_REMINDER,
+          }))
+      );
+    } else {
+      setData((prev) => ({ ...prev, [jenis]: value }));
+    }
   };
 
   const handleChangeText = (value, key) => {
     if (validateLength500(value)) {
-      setData(prev => ({ ...prev, [key]: value }));
+      setData((prev) => ({ ...prev, [key]: value }));
       if (key === "benefitFinansial")
-        setError(prev => ({ ...prev, [key]: noErr }));
-      else
-        setError(prev => ({ ...prev, [key]: value ? noErr : err }));
-    } else setError(prev => ({ ...prev, [key]: { error: true, text: "Tidak boleh lebih dari 500 karakter." } }));
+        setError((prev) => ({ ...prev, [key]: noErr }));
+      else setError((prev) => ({ ...prev, [key]: value ? noErr : err }));
+    } else
+      setError((prev) => ({
+        ...prev,
+        [key]: { error: true, text: "Tidak boleh lebih dari 500 karakter." },
+      }));
   };
 
   const validateLength500 = (value) => {
@@ -160,9 +304,15 @@ export default function Charter(props) {
     if (validateLength500(event.target.value)) {
       newArray[parseInt(event.target.name)] = event.target.value;
       setTujuan(newArray);
-      setError(prev => ({ ...prev, tujuan: newArray.some(na => na) ? noErr : err }));
+      setError((prev) => ({
+        ...prev,
+        tujuan: newArray.some((na) => na) ? noErr : err,
+      }));
     } else if (!newArray[parseInt(event.target.name)]) {
-      setError(prev => ({ ...prev, tujuan: { error: true, text: "Tidak boleh lebih dari 500 karakter." } }));
+      setError((prev) => ({
+        ...prev,
+        tujuan: { error: true, text: "Tidak boleh lebih dari 500 karakter." },
+      }));
     }
   };
 
@@ -183,9 +333,15 @@ export default function Charter(props) {
     if (validateLength500(event.target.value)) {
       newArray[parseInt(event.target.name)] = event.target.value;
       setScope(newArray);
-      setError(prev => ({ ...prev, scope: newArray.some(na => na) ? noErr : err }));
+      setError((prev) => ({
+        ...prev,
+        scope: newArray.some((na) => na) ? noErr : err,
+      }));
     } else if (!newArray[parseInt(event.target.name)]) {
-      setError(prev => ({ ...prev, tujuan: { error: true, text: "Tidak boleh lebih dari 500 karakter." } }));
+      setError((prev) => ({
+        ...prev,
+        tujuan: { error: true, text: "Tidak boleh lebih dari 500 karakter." },
+      }));
     }
   };
 
@@ -206,9 +362,15 @@ export default function Charter(props) {
     if (validateLength500(event.target.value)) {
       newArray[parseInt(event.target.name)] = event.target.value;
       setTarget(newArray);
-      setError(prev => ({ ...prev, target: newArray.some(na => na) ? noErr : err }));
+      setError((prev) => ({
+        ...prev,
+        target: newArray.some((na) => na) ? noErr : err,
+      }));
     } else if (!newArray[parseInt(event.target.name)]) {
-      setError(prev => ({ ...prev, tujuan: { error: true, text: "Tidak boleh lebih dari 500 karakter." } }));
+      setError((prev) => ({
+        ...prev,
+        tujuan: { error: true, text: "Tidak boleh lebih dari 500 karakter." },
+      }));
     }
   };
 
@@ -222,65 +384,105 @@ export default function Charter(props) {
     setError({
       tanggalMulai: data.tanggalMulai ? noErr : err,
       tanggalSelesai: data.tanggalSelesai ? noErr : err,
+      tanggalReminder: data.tanggalReminder ? noErr : err,
       benefitNonFinansial: data.benefitNonFinansial ? noErr : err,
       benefitFinansial: noErr,
-      tujuan: tujuan.some(tu => tu) ? noErr : err,
-      scope: scope.some(sc => sc) ? noErr : err,
-      target: target.some(ta => ta) ? noErr : err
+      tujuan: tujuan.some((tu) => tu) ? noErr : err,
+      scope: scope.some((sc) => sc) ? noErr : err,
+      target: target.some((ta) => ta) ? noErr : err,
     });
 
-    if (data.tanggalMulai && data.tanggalSelesai && data.benefitNonFinansial && tujuan.some(tu => tu) && scope.some(sc => sc) && target.some(ta => ta))
+    if (
+      data.tanggalMulai &&
+      data.tanggalSelesai &&
+      data.tanggalReminder &&
+      data.benefitNonFinansial &&
+      tujuan.some((tu) => tu) &&
+      scope.some((sc) => sc) &&
+      target.some((ta) => ta)
+    )
       return true;
-    else
-      return false;
+    else return false;
   };
-const handleFile = (e)=>{
-  if(e.target.files){
-    setFile(e.target.files[0])
-    console.log(e.target.files[0]);
-  }
+  const handleFile = (e) => {
+    if (e.target.files) {
+      if(e.target.files[0].type !=="application/pdf"){
+        setAlertDialog({ openAlertDialog: true, messageAlertDialog: "File harus PDF", severity: "error" });
+      }else{
+      setFile(e.target.files[0])
+      console.log(e.target.files[0]);
+    }
+    }
+  };
 
-}
+  const handleDownload = () => {
+    if (data.dokumen) {
+      downloadFile({ filename: data.dokumen }).then((res) =>
+        fileDownload(res.data, data.dokumen)
+      )
+      .catch((error)=>{
+        setAlertDialog({ openAlertDialog: true, messageAlertDialog: "file tidak ditemukan", severity: "error" });
+      })
+    } else {
+      setAlertDialog({
+        openAlertDialog: true,
+        messageAlertDialog: "Tidak ada file",
+        severity: "error",
+      });
+    }
+  };
+  const handleSubmit = () => {
+    if (file) {
+      const formData = new FormData();
+      formData.append("file", file, proyek.IDPROYEK + "-charter-" + file.name);
 
-const handleDownload = () =>{
-  if(data.dokumen){
-  downloadFile({filename:data.dokumen})
-  .then(res=>fileDownload(res.data,data.dokumen))
- 
-  }else{
-    setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Tidak ada file", severity: "error" });
-  }
-  
-}
-const handleSubmit = ()=>{
-  if(file){
-    const formData = new FormData();
-    formData.append("file", file, proyek.IDPROYEK+'-charter-'+file.name);
-   
-    uploadFile(formData)
-    .then(res=>setAlertDialog({ openAlertDialog: true, messageAlertDialog: res.data.message, severity: res.status === 200?'info':'error' }))
-    .then(  setUpl(true) )
-  }else{
-    setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Pilih File terlebih dahulu", severity: "error" });
-  }
-}
+      uploadFile(formData).then((res) =>
+        setAlertDialog({
+          openAlertDialog: true,
+          messageAlertDialog: res.data.message,
+          severity: res.status === 200 ? "info" : "error",
+        })
+      );
+    }
+  };
 
   const simpan = () => {
     if (validateAll()) {
       setLoadingButton(true);
-      const formatTujuan = tujuan.filter(d => d).map((d, i) => ({ kodedetail: "TUJUAN", kodesort: (i + 1), keterangan: d }));
-      const formatScope = scope.filter(d => d).map((d, i) => ({ kodedetail: "SCOPE", kodesort: (i + 1), keterangan: d }));
-      const formatTarget = target.filter(d => d).map((d, i) => ({ kodedetail: "TARGET", kodesort: (i + 1), keterangan: d }));
+      const formatTujuan = tujuan
+        .filter((d) => d)
+        .map((d, i) => ({
+          kodedetail: "TUJUAN",
+          kodesort: i + 1,
+          keterangan: d,
+        }));
+      const formatScope = scope
+        .filter((d) => d)
+        .map((d, i) => ({
+          kodedetail: "SCOPE",
+          kodesort: i + 1,
+          keterangan: d,
+        }));
+      const formatTarget = target
+        .filter((d) => d)
+        .map((d, i) => ({
+          kodedetail: "TARGET",
+          kodesort: i + 1,
+          keterangan: d,
+        }));
       const listdetail = formatTujuan.concat(formatScope, formatTarget);
       const formatData = {
         idcharter: data.idcharter ? data.idcharter : null,
         idproj: proyek.IDPROYEK,
         tglmulai: moment(data.tanggalMulai).format("DD/MM/YYYY"),
         tglselesai: moment(data.tanggalSelesai).format("DD/MM/YYYY"),
+        tglreminder: moment(data.tanggalReminder).format("DD/MM/YYYY"),
         benffin: data.benefitFinansial,
         benfnonfin: data.benefitNonFinansial,
-        dokumen:proyek.IDPROYEK+"-charter-"+file.name,
-        listdetail: listdetail
+        dokumen: file
+          ? proyek.IDPROYEK + "-charter-" + file.name
+          : data.dokumen,
+        listdetail: listdetail,
       };
       // console.log(formatData);
       // setTimeout(() => {
@@ -288,67 +490,112 @@ const handleSubmit = ()=>{
       // }, 500);
       if (edit) {
         // console.log("update", formatData);
+        handleSubmit();
+        setTimeout(() => {}, 500);
         updateCharter(formatData)
           .then((response) => {
-            const tujuan = response.data.LISTDETAIL.filter(d => d.KODEDETAIL === "TUJUAN");
-            const scope = response.data.LISTDETAIL.filter(d => d.KODEDETAIL === "SCOPE");
-            const target = response.data.LISTDETAIL.filter(d => d.KODEDETAIL === "TARGET");
+            const tujuan = response.data.LISTDETAIL.filter(
+              (d) => d.KODEDETAIL === "TUJUAN"
+            );
+            const scope = response.data.LISTDETAIL.filter(
+              (d) => d.KODEDETAIL === "SCOPE"
+            );
+            const target = response.data.LISTDETAIL.filter(
+              (d) => d.KODEDETAIL === "TARGET"
+            );
             delete response.data.LISTDETAIL;
             const newData = {
               ...response.data,
               TUJUAN: tujuan,
               SCOPE: scope,
-              TARGET: target
+              TARGET: target,
             };
             setData(formatDataCharter(newData));
-            setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil ubah", severity: "success" });
+            setAlertDialog({
+              openAlertDialog: true,
+              messageAlertDialog: "Berhasil ubah",
+              severity: "success",
+            });
             setLoadingButton(false);
+            setRefreshData(true)
           })
           .catch((error) => {
             setLoadingButton(false);
             if (error.response)
-              setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data.message, severity: "error" });
+              setAlertDialog({
+                openAlertDialog: true,
+                messageAlertDialog: error.response.data.message,
+                severity: "error",
+              });
             else
-              setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
+              setAlertDialog({
+                openAlertDialog: true,
+                messageAlertDialog: error.message,
+                severity: "error",
+              });
           });
-      }
-      else {
+      } else {
         // console.log("create", formatData);
+        handleSubmit();
+        setTimeout(() => {}, 500);
         createCharter(formatData)
           .then((response) => {
             // await getCharterByIdProyek(response.data.IDPROJ).then((response) => {
-            const tujuan = response.data.LISTDETAIL.filter(d => d.KODEDETAIL === "TUJUAN");
-            const scope = response.data.LISTDETAIL.filter(d => d.KODEDETAIL === "SCOPE");
-            const target = response.data.LISTDETAIL.filter(d => d.KODEDETAIL === "TARGET");
+            const tujuan = response.data.LISTDETAIL.filter(
+              (d) => d.KODEDETAIL === "TUJUAN"
+            );
+            const scope = response.data.LISTDETAIL.filter(
+              (d) => d.KODEDETAIL === "SCOPE"
+            );
+            const target = response.data.LISTDETAIL.filter(
+              (d) => d.KODEDETAIL === "TARGET"
+            );
             delete response.data.LISTDETAIL;
             const newData = {
               ...response.data,
               TUJUAN: tujuan,
               SCOPE: scope,
-              TARGET: target
+              TARGET: target,
             };
             setData(formatDataCharter(newData));
             // });
             setEdit(true);
-            setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Berhasil simpan", severity: "success" });
+            setAlertDialog({
+              openAlertDialog: true,
+              messageAlertDialog: "Berhasil simpan",
+              severity: "success",
+            });
             setLoadingButton(false);
+            setRefreshData(true)
           })
           .catch((error) => {
             setLoadingButton(false);
             if (error.response)
-              setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.response.data.message, severity: "error" });
+              setAlertDialog({
+                openAlertDialog: true,
+                messageAlertDialog: error.response.data.message,
+                severity: "error",
+              });
             else
-              setAlertDialog({ openAlertDialog: true, messageAlertDialog: error.message, severity: "error" });
+              setAlertDialog({
+                openAlertDialog: true,
+                messageAlertDialog: error.message,
+                severity: "error",
+              });
           });
       }
-    }
-    else {
-      setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Data tidak valid. Silahkan cek data yang anda input", severity: "warning" });
+    } else {
+      setAlertDialog({
+        openAlertDialog: true,
+        messageAlertDialog:
+          "Data tidak valid. Silahkan cek data yang anda input",
+        severity: "warning",
+      });
     }
   };
 
   return (
-    <Grid container spacing={3} direction="column" >
+    <Grid container spacing={3} direction="column">
       <AlertDialog
         open={alertDialog.openAlertDialog}
         id="alert-dialog"
@@ -363,39 +610,72 @@ const handleSubmit = ()=>{
       </Grid>
       <Divider />
       <Grid item container direction="column" spacing={2}>
-        <Grid item xs container direction="row" spacing={2} justify="space-between">
+        <Grid
+          item
+          xs
+          container
+          direction="row"
+          spacing={2}
+          justify="space-between"
+        >
           <Grid item xs>
-            <TextField id="nomor" label="Nomor Charter" fullWidth
+            <TextField
+              id="nomor"
+              label="Nomor Charter"
+              fullWidth
               value={data ? data.nomor : ""}
               disabled
               className={classes.textFieldDisabled}
             />
           </Grid>
           <Grid item xs>
-            <TextField id="namaProyek" label="Nama Proyek" fullWidth
+            <TextField
+              id="namaProyek"
+              label="Nama Proyek"
+              fullWidth
               value={proyek ? proyek.NAMAPROYEK : ""}
               disabled
               className={classes.textFieldDisabled}
             />
           </Grid>
         </Grid>
-        <Grid item xs container direction="row" spacing={2} justify="space-between" >
+        <Grid
+          item
+          xs
+          container
+          direction="row"
+          spacing={2}
+          justify="space-between"
+        >
           <Grid item xs>
-            <TextField id="nikBPO" label="NIK BPO" fullWidth
+            <TextField
+              id="nikBPO"
+              label="NIK BPO"
+              fullWidth
               value={proyek ? proyek.NIKREQ : ""}
               disabled
               className={classes.textFieldDisabled}
             />
           </Grid>
           <Grid item xs>
-            <TextField id="nikPM" label="NIK PM" fullWidth
+            <TextField
+              id="nikPM"
+              label="NIK PM"
+              fullWidth
               value={proyek ? proyek.NIKPM : ""}
               disabled
               className={classes.textFieldDisabled}
             />
           </Grid>
         </Grid>
-        <Grid item xs container direction="row" spacing={2} justify="space-between" >
+        <Grid
+          item
+          xs
+          container
+          direction="row"
+          spacing={2}
+          justify="space-between"
+        >
           <Grid item xs>
             <KeyboardDatePicker
               fullWidth
@@ -410,10 +690,10 @@ const handleSubmit = ()=>{
               helperText={error.tanggalMulai.text}
               inputVariant="outlined"
               className={classes.textField}
-              views={['year', 'month', 'date']}
+              views={["year", "month", "date"]}
             />
           </Grid>
-          <Grid item xs >
+          <Grid item xs>
             <KeyboardDatePicker
               fullWidth
               clearable
@@ -421,24 +701,63 @@ const handleSubmit = ()=>{
               format="DD/MM/YYYY"
               label="Tanggal Selesai"
               value={data ? data.tanggalSelesai : null}
-              minDate={(data && data.tanggalMulai) || moment("1900-01-01", "YYYY-MM-DD")}
+              minDate={
+                (data && data.tanggalMulai) ||
+                moment("1900-01-01", "YYYY-MM-DD")
+              }
               onChange={(value) => handleChangeDate(value, "tanggalSelesai")}
               required
               error={error.tanggalSelesai.error}
               helperText={error.tanggalSelesai.text}
               inputVariant="outlined"
               className={classes.textField}
-              views={['year', 'month', 'date']}
+              views={["year", "month", "date"]}
+              disabled={!(data && data.tanggalMulai)}
+            />
+          </Grid>
+          <Grid item xs>
+            <KeyboardDatePicker
+              fullWidth
+              clearable
+              id="tanggalReminder"
+              format="DD/MM/YYYY"
+              label="Tanggal Reminder"
+              value={data ? data.tanggalReminder : null}
+              maxDate={data && data.tanggalSelesai}
+              minDate={
+                (data && data.tanggalMulai) ||
+                moment("1900-01-01", "YYYY-MM-DD")
+              }
+              onChange={(value) => handleChangeDate(value, "tanggalReminder")}
+              required
+              error={error.tanggalReminder.error}
+              helperText={error.tanggalReminder.text}
+              inputVariant="outlined"
+              className={classes.textField}
+              views={["year", "month", "date"]}
               disabled={!(data && data.tanggalMulai)}
             />
           </Grid>
         </Grid>
-        <Grid item xs container direction="row" spacing={2} justify="space-between" >
+
+        <Grid
+          item
+          xs
+          container
+          direction="row"
+          spacing={2}
+          justify="space-between"
+        >
           <Grid item xs>
-            <TextField id="non-financial" label="Benefit (Non-Financial)" fullWidth
+            <TextField
+              id="non-financial"
+              label="Benefit (Non-Financial)"
+              fullWidth
               // value={proyek ? proyek.NIKREQ : ""}
               value={data?.benefitNonFinansial ?? ""}
-              onChange={e => handleChangeText(e.target.value, "benefitNonFinansial")}
+              onChange={(e) =>
+                handleChangeText(e.target.value, "benefitNonFinansial")
+              }
               variant="outlined"
               required
               className={classes.textField}
@@ -446,11 +765,16 @@ const handleSubmit = ()=>{
               helperText={error.benefitNonFinansial.text}
             />
           </Grid>
-          <Grid item xs >
-            <TextField id="financial" label="Benefit (Financial)" fullWidth
+          <Grid item xs>
+            <TextField
+              id="financial"
+              label="Benefit (Financial)"
+              fullWidth
               // value={proyek ? proyek.NIKREQ : ""}
               value={data?.benefitFinansial ?? ""}
-              onChange={e => handleChangeText(e.target.value, "benefitFinansial")}
+              onChange={(e) =>
+                handleChangeText(e.target.value, "benefitFinansial")
+              }
               variant="outlined"
               className={classes.textField}
               error={error.benefitFinansial.error}
@@ -458,64 +782,111 @@ const handleSubmit = ()=>{
             />
           </Grid>
         </Grid>
-        <Grid item xs container spacing={2} >
+        <Grid item xs container spacing={2}>
           <Grid item xs>
-            <AddTextFiels required label="Tujuan" error={error.tujuan.error} helperText={error.tujuan.text}
-              data={tujuan} onAdd={addTujuan} onChange={changeTujuan} onDelete={deleteTujuan} />
-            <AddTextFiels required label="Ruang Lingkup" error={error.scope.error} helperText={error.scope.text}
-              data={scope} onAdd={addScope} onChange={changeScope} onDelete={deleteScope} />
-            <AddTextFiels required label="Target / Hasil Capaian" error={error.target.error} helperText={error.target.text}
-              data={target} onAdd={addTarget} onChange={changeTarget} onDelete={deleteTarget} />
+            <AddTextFiels
+              required
+              label="Tujuan"
+              error={error.tujuan.error}
+              helperText={error.tujuan.text}
+              data={tujuan}
+              onAdd={addTujuan}
+              onChange={changeTujuan}
+              onDelete={deleteTujuan}
+            />
+            <AddTextFiels
+              required
+              label="Ruang Lingkup"
+              error={error.scope.error}
+              helperText={error.scope.text}
+              data={scope}
+              onAdd={addScope}
+              onChange={changeScope}
+              onDelete={deleteScope}
+            />
+            <AddTextFiels
+              required
+              label="Target / Hasil Capaian"
+              error={error.target.error}
+              helperText={error.target.text}
+              data={target}
+              onAdd={addTarget}
+              onChange={changeTarget}
+              onDelete={deleteTarget}
+            />
           </Grid>
         </Grid>
       </Grid>
       <Divider />
-      
-      <Grid item  container  justify='flex-end' >
-         
+
+      <Grid item container justify="flex-end">
+        <>
+          <Grid item xs={3}>
+            <TextField
+              inputProps={{ accept: "application/pdf" }}
+              style={{ display: "none" }}
+              id="contained-button-file"
+              name="file"
+              onChange={(e) => handleFile(e)}
+              multiple
+              type="file"
+
+              //value={data?.dokumen??file}
+            />
+
+            <TextField fullWidth value={file?.name} />
+          </Grid>
+          <label htmlFor="contained-button-file">
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<PublishIcon />}
+              component="span"
+            >
+              Upload MoM
+            </Button>
+          </label>
+        </>
+      </Grid>
+      <Grid item container justify="flex-end">
+        <Grid item xs={3}>
           <TextField
-        accept="image/*"
-        //style={{display:'none'}}
-        id="contained-button-file"
-        name='file'
-        onChange={e=>handleFile(e)}
-        multiple
-        type="file"
-        //value={data?.dokumen??file}
-      />
-      
-      
-        <Button variant="contained" disabled={upl} onClick={handleSubmit} color="primary" startIcon={<PublishIcon />} component="span">
-          Upload  
-        </Button>
-      
-      </Grid>
-      <Grid item container  justify='flex-end' >
-      <Grid item xs={3}>
-      <TextField
-       
-        //style={{display:'none'}}
-        id="contained-button-file"
-        name='file'
-       // onChange={e=>handleFile(e)}
-       fullWidth
-        value={data?.dokumen??""}
-      />
-      </Grid>
-      <Button variant="contained" color="primary" onClick={handleDownload}  startIcon={<GetAppIcon />} component="span">
+            //style={{display:'none'}}
+            id="contained-button-file"
+            name="file"
+            // onChange={e=>handleFile(e)}
+            fullWidth
+            value={data?.dokumen ?? ""}
+            
+          />
+        </Grid>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleDownload}
+          startIcon={<GetAppIcon />}
+          component="span"
+        >
           Download
         </Button>
-        
-        </Grid>
+      </Grid>
 
-      
-       
       <Divider />
       <Grid item container justify="flex-end">
-        <Button onClick={loadingButton ? null : simpan} color="primary" variant="contained" >
-          {loadingButton ? <CircularProgress size={20} color="inherit" /> : edit ? "Ubah" : "Simpan"}
+        <Button
+          onClick={loadingButton ? null : simpan}
+          color="primary"
+          variant="contained"
+        >
+          {loadingButton ? (
+            <CircularProgress size={20} color="inherit" />
+          ) : edit ? (
+            "Ubah"
+          ) : (
+            "Simpan"
+          )}
         </Button>
       </Grid>
-    </Grid >
+    </Grid>
   );
-};
+}

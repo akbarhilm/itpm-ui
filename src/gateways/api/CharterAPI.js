@@ -4,6 +4,11 @@ export const getCharterByIdProyek = async (id) => {
   return await api.get('/proyek/charter/' + id);
 };
 
+export const getCharterReminder = async (data) => {
+  console.log(data);
+  return await api.get('/proyek/charter/reminder',{params:data} );
+};
+
 export const createCharter = async (data) => {
   return await api.post('/proyek/charter/tambah', data);
 };

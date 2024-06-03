@@ -10,6 +10,7 @@ import PublishIcon from '@material-ui/icons/Publish';
 import GetAppIcon from '@material-ui/icons/GetApp';
 import fileDownload from 'js-file-download';
 
+
 const useStyles = makeStyles((theme) => ({
   paper: {
     padding: theme.spacing(2),
@@ -129,8 +130,13 @@ export default function Uat(props) {
 
   const handleFile = (e)=>{
     if(e.target.files){
+      if(e.target.files[0].type !=="application/pdf"){
+        setAlertDialog({ openAlertDialog: true, messageAlertDialog: "File harus PDF", severity: "error" });
+      }else{
+        setUpl(true)
       setFile(e.target.files[0])
       console.log(e.target.files[0]);
+    }
     }
   
   }
@@ -140,13 +146,15 @@ export default function Uat(props) {
     if(data[0].dokumen){
     downloadFile({filename:data[0].dokumen})
     .then(res=>fileDownload(res.data,data[0].dokumen))
-   
+    .catch((error)=>{
+      setAlertDialog({ openAlertDialog: true, messageAlertDialog: "file tidak ditemukan", severity: "error" });
+    })
     }else{
       setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Tidak ada file", severity: "error" });
     }
     
   }
-  const handleSubmit = ()=>{
+  const handleSubmit = async()=>{
     if(file){
       const formData = new FormData();
       formData.append("file", file, proyek.IDPROYEK+'-uat-'+file.name);
@@ -167,6 +175,7 @@ export default function Uat(props) {
     data.filename = proyek.IDPROYEK+'-uat-'+file.name
     data.idproyek = proyek.IDPROYEK
     simpanUpl(data)
+    .then(handleSubmit())
     .then(res=>setAlertDialog({ openAlertDialog: true, messageAlertDialog: res.data.message, severity: res.status === 200?'info':'error' }))
     .then(setRefreshData(true))
     setLoadingButton(false);
@@ -272,47 +281,62 @@ export default function Uat(props) {
        
       </Grid >
       <Divider/>
-      <Grid item  container  justify='flex-end' >
-         
-         <TextField
-       accept="image/*"
-       //style={{display:'none'}}
-       id="contained-button-file"
-       name='file'
-       onChange={e=>handleFile(e)}
-       multiple
-       type="file"
-       //value={data?.dokumen??file}
-     />
-     
-     
-       <Button variant="contained" disabled={upl} onClick={handleSubmit} color="primary" startIcon={<PublishIcon />} component="span">
-         Upload  
-       </Button>
-     
-     </Grid>
-     <Grid item container  justify='flex-end' >
-     <Grid item xs={3}>
-     <TextField
-      
-       //style={{display:'none'}}
-       id="contained-button-file"
-       name='file'
-      // onChange={e=>handleFile(e)}
-      fullWidth
-       value={data[0]?.dokumen??""}
-     />
-     </Grid>
-     <Button variant="contained" color="primary" onClick={handleDownload}  startIcon={<GetAppIcon />} component="span">
-         Download
-       </Button>
-       
-       </Grid>
+      <Grid item container justify="flex-end">
+        <>
+          <Grid item xs={3}>
+            <TextField
+              inputProps={{ accept: "application/pdf" }}
+              style={{ display: "none" }}
+              id="contained-button-file"
+              name="file"
+              onChange={(e) => handleFile(e)}
+              multiple
+              type="file"
+
+              //value={data?.dokumen??file}
+            />
+
+            <TextField fullWidth value={file?.name} />
+          </Grid>
+          <label htmlFor="contained-button-file">
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<PublishIcon />}
+              component="span"
+            >
+              Pilih
+            </Button>
+          </label>
+        </>
+      </Grid>
+      <Grid item container justify="flex-end">
+        <Grid item xs={3}>
+          <TextField
+            //style={{display:'none'}}
+            id="contained-button-file"
+            name="file"
+            // onChange={e=>handleFile(e)}
+            fullWidth
+            value={data[0]?.dokumen??""}
+            helperText={"Terupload"}
+          />
+        </Grid>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleDownload}
+          startIcon={<GetAppIcon />}
+          component="span"
+        >
+          Download
+        </Button>
+      </Grid>
       <Divider/>
       <Grid item container justify="flex-end">
       
         <Button disabled={upl?data.length>0?false:true:true} onClick={loadingButton ? null : simpanupl} color="primary" variant="contained" >
-          {loadingButton ? <CircularProgress size={20} color="inherit" /> : "Simpan"}
+          {loadingButton ? <CircularProgress size={20} color="inherit" /> : "Upload"}
         </Button>
       </Grid>
       < Dialog open={openDialogAdd} onClose={handleCloseDialogAdd} maxWidth="lg" fullWidth >
