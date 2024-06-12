@@ -32,6 +32,7 @@ const defaultError = { kebutuhan: noErr, rincian: noErr, useCase: noErr };
 
 export default function UserRequirement(props) {
   const { ureq, proyek,fd } = props;
+ 
   const classes = useStyles();
   const [loadingButton, setLoadingButton] = useState(false);
   const [edit, setEdit] = useState(false);
@@ -184,7 +185,7 @@ export default function UserRequirement(props) {
           idproj: proyek.IDPROYEK,
           dokumen:file?proyek.IDPROYEK+"-ureq-"+file.name:dokumen,
           nofd : noFd?noFd:fd,
-          grup: proyek.APLIKASI.GRUPAPLIKASI,
+          grup: proyek.APLIKASI?.GRUPAPLIKASI||"",
           listdetail: listdetail
         };
         if (edit) {
@@ -209,7 +210,7 @@ export default function UserRequirement(props) {
             });
         } else {
          
-       
+         
           createUreq(formatData)
             .then((response) => {
               let newData = [];
