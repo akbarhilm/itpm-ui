@@ -184,7 +184,7 @@ export default function UserRequirement(props) {
           idproj: proyek.IDPROYEK,
           dokumen:file?proyek.IDPROYEK+"-ureq-"+file.name:dokumen,
           nofd : noFd?noFd:fd,
-          grup: proyek.APLIKASI.GRUPAPLIKASI,
+          grup: proyek.APLIKASI?.GRUPAPLIKASI||"",
           listdetail: listdetail
         };
         if (edit) {
