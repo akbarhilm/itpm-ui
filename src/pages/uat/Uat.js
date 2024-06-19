@@ -129,9 +129,13 @@ export default function Uat(props) {
   };
 
   const handleFile = (e)=>{
+    
     if(e.target.files){
       if(e.target.files[0].type !=="application/pdf"){
         setAlertDialog({ openAlertDialog: true, messageAlertDialog: "File harus PDF", severity: "error" });
+      }
+      if(e.target.files[0].name.length>40){
+        setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Nama File max 40 character", severity: "error" });
       }else{
         setUpl(true)
       setFile(e.target.files[0])

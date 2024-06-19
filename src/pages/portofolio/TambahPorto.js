@@ -1144,6 +1144,7 @@ console.log(value);
                         onChange={(e) => handleChangeTFD(e, i, "status")}
                         value={d.status}
                       >
+                      <MenuItem value={" "}>-</MenuItem>
                         <MenuItem value={"A"}>AKTIF</MenuItem>
                         <MenuItem value={"D"}>TIDAK AKTIF</MenuItem>
                       </TextField>
