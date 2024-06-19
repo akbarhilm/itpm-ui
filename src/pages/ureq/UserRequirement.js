@@ -123,6 +123,9 @@ export default function UserRequirement(props) {
     if(e.target.files){
       if(e.target.files[0].type !=="application/pdf"){
         setAlertDialog({ openAlertDialog: true, messageAlertDialog: "File harus PDF", severity: "error" });
+      }
+      if(e.target.files[0].name.length>40){
+        setAlertDialog({ openAlertDialog: true, messageAlertDialog: "Nama File max 40 character", severity: "error" });
       }else{
       setFile(e.target.files[0])
       console.log(e.target.files[0]);
@@ -406,7 +409,7 @@ export default function UserRequirement(props) {
             // onChange={e=>handleFile(e)}
             fullWidth
             value={dokumen}
-            helperText={"Terupload"}
+            
           />
         </Grid>
         <Button
