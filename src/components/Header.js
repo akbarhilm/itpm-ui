@@ -157,6 +157,14 @@ export default function Header(props) {
     handleClose()
   };
 
+  const handleLinkToCata= () => {
+    //setProyek();
+   
+    setMenuSideBar(false);
+    history.push("/cata");
+    handleClose()
+  };
+
   const handleLinkToMPTI= () => {
     //setProyek();
     setMenuSideBar(false);
@@ -234,7 +242,8 @@ export default function Header(props) {
         }
          {user.OTORITAS.includes("PMO") && 
         <Box>
-        <MenuItem onClick={handleLinkToPorto}>Portofolio</MenuItem></Box>
+        <MenuItem onClick={handleLinkToPorto}>Portofolio</MenuItem>
+        <MenuItem onClick={handleLinkToCata}>Service Cata</MenuItem></Box>
        } 
         </MenuList>
       </Menu>

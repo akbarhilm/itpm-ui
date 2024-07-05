@@ -5,7 +5,7 @@ export const getCharterByIdProyek = async (id) => {
 };
 
 export const getCharterReminder = async (data) => {
-  console.log(data);
+
   return await api.get('/proyek/charter/reminder',{params:data} );
 };
 
